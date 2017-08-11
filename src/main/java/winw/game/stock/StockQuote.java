@@ -10,12 +10,12 @@ package winw.game.stock;
 public class StockQuote {// 历史报价（行情）
 	protected String date;// 交易日期
 
-	protected double open; // �?盘价
-	protected double high; // �?高价
-	protected double low; // �?低价
-	protected double close; // 收盘�?
+	protected double open; // 开盘价
+	protected double high; // 最高价
+	protected double low; // 最低价
+	protected double close; // 收盘价
 
-	protected int volume; // 成交�?
+	protected int volume; // 成交量
 	protected double amount; // 成交金额
 
 	public StockQuote() {

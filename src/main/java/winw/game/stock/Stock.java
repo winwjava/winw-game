@@ -9,20 +9,20 @@ import java.util.Date;
  *
  */
 public class Stock {
-	private String code;// ´úÂë
-	private String name;// Ãû³Æ
+	private String code;// ä»£ç 
+	private String name;// åç§°
 
-	private Date time;// ±¨¼ÛÊ±¼ä
+	private Date time;// æŠ¥ä»·æ—¶é—´
 
-	private double price = 0.0;// ¼Û¸ñ
-	private double open = 0.0;// ¿ªÅÌ¼Û
-	private double high = 0.0;// ×î¸ß¼Û
-	private double low = 0.0;// ×îµÍ¼Û
+	private double price = 0.0;// ä»·æ ¼
+	private double open = 0.0;// å¼€ç›˜ä»·
+	private double high = 0.0;// æœ€é«˜ä»·
+	private double low = 0.0;// æœ€ä½ä»·
 
-	private double previousClose = 0.0;// ×òÈÕÊÕÅÌ¼Û
+	private double previousClose = 0.0;// æ˜¨æ—¥æ”¶ç›˜ä»·
 
-	private int volume = 0;// ³É½»Á¿
-	private double pe = 0.0;// ÊĞÓ¯ÂÊ
+	private int volume = 0;// æˆäº¤é‡
+	private double pe = 0.0;// å¸‚ç›ˆç‡
 
 	// private double eps = 0.0;
 	// private double marketcap = 0.0;

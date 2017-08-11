@@ -6,40 +6,40 @@ import java.util.List;
 import winw.game.stock.StockQuote;
 
 /**
- * Ö¸±ê¡£
+ * æŒ‡æ ‡ã€‚
  * 
  * @author winw
  *
  */
 public class Indicators extends StockQuote {// extends MovingAverage,
 
-	private double ma5;// 5ÈÕ¾ù¼Û
-	private double ma10;// 10ÈÕ¾ù¼Û
-	private double ma20;// 20ÈÕ¾ù¼Û
+	private double ma5;// 5æ—¥å‡ä»·
+	private double ma10;// 10æ—¥å‡ä»·
+	private double ma20;// 20æ—¥å‡ä»·
 
-	private double volumeMa5;// 5ÈÕ¾ùÁ¿
-	private double volumeMa10;// 10ÈÕ¾ùÁ¿
-	private double volumeMa20;// 20ÈÕ¾ùÁ¿
+	private double volumeMa5;// 5æ—¥å‡é‡
+	private double volumeMa10;// 10æ—¥å‡é‡
+	private double volumeMa20;// 20æ—¥å‡é‡
 
-	// MACD Ö¸±êµÄÈı¸öÊôĞÔ
+	// MACD æŒ‡æ ‡çš„ä¸‰ä¸ªå±æ€§
 	private double dea;
 	private double diff;
 	private double macd;
 
-	// KDJ Ö¸±êµÄÈı¸öÊôĞÔ
+	// KDJ æŒ‡æ ‡çš„ä¸‰ä¸ªå±æ€§
 	private double k;
 	private double d;
 	private double j;
 
-	// RSI Ö¸±êµÄÈı¸öÊôĞÔ
+	// RSI æŒ‡æ ‡çš„ä¸‰ä¸ªå±æ€§
 	private double rsi1;
 	private double rsi2;
 	private double rsi3;
 
-	// BOLL Ö¸±êµÄÈı¸öÊôĞÔ
-	private double up; // ÉÏ¹ìÏß
-	private double mb; // ÖĞ¹ìÏß
-	private double dn; // ÏÂ¹ìÏß
+	// BOLL æŒ‡æ ‡çš„ä¸‰ä¸ªå±æ€§
+	private double up; // ä¸Šè½¨çº¿
+	private double mb; // ä¸­è½¨çº¿
+	private double dn; // ä¸‹è½¨çº¿
 
 	public Indicators(StockQuote o) {
 		super();
@@ -53,7 +53,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã MA MACD BOLL RSI KDJ Ö¸±ê
+	 * è®¡ç®— MA MACD BOLL RSI KDJ æŒ‡æ ‡
 	 * 
 	 * @param quoteList
 	 * @return
@@ -72,7 +72,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã MA
+	 * è®¡ç®— MA
 	 */
 	private static void computeMA(List<Indicators> entries) {
 		double ma5 = 0;
@@ -125,12 +125,12 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã MACD
+	 * è®¡ç®— MACD
 	 */
 	private static void computeMACD(List<Indicators> entries) {// moving average convergence/divergence
-		// Ö¸ÊıÆ½¾ùÊıÖ¸±ê £¨Exponential Moving Average£©
+		// æŒ‡æ•°å¹³å‡æ•°æŒ‡æ ‡ ï¼ˆExponential Moving Averageï¼‰
 
-		// EMAtoday=¦Á * Price today + ( 1 - ¦Á ) * EMAyesterday;
+		// EMAtoday=Î± * Price today + ( 1 - Î± ) * EMAyesterday;
 
 		/*
 		 * The most commonly used values are 12, 26, and 9 days, that is, MACD(12,26,9).
@@ -163,17 +163,17 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 				ema12 = entry.getClose();
 				ema26 = entry.getClose();
 			} else {
-				// EMA£¨12£© = Ç°Ò»ÈÕEMA£¨12£© X 11/13 + ½ñÈÕÊÕÅÌ¼Û X 2/13
-				ema12 = ema12 * 11f / 13f + entry.getClose() * 2f / 13f;// ¿ìËÙÒÆ¶¯Æ½¾ùÏß
-				// EMA£¨26£© = Ç°Ò»ÈÕEMA£¨26£© X 25/27 + ½ñÈÕÊÕÅÌ¼Û X 2/27
-				ema26 = ema26 * 25f / 27f + entry.getClose() * 2f / 27f;// ÂıËÙÒÆ¶¯Æ½¾ùÏß
+				// EMAï¼ˆ12ï¼‰ = å‰ä¸€æ—¥EMAï¼ˆ12ï¼‰ X 11/13 + ä»Šæ—¥æ”¶ç›˜ä»· X 2/13
+				ema12 = ema12 * 11f / 13f + entry.getClose() * 2f / 13f;// å¿«é€Ÿç§»åŠ¨å¹³å‡çº¿
+				// EMAï¼ˆ26ï¼‰ = å‰ä¸€æ—¥EMAï¼ˆ26ï¼‰ X 25/27 + ä»Šæ—¥æ”¶ç›˜ä»· X 2/27
+				ema26 = ema26 * 25f / 27f + entry.getClose() * 2f / 27f;// æ…¢é€Ÿç§»åŠ¨å¹³å‡çº¿
 			}
 
-			// DIF = EMA£¨12£© - EMA£¨26£© ¡£
-			diff = ema12 - ema26;// Àë²îÖµ£¨¿ìËÙEMA ÓëÂıËÙEMAµÄ²îÖµ£©
-			// ½ñÈÕDEA = £¨Ç°Ò»ÈÕDEA X 8/10 + ½ñÈÕDIF X 2/10£©
-			dea = dea * 8f / 10f + diff * 2f / 10f;// ¸ù¾İÀë²îÖµ¼ÆËãÆä9ÈÕµÄEMA£¬¼´Àë²îÆ½¾ùÖµ£¬ÊÇËùÇóµÄMACDÖµ¡£ÎªÁË²»ÓëÖ¸±êÔ­ÃûÏà»ìÏı£¬´ËÖµÓÖÃûDEA»òDEM¡£
-			// ÓÃ£¨DIF-DEA£©*2 ¼´Îª MACD Öù×´Í¼¡£
+			// DIF = EMAï¼ˆ12ï¼‰ - EMAï¼ˆ26ï¼‰ ã€‚
+			diff = ema12 - ema26;// ç¦»å·®å€¼ï¼ˆå¿«é€ŸEMA ä¸æ…¢é€ŸEMAçš„å·®å€¼ï¼‰
+			// ä»Šæ—¥DEA = ï¼ˆå‰ä¸€æ—¥DEA X 8/10 + ä»Šæ—¥DIF X 2/10ï¼‰
+			dea = dea * 8f / 10f + diff * 2f / 10f;// æ ¹æ®ç¦»å·®å€¼è®¡ç®—å…¶9æ—¥çš„EMAï¼Œå³ç¦»å·®å¹³å‡å€¼ï¼Œæ˜¯æ‰€æ±‚çš„MACDå€¼ã€‚ä¸ºäº†ä¸ä¸æŒ‡æ ‡åŸåç›¸æ··æ·†ï¼Œæ­¤å€¼åˆåDEAæˆ–DEMã€‚
+			// ç”¨ï¼ˆDIF-DEAï¼‰*2 å³ä¸º MACD æŸ±çŠ¶å›¾ã€‚
 			macd = (diff - dea) * 2f;
 
 			entry.setDiff(diff);
@@ -183,7 +183,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã BOLL ĞèÒªÔÚ¼ÆËã MA Ö®ºó½øĞĞ
+	 * è®¡ç®— BOLL éœ€è¦åœ¨è®¡ç®— MA ä¹‹åè¿›è¡Œ
 	 */
 	private static void computeBOLL(List<Indicators> entries) {
 		for (int i = 0; i < entries.size(); i++) {
@@ -218,7 +218,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã RSI
+	 * è®¡ç®— RSI
 	 */
 	private static void computeRSI(List<Indicators> entries) {
 		double rsi1 = 0;
@@ -269,7 +269,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	}
 
 	/**
-	 * ¼ÆËã KDJ
+	 * è®¡ç®— KDJ
 	 */
 	private static void computeKDJ(List<Indicators> entries) {
 		double k = 0;
