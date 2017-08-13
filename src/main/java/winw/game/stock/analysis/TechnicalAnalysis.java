@@ -7,6 +7,8 @@ import java.util.List;
 
 import winw.game.stock.Stock;
 import winw.game.stock.StockQuote;
+import winw.game.stock.analysis.Advise.Market;
+import winw.game.stock.analysis.Advise.Signal;
 
 /**
  * 趋势分析。
@@ -19,10 +21,18 @@ public class TechnicalAnalysis {
 	// 由于MACD是基于移动平均线，因此本质上是滞后指标。
 	// 作为价格趋势的指标，MACD对于不趋势（在一定范围内交易）或正在以不稳定的价格行动进行交易的股票不太有用。
 
-	public void analysis(Stock stock, List<StockQuote> quoteList) {
+	public Advise analysis(Stock stock, List<StockQuote> quoteList) {
+		addToday(stock, quoteList);
+		// 计算 MA MACD BOLL RSI KDJ 指标
+		return trend(stock, Indicators.compute(quoteList));
+
+		// TODO KDJ
+	}
+
+	private void addToday(Stock stock, List<StockQuote> quoteList) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		String today = dateFormat.format(new Date());
-		
+
 		Calendar instance = Calendar.getInstance();
 		instance.setTime(stock.getTime());
 		// 如果当前时间是交易时间，则将当天的交易，也纳入到历史记录里计算
@@ -37,13 +47,14 @@ public class TechnicalAnalysis {
 			quote.setVolume(stock.getVolume());
 			quoteList.add(quote);
 		}
-		// 计算 MA MACD BOLL RSI KDJ 指标
-		analysisMACD(stock, Indicators.compute(quoteList));
-
-		// TODO KDJ
 	}
 
 	/**
+	 * 趋势分析。
+	 * 
+	 * <p>
+	 * 价格以趋势方式演变。
+	 * 
 	 * 信号线交叉。
 	 * <p>
 	 * 当MACD和平均线交叉时，发生“信号线交叉” 也就是说，当分歧（条形图）改变符号时。 如果MACD线穿过平均线（“看涨”交叉），
@@ -57,34 +68,47 @@ public class TechnicalAnalysis {
 	 * 
 	 * @param list
 	 */
-	protected void analysisMACD(Stock stock, List<Indicators> list) {// MACD信号线交叉分析、零交叉分析。
+	public Advise trend(Stock stock, List<Indicators> list) {// MACD信号线交叉分析、零交叉分析。
+		Advise advise = new Advise();
 		Indicators today = list.get(list.size() - 1);
 		Indicators yesterday = list.get(list.size() - 2);
 		StringBuilder result = new StringBuilder();
 
 		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
-		if (today.getDiff() > yesterday.getDiff() && today.getDea() < yesterday.getDea()) {
+		if (today.getDiff() > yesterday.getDiff()
+				&& today.getDea() < yesterday.getDea()) {
+			// TODO 为了避免虚假信号
+			
+			advise.setSignal(Signal.BUY_SIGNAL);
 			result.append("1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。");
 		}
 		// 2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
-		if (today.getDiff() < yesterday.getDiff() && today.getDea() > yesterday.getDea()) {
+		if (today.getDiff() < yesterday.getDiff()
+				&& today.getDea() > yesterday.getDea()) {
+			advise.setSignal(Signal.SELL_SIGNAL);
 			result.append("2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。");
 		}
 		// 3. MACD 绿转红：MACD 值由负变正，市场由空头转为多头。
 		if (today.getMacd() > 0 && yesterday.getMacd() < 0) {
+			advise.setMarket(Market.BULL_MARKET);
 			result.append("3. MACD 绿转红：MACD 值由负变正，市场由空头转为多头。");
 		}
 		// 4. MACD 红转绿：MACD 值由正变负，市场由多头转为空头。
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
 			result.append("4. MACD 红转绿：MACD 值由正变负，市场由多头转为空头。");
+			advise.setMarket(Market.BEAR_MARKET);
+			advise.setSignal(Signal.SELL_SIGNAL);
 		}
 
-		// TODO 当前在上涨阶段，还是
-		
+		advise.setMarket(today.getMacd() > 0 ? Market.BULL_MARKET
+				: Market.BEAR_MARKET);
+
 		if (result.length() > 0) {
-			System.out.println(today.getDate() + " " + stock.getCode() + " " + stock.getName() + " " + stock.getPrice()
-					+ ": " + result.toString());
+			advise.setAdvise(today.getDate() + " " + stock.getCode() + " "
+					+ stock.getName() + " " + today.getClose() + ": "
+					+ result.toString());
 		}
+		return advise;
 	}
 
 }

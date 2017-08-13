@@ -23,7 +23,7 @@ public class HttpUtils {
 		connection.setReadTimeout(readTimeout);
 
 		InputStreamReader is = new InputStreamReader(
-				connection.getInputStream());
+				connection.getInputStream(), "GBK");
 		BufferedReader br = new BufferedReader(is);
 		//br.readLine(); // skip the first line
 
