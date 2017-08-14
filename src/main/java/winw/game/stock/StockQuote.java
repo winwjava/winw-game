@@ -1,5 +1,10 @@
 package winw.game.stock;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Historical prices and volumes. Historical price trends can indicate the
  * future direction of a stock.
@@ -33,7 +38,25 @@ public class StockQuote {// 历史报价（行情）
 		this.amount = amount;
 	}
 
+	public static void addToday(List<StockQuote> quoteList, Stock stock) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		String today = dateFormat.format(new Date());
 
+		Calendar instance = Calendar.getInstance();
+		instance.setTime(stock.getTime());
+		// 如果当前时间是交易时间，则将当天的交易，也纳入到历史记录里计算
+		if (instance.get(Calendar.HOUR_OF_DAY) < 15) {
+			System.out.println("交易时间：" + stock.getTime());
+			StockQuote quote = new StockQuote();
+			quote.setDate(today);
+			quote.setOpen(stock.getOpen());
+			quote.setClose(stock.getPrice());// FIXME 用当前价，当作收盘价
+			quote.setHigh(stock.getHigh());
+			quote.setLow(stock.getLow());
+			quote.setVolume(stock.getVolume());
+			quoteList.add(quote);
+		}
+	}
 
 	public String getDate() {
 		return date;

@@ -1,12 +1,7 @@
 package winw.game.stock.analysis;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-import winw.game.stock.Stock;
-import winw.game.stock.StockQuote;
 import winw.game.stock.analysis.Advise.Market;
 import winw.game.stock.analysis.Advise.Signal;
 
@@ -21,37 +16,17 @@ public class TechnicalAnalysis {
 	// 由于MACD是基于移动平均线，因此本质上是滞后指标。
 	// 作为价格趋势的指标，MACD对于不趋势（在一定范围内交易）或正在以不稳定的价格行动进行交易的股票不太有用。
 
-	public Advise analysis(Stock stock, List<StockQuote> quoteList) {
-		addToday(stock, quoteList);
-		// 计算 MA MACD BOLL RSI KDJ 指标
-		return trend(stock, Indicators.compute(quoteList));
+	// public Advise analysis(Stock stock, List<StockQuote> quoteList) {
+	// addToday(stock, quoteList);
+	// 计算 MA MACD BOLL RSI KDJ 指标
+	// return macdAnalysis(stock, Indicators.compute(quoteList));
 
-		// TODO KDJ
-		// TODO RSI
-	}
-
-	private void addToday(Stock stock, List<StockQuote> quoteList) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-		String today = dateFormat.format(new Date());
-
-		Calendar instance = Calendar.getInstance();
-		instance.setTime(stock.getTime());
-		// 如果当前时间是交易时间，则将当天的交易，也纳入到历史记录里计算
-		if (instance.get(Calendar.HOUR_OF_DAY) < 15) {
-			System.out.println("交易时间：" + stock.getTime());
-			StockQuote quote = new StockQuote();
-			quote.setDate(today);
-			quote.setOpen(stock.getOpen());
-			quote.setClose(stock.getPrice());// FIXME 用当前价，当作收盘价
-			quote.setHigh(stock.getHigh());
-			quote.setLow(stock.getLow());
-			quote.setVolume(stock.getVolume());
-			quoteList.add(quote);
-		}
-	}
+	// TODO KDJ
+	// TODO RSI
+	// }
 
 	/**
-	 * 趋势分析。
+	 * MACD趋势分析。
 	 * 
 	 * <p>
 	 * 价格以趋势方式演变。
@@ -69,23 +44,21 @@ public class TechnicalAnalysis {
 	 * 
 	 * @param list
 	 */
-	public Advise trend(Stock stock, List<Indicators> list) {// MACD信号线交叉分析、零交叉分析。
+	public static Advise macdAnalysis(List<Indicators> list) {// MACD信号线交叉分析、零交叉分析。
 		Advise advise = new Advise();
 		Indicators today = list.get(list.size() - 1);
 		Indicators yesterday = list.get(list.size() - 2);
 		StringBuilder result = new StringBuilder();
 
 		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
-		if (today.getDiff() > yesterday.getDiff()
-				&& today.getDea() < yesterday.getDea()) {
+		if (today.getDiff() > yesterday.getDiff() && today.getDea() < yesterday.getDea()) {
 			// TODO 为了避免虚假信号
-			
+
 			advise.setSignal(Signal.BUY_SIGNAL);
 			result.append("1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。");
 		}
 		// 2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
-		if (today.getDiff() < yesterday.getDiff()
-				&& today.getDea() > yesterday.getDea()) {
+		if (today.getDiff() < yesterday.getDiff() && today.getDea() > yesterday.getDea()) {
 			advise.setSignal(Signal.SELL_SIGNAL);
 			result.append("2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。");
 		}
@@ -101,13 +74,10 @@ public class TechnicalAnalysis {
 			advise.setSignal(Signal.SELL_SIGNAL);
 		}
 
-		advise.setMarket(today.getMacd() > 0 ? Market.BULL_MARKET
-				: Market.BEAR_MARKET);
+		advise.setMarket(today.getMacd() > 0 ? Market.BULL_MARKET : Market.BEAR_MARKET);
 
 		if (result.length() > 0) {
-			advise.setAdvise(today.getDate() + " " + stock.getCode() + " "
-					+ stock.getName() + " " + today.getClose() + ": "
-					+ result.toString());
+			advise.setAdvise(result.toString());
 		}
 		return advise;
 	}
