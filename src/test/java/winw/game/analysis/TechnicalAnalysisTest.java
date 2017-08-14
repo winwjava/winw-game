@@ -13,9 +13,9 @@ import winw.game.stock.StockQuote;
 import winw.game.stock.TencentStockQuoteService;
 import winw.game.stock.analysis.Advise;
 import winw.game.stock.analysis.Advise.Signal;
+import winw.game.stock.trading.Trade;
 import winw.game.stock.analysis.Indicators;
 import winw.game.stock.analysis.TechnicalAnalysis;
-import winw.game.stock.quant.trader.Trade;
 
 public class TechnicalAnalysisTest {
 

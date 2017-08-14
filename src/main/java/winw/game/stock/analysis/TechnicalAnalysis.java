@@ -27,6 +27,7 @@ public class TechnicalAnalysis {
 		return trend(stock, Indicators.compute(quoteList));
 
 		// TODO KDJ
+		// TODO RSI
 	}
 
 	private void addToday(Stock stock, List<StockQuote> quoteList) {
