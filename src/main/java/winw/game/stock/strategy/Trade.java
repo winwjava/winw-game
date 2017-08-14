@@ -1,4 +1,4 @@
-package winw.game.stock.trading;
+package winw.game.stock.strategy;
 
 import java.util.List;
 

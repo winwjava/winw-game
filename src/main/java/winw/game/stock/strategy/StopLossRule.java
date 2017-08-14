@@ -1,4 +1,4 @@
-package winw.game.stock.trading;
+package winw.game.stock.strategy;
 
 /**
  * 止盈止损规则。

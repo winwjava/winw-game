@@ -1,4 +1,4 @@
-package winw.game.stock.trading;
+package winw.game.stock.strategy;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -11,6 +11,8 @@ import winw.game.stock.Stock;
 import winw.game.stock.StockQuote;
 import winw.game.stock.TencentStockQuoteService;
 import winw.game.stock.analysis.Indicators;
+import winw.game.stock.strategy.Trade;
+import winw.game.stock.strategy.TrendTradingStrategy;
 
 public class TrendTradingStrategyTest {
 
