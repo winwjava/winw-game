@@ -63,8 +63,8 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// 36: 成交量（手）
 		// 37: 成交额（万）
 		// 38: 换手率
-		// 39: 市盈率
-		// TODO
+		// 39: 市盈率 
+		// TODO 市盈率
 		//quote.setPe(Double.parseDouble(split[39]));
 		// 40:
 		// 41: 最高

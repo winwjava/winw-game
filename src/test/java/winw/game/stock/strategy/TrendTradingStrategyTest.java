@@ -22,30 +22,32 @@ public class TrendTradingStrategyTest {
 
 	@Test
 	public void test() throws IOException, ParseException {
-		for (int i = 1; i < 100; i++) {
-			try {
-				testProfit("sh" + (600000 + i));
-			} catch (Exception e) {
-				// e.printStackTrace();
-			}
-		}
+		 for (int i = 1; i < 700; i++) {
+		 try {
+		 testProfit("sh" + (600000 + i));
+		 } catch (Exception e) {
+		 // e.printStackTrace();
+		 }
+		 }
 
+		testProfit("sh600211");
 		testProfit("sz002714");
 		testProfit("sh600233");
 		testProfit("sz002120");
 		testProfit("sz002352");
 	}
 
+	DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+
 	public void testProfit(String code) throws IOException, ParseException {
 		Stock stock = service.getStock(code);
 		List<StockQuote> quoteList = service.getHistoricalQuote(stock.getCode());
 
 		List<Trade> tradeLog = strategy.test(Indicators.compute(quoteList));
-		// TODO log tradeLog
-		System.out.println(stock.getName() + "\t"
-				+ tradeLog.toString());
-		// profit
-		DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+
+		// print tradeLog
+//		System.out.println(stock.getName() + "\t" + tradeLog.toString());
+		// print profit
 		System.out.println(stock.getName() + "\t"
 				+ decimalFormat.format(Trade.profit(tradeLog, quoteList.get(quoteList.size() - 1).getClose())));
 	}

@@ -1,4 +1,4 @@
-package winw.game;
+package winw.game.stock;
 
 import java.io.IOException;
 import java.text.ParseException;

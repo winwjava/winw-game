@@ -19,11 +19,11 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 
 	private double volumeMa5;// 5日均量
 	private double volumeMa10;// 10日均量
-	private double volumeMa20;// 20日均量
+	//private double volumeMa20;// 20日均量
 
 	// MACD 指标的三个属性
-	private double dea;
 	private double diff;
+	private double dea;
 	private double macd;
 
 	// KDJ 指标的三个属性
@@ -345,14 +345,6 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 		this.volumeMa10 = volumeMa10;
 	}
 
-	public double getVolumeMa20() {
-		return volumeMa20;
-	}
-
-	public void setVolumeMa20(double volumeMa20) {
-		this.volumeMa20 = volumeMa20;
-	}
-
 	public double getDea() {
 		return dea;
 	}
@@ -452,22 +444,14 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Indicators [ma5=");
-		builder.append(ma5);
-		builder.append(", ma10=");
-		builder.append(ma10);
-		builder.append(", ma20=");
-		builder.append(ma20);
-		builder.append(", volumeMa5=");
-		builder.append(volumeMa5);
-		builder.append(", volumeMa10=");
-		builder.append(volumeMa10);
-		builder.append(", volumeMa20=");
-		builder.append(volumeMa20);
-		builder.append(", dea=");
-		builder.append(dea);
+		builder.append("Indicators [date=");
+		builder.append(date);
+		builder.append(", close=");
+		builder.append(close);
 		builder.append(", diff=");
 		builder.append(diff);
+		builder.append(", dea=");
+		builder.append(dea);
 		builder.append(", macd=");
 		builder.append(macd);
 		builder.append(", k=");

@@ -50,9 +50,10 @@ public class TechnicalAnalysis {
 		Indicators yesterday = list.get(list.size() - 2);
 		StringBuilder result = new StringBuilder();
 
+		// TODO 如何避免虚假信号
+
 		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
 		if (today.getDiff() > yesterday.getDiff() && today.getDea() < yesterday.getDea()) {
-			// TODO 为了避免虚假信号
 
 			advise.setSignal(Signal.BUY_SIGNAL);
 			result.append("1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。");

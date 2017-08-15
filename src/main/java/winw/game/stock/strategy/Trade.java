@@ -34,7 +34,7 @@ public class Trade {
 		this.amount = price * count;
 
 		// 计算佣金，买入时万3，卖出是千分之1.3,不足5元以五元计
-		this.commission = count > 0 ? amount * 0.0003 : amount * 0.0013;
+		this.commission = count > 0 ? amount * 0.0003 : Math.abs(amount) * 0.0013;
 		if (commission < 5) {
 			commission = 5;
 		}
@@ -44,7 +44,7 @@ public class Trade {
 		double profit = 0;// 收益
 		int position = 0; // 持仓
 		for (Trade trade : tradeLog) {
-			profit += trade.getAmount() - trade.getCommission();
+			profit += -trade.getAmount() - trade.getCommission();
 			position += trade.count;
 		}
 		return profit + position * currentPrice;
@@ -88,6 +88,23 @@ public class Trade {
 
 	public void setCommission(double commission) {
 		this.commission = commission;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Trade [date=");
+		builder.append(date);
+		builder.append(", price=");
+		builder.append(price);
+		builder.append(", count=");
+		builder.append(count);
+		builder.append(", amount=");
+		builder.append(amount);
+		builder.append(", commission=");
+		builder.append(commission);
+		builder.append("]");
+		return builder.toString();
 	}
 
 }
