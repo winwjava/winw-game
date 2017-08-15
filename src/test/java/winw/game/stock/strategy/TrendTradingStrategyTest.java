@@ -41,7 +41,9 @@ public class TrendTradingStrategyTest {
 		List<StockQuote> quoteList = service.getHistoricalQuote(stock.getCode());
 
 		List<Trade> tradeLog = strategy.test(Indicators.compute(quoteList));
-
+		// TODO log tradeLog
+		System.out.println(stock.getName() + "\t"
+				+ tradeLog.toString());
 		// profit
 		DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 		System.out.println(stock.getName() + "\t"
