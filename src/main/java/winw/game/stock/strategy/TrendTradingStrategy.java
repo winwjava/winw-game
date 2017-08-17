@@ -19,7 +19,7 @@ public class TrendTradingStrategy implements TradingStrategy{
 	public List<Trade> test(List<Indicators> indicators) {
 		boolean isHold = false; // 是否持仓
 		List<Trade> tradeLog = new ArrayList<Trade>();
-		for (int i = 60; i < indicators.size(); i++) {
+		for (int i = 40; i < indicators.size(); i++) {
 			Indicators current = indicators.get(i);
 			Advise advise = TechnicalAnalysis.macdAnalysis(indicators.subList(0, i));
 			if (advise.getSignal() == Signal.BUY_SIGNAL && !isHold) {

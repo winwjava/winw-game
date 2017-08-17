@@ -11,12 +11,14 @@ import winw.game.stock.util.HttpUtils;
 public class TencentStockQuoteService implements StockQuoteService {
 
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
-	
+
 	// TODO 获取前复权的数据
-	//http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=sh600161,day,,,100,qfq
-	//下面的接口是不复权接口
-	
-	protected String historicalQuoteUrl = "http://data.gtimg.cn/flashdata/hushen/latest/daily/V_CODE.js";
+	//
+	// 下面的接口是不复权接口
+
+	protected String historicalQuoteUrlKLine = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,100,qfq";
+
+	protected String historicalQuoteUrl = "http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js";
 
 	// http://qt.gtimg.cn/q=s_sh600233
 	//
@@ -26,7 +28,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 	// http://data.gtimg.cn/flashdata/hushen/weekly/sh600233.js
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	
+
 	public Stock getStock(String code) throws IOException, ParseException {
 		String response = HttpUtils.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] split = response.split("~");
@@ -58,7 +60,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// 21-28: 卖二 卖五
 		// 29: 最近逐笔成交
 		// 30: 时间
-		//20170804150557
+		// 20170804150557
 		quote.setTime(dateFormat.parse(split[30]));
 		// 31: 涨跌
 		// 32: 涨跌%
@@ -68,9 +70,9 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// 36: 成交量（手）
 		// 37: 成交额（万）
 		// 38: 换手率
-		// 39: 市盈率 
+		// 39: 市盈率
 		// TODO 市盈率
-		//quote.setPe(Double.parseDouble(split[39]));
+		// quote.setPe(Double.parseDouble(split[39]));
 		// 40:
 		// 41: 最高
 		quote.setHigh(Double.parseDouble(split[41]));
@@ -86,7 +88,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 	}
 
 	public List<StockQuote> getHistoricalQuote(String code) throws IOException {
-		String response = HttpUtils.get(historicalQuoteUrl.replaceFirst("V_CODE", code));
+		String response = HttpUtils.get(historicalQuoteUrlKLine.replaceFirst("V_CODE", code));
 		// latest_daily_data="\n\
 		// num:100 total:4024 start:000608 00:140 01:237 02:236 03:240 04:242
 		// 05:218 06:240 07:240 08:245 09:243 10:241 11:242 12:242 13:238 14:245
@@ -95,11 +97,13 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// ";
 
 		// date open close high low volume
-		String[] lines = response.split("\\\\n\\\\");
+		String data = response.substring(response.indexOf("qfqday") + 10, response.indexOf("\"]],"));
+		String[] lines = data.split("\\]\\,\\[");// "],["
+
 		List<StockQuote> quoteList = new ArrayList<StockQuote>();
 		for (int i = 2; i < lines.length; i++) {
-			String[] fileds = lines[i].split(" ");
-			if (fileds == null || fileds.length != 6) {
+			String[] fileds = lines[i].replaceAll("\"", "").split("\\,");
+			if (fileds == null || fileds.length < 6) {
 				continue;
 			}
 
@@ -109,7 +113,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 			quote.setClose(Double.parseDouble(fileds[2]));
 			quote.setHigh(Double.parseDouble(fileds[3]));
 			quote.setLow(Double.parseDouble(fileds[4]));
-			quote.setVolume(Integer.parseInt(fileds[5]));
+			quote.setVolume((int) Double.parseDouble(fileds[5]));
 			quoteList.add(quote);
 		}
 		return quoteList;

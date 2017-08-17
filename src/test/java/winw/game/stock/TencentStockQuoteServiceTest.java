@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import winw.game.stock.Stock;
 import winw.game.stock.StockQuote;
-import winw.game.stock.TencentStockQuoteService;
 
 public class TencentStockQuoteServiceTest {
 
