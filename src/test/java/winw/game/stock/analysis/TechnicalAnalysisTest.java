@@ -36,7 +36,7 @@ public class TechnicalAnalysisTest {
 	@Test
 	public void test() throws IOException, ParseException {
 
-		Stock stock = service.getStock("sh600211");
+		Stock stock = service.getStock("sh600161");
 		List<StockQuote> quoteList = service.getHistoricalQuote(stock.getCode());
 		List<Indicators> indicatorsList = Indicators.compute(quoteList);
 		

@@ -75,6 +75,11 @@ public class TechnicalAnalysis {
 			advise.setSignal(Signal.SELL_SIGNAL);
 		}
 
+//		if (today.getDiff() < yesterday.getDiff()) {
+//			result.append("MACD 比昨天小，卖掉");
+//			advise.setSignal(Signal.SELL_SIGNAL);
+//		}
+		
 		advise.setMarket(today.getMacd() > 0 ? Market.BULL_MARKET : Market.BEAR_MARKET);
 
 		if (result.length() > 0) {

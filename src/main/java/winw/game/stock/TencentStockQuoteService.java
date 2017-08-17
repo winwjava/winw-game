@@ -11,6 +11,11 @@ import winw.game.stock.util.HttpUtils;
 public class TencentStockQuoteService implements StockQuoteService {
 
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
+	
+	// TODO 获取前复权的数据
+	//http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=sh600161,day,,,100,qfq
+	//下面的接口是不复权接口
+	
 	protected String historicalQuoteUrl = "http://data.gtimg.cn/flashdata/hushen/latest/daily/V_CODE.js";
 
 	// http://qt.gtimg.cn/q=s_sh600233
