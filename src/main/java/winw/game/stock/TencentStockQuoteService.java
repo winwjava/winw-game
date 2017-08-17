@@ -12,16 +12,14 @@ public class TencentStockQuoteService implements StockQuoteService {
 
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
-	// TODO 获取前复权的数据
-	//
-	// 下面的接口是不复权接口
-
+	// 获取前复权的数据
 	protected String historicalQuoteUrlKLine = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,100,qfq";
 
 	protected String historicalQuoteUrl = "http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js";
 
 	// http://qt.gtimg.cn/q=s_sh600233
-	//
+	
+	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
 	//
 	// http://data.gtimg.cn/flashdata/hushen/daily/17/sh600233.js
