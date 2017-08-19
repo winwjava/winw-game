@@ -2,7 +2,7 @@ package winw.game.stock.strategy;
 
 import java.util.List;
 
-import winw.game.stock.analysis.Indicators;
+import winw.game.stock.analysis.Indicator;
 
 /**
  * 交易策略。
@@ -12,5 +12,5 @@ import winw.game.stock.analysis.Indicators;
  */
 public interface TradingStrategy {
 
-	List<Trade> test(List<Indicators> indicators);
+	List<Trade> test(List<Indicator> indicator);
 }

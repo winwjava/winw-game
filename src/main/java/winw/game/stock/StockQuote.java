@@ -6,131 +6,128 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Historical prices and volumes. Historical price trends can indicate the
- * future direction of a stock.
+ * 股票报价。
  * 
  * @author winw
  *
  */
-public class StockQuote {// 历史报价（行情）
-	protected String date;// 交易日期
+public class StockQuote extends Quote {
 
-	protected double open; // 开盘价
-	protected double high; // 最高价
-	protected double low; // 最低价
-	protected double close; // 收盘价
+	private String code;// 代码
+	private String name;// 名称
 
-	protected int volume; // 成交量
-	protected double amount; // 成交金额
+	private Date time;// 报价时间
+
+	private double price = 0.0;// 价格
+
+	private double previousClose = 0.0;// 昨日收盘价
+
+	private double pe = 0.0;// 市盈率
+
+	// private double eps = 0.0;
+	// private double marketcap = 0.0;
+	// private String currency = "";
+	// private double shortRatio = 0.0;
+	// private String exchange;
 
 	public StockQuote() {
 		super();
 	}
 
-	public StockQuote(String date, double open, double high, double low, double close, int volume, double amount) {
+	public StockQuote(String code, String name) {
 		super();
-		this.date = date;
-		this.open = open;
-		this.high = high;
-		this.low = low;
-		this.close = close;
-		this.volume = volume;
-		this.amount = amount;
+		this.code = code;
+		this.name = name;
 	}
 
-	public static void addToday(List<StockQuote> quoteList, Stock stock) {
+	public static void addToday(List<Quote> quoteList, StockQuote stockQuote) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		String today = dateFormat.format(new Date());
 
 		Calendar instance = Calendar.getInstance();
-		instance.setTime(stock.getTime());
+		instance.setTime(stockQuote.getTime());
 		// 如果当前时间是交易时间，则将当天的交易，也纳入到历史记录里计算
 		if (instance.get(Calendar.HOUR_OF_DAY) < 15) {
-			System.out.println("交易时间：" + stock.getTime());
-			StockQuote quote = new StockQuote();
+			System.out.println("交易时间：" + stockQuote.getTime());
+			Quote quote = new Quote();
 			quote.setDate(today);
-			quote.setOpen(stock.getOpen());
-			quote.setClose(stock.getPrice());// FIXME 用当前价，当作收盘价
-			quote.setHigh(stock.getHigh());
-			quote.setLow(stock.getLow());
-			quote.setVolume(stock.getVolume());
+			quote.setOpen(stockQuote.getOpen());
+			quote.setClose(stockQuote.getPrice());// FIXME 用当前价，当作收盘价
+			quote.setHigh(stockQuote.getHigh());
+			quote.setLow(stockQuote.getLow());
+			quote.setVolume(stockQuote.getVolume());
 			quoteList.add(quote);
 		}
 	}
 
-	public String getDate() {
-		return date;
+	public QuoteType getQuoteType() {
+		if (quoteType == null && time != null) {
+			return QuoteType.REALTIME_QUOTE;
+		}
+		return quoteType;
 	}
 
-	public void setDate(String date) {
-		this.date = date;
+	public String getCode() {
+		return code;
 	}
 
-	public double getOpen() {
-		return open;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
-	public void setOpen(double open) {
-		this.open = open;
+	public String getName() {
+		return name;
 	}
 
-	public double getHigh() {
-		return high;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public void setHigh(double high) {
-		this.high = high;
+	public Date getTime() {
+		return time;
 	}
 
-	public double getLow() {
-		return low;
+	public void setTime(Date time) {
+		this.time = time;
 	}
 
-	public void setLow(double low) {
-		this.low = low;
+	public double getPrice() {
+		return price;
 	}
 
-	public double getClose() {
-		return close;
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
-	public void setClose(double close) {
-		this.close = close;
+	public double getPreviousClose() {
+		return previousClose;
 	}
 
-	public int getVolume() {
-		return volume;
+	public void setPreviousClose(double previousClose) {
+		this.previousClose = previousClose;
 	}
 
-	public void setVolume(int volume) {
-		this.volume = volume;
+	public double getPe() {
+		return pe;
 	}
 
-	public double getAmount() {
-		return amount;
-	}
-
-	public void setAmount(double amount) {
-		this.amount = amount;
+	public void setPe(double pe) {
+		this.pe = pe;
 	}
 
 	@Override
 	public String toString() {
+		if (getQuoteType() != QuoteType.REALTIME_QUOTE) {
+			return super.toString();
+		}
+
 		StringBuilder builder = new StringBuilder();
-		builder.append("HistoricalQuote [date=");
-		builder.append(date);
-		builder.append(", open=");
-		builder.append(open);
-		builder.append(", high=");
-		builder.append(high);
-		builder.append(", low=");
-		builder.append(low);
-		builder.append(", close=");
-		builder.append(close);
-		builder.append(", volume=");
-		builder.append(volume);
-		builder.append(", amount=");
-		builder.append(amount);
+		builder.append("StockQuote [code=");
+		builder.append(code);
+		builder.append(", name=");
+		builder.append(name);
+		builder.append(", price=");
+		builder.append(price);
 		builder.append("]");
 		return builder.toString();
 	}

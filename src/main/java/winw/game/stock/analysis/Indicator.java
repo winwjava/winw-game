@@ -3,7 +3,7 @@ package winw.game.stock.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
-import winw.game.stock.StockQuote;
+import winw.game.stock.Quote;
 
 /**
  * 指标。
@@ -11,7 +11,7 @@ import winw.game.stock.StockQuote;
  * @author winw
  *
  */
-public class Indicators extends StockQuote {// extends MovingAverage,
+public class Indicator extends Quote {
 
 	private double ma5;// 5日均价
 	private double ma10;// 10日均价
@@ -19,7 +19,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 
 	private double volumeMa5;// 5日均量
 	private double volumeMa10;// 10日均量
-	//private double volumeMa20;// 20日均量
+	// private double volumeMa20;// 20日均量
 
 	// MACD 指标的三个属性
 	private double diff;
@@ -41,7 +41,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	private double mb; // 中轨线
 	private double dn; // 下轨线
 
-	public Indicators(StockQuote o) {
+	public Indicator(Quote o) {
 		super();
 		this.date = o.getDate();
 		this.open = o.getOpen();
@@ -58,10 +58,10 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	 * @param quoteList
 	 * @return
 	 */
-	public static List<Indicators> compute(List<StockQuote> quoteList) {
-		List<Indicators> list = new ArrayList<Indicators>();
-		for (StockQuote quote : quoteList) {
-			list.add(new Indicators(quote));
+	public static List<Indicator> compute(List<? extends Quote> quoteList) {
+		List<Indicator> list = new ArrayList<Indicator>();
+		for (Quote quote : quoteList) {
+			list.add(new Indicator(quote));
 		}
 		computeMA(list);
 		computeMACD(list);
@@ -74,52 +74,52 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	/**
 	 * 计算 MA
 	 */
-	private static void computeMA(List<Indicators> entries) {
+	private static void computeMA(List<Indicator> list) {
 		double ma5 = 0;
 		double ma10 = 0;
 		double ma20 = 0;
 		double volumeMa5 = 0;
 		double volumeMa10 = 0;
 
-		for (int i = 0; i < entries.size(); i++) {
-			Indicators entry = entries.get(i);
+		for (int i = 0; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
 
-			ma5 += entry.getClose();
-			ma10 += entry.getClose();
-			ma20 += entry.getClose();
+			ma5 += indicator.getClose();
+			ma10 += indicator.getClose();
+			ma20 += indicator.getClose();
 
-			volumeMa5 += entry.getVolume();
-			volumeMa10 += entry.getVolume();
+			volumeMa5 += indicator.getVolume();
+			volumeMa10 += indicator.getVolume();
 
 			if (i >= 5) {
-				ma5 -= entries.get(i - 5).getClose();
-				entry.setMa5(ma5 / 5f);
+				ma5 -= list.get(i - 5).getClose();
+				indicator.setMa5(ma5 / 5f);
 
-				volumeMa5 -= entries.get(i - 5).getVolume();
-				entry.setVolumeMa5(volumeMa5 / 5f);
+				volumeMa5 -= list.get(i - 5).getVolume();
+				indicator.setVolumeMa5(volumeMa5 / 5f);
 			} else {
-				entry.setMa5(ma5 / (i + 1f));
+				indicator.setMa5(ma5 / (i + 1f));
 
-				entry.setVolumeMa5(volumeMa5 / (i + 1f));
+				indicator.setVolumeMa5(volumeMa5 / (i + 1f));
 			}
 
 			if (i >= 10) {
-				ma10 -= entries.get(i - 10).getClose();
-				entry.setMa10(ma10 / 10f);
+				ma10 -= list.get(i - 10).getClose();
+				indicator.setMa10(ma10 / 10f);
 
-				volumeMa10 -= entries.get(i - 10).getVolume();
-				entry.setVolumeMa10(volumeMa10 / 5f);
+				volumeMa10 -= list.get(i - 10).getVolume();
+				indicator.setVolumeMa10(volumeMa10 / 5f);
 			} else {
-				entry.setMa10(ma10 / (i + 1f));
+				indicator.setMa10(ma10 / (i + 1f));
 
-				entry.setVolumeMa10(volumeMa10 / (i + 1f));
+				indicator.setVolumeMa10(volumeMa10 / (i + 1f));
 			}
 
 			if (i >= 20) {
-				ma20 -= entries.get(i - 20).getClose();
-				entry.setMa20(ma20 / 20f);
+				ma20 -= list.get(i - 20).getClose();
+				indicator.setMa20(ma20 / 20f);
 			} else {
-				entry.setMa20(ma20 / (i + 1f));
+				indicator.setMa20(ma20 / (i + 1f));
 			}
 		}
 	}
@@ -127,7 +127,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	/**
 	 * 计算 MACD
 	 */
-	private static void computeMACD(List<Indicators> entries) {// moving average convergence/divergence
+	private static void computeMACD(List<Indicator> list) {// moving average convergence/divergence
 		// 指数平均数指标 （Exponential Moving Average）
 
 		// EMAtoday=α * Price today + ( 1 - α ) * EMAyesterday;
@@ -156,17 +156,17 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 		double dea = 0;
 		double macd = 0;
 
-		for (int i = 0; i < entries.size(); i++) {
-			Indicators entry = entries.get(i);
+		for (int i = 0; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
 
 			if (i == 0) {
-				ema12 = entry.getClose();
-				ema26 = entry.getClose();
+				ema12 = indicator.getClose();
+				ema26 = indicator.getClose();
 			} else {
 				// EMA（12） = 前一日EMA（12） X 11/13 + 今日收盘价 X 2/13
-				ema12 = ema12 * 11f / 13f + entry.getClose() * 2f / 13f;// 快速移动平均线
+				ema12 = ema12 * 11f / 13f + indicator.getClose() * 2f / 13f;// 快速移动平均线
 				// EMA（26） = 前一日EMA（26） X 25/27 + 今日收盘价 X 2/27
-				ema26 = ema26 * 25f / 27f + entry.getClose() * 2f / 27f;// 慢速移动平均线
+				ema26 = ema26 * 25f / 27f + indicator.getClose() * 2f / 27f;// 慢速移动平均线
 			}
 
 			// DIF = EMA（12） - EMA（26） 。
@@ -176,23 +176,23 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 			// 用（DIF-DEA）*2 即为 MACD 柱状图。
 			macd = (diff - dea) * 2f;
 
-			entry.setDiff(diff);
-			entry.setDea(dea);
-			entry.setMacd(macd);
+			indicator.setDiff(diff);
+			indicator.setDea(dea);
+			indicator.setMacd(macd);
 		}
 	}
 
 	/**
 	 * 计算 BOLL 需要在计算 MA 之后进行
 	 */
-	private static void computeBOLL(List<Indicators> entries) {
-		for (int i = 0; i < entries.size(); i++) {
-			Indicators entry = entries.get(i);
+	private static void computeBOLL(List<Indicator> list) {
+		for (int i = 0; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
 
 			if (i == 0) {
-				entry.setMb(entry.getClose());
-				entry.setUp(Double.NaN);
-				entry.setDn(Double.NaN);
+				indicator.setMb(indicator.getClose());
+				indicator.setUp(Double.NaN);
+				indicator.setDn(Double.NaN);
 			} else {
 				int n = 20;
 				if (i < 20) {
@@ -201,8 +201,8 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 
 				double md = 0;
 				for (int j = i - n + 1; j <= i; j++) {
-					double c = entries.get(j).getClose();
-					double m = entry.getMa20();
+					double c = list.get(j).getClose();
+					double m = indicator.getMa20();
 					double value = c - m;
 					md += value * value;
 				}
@@ -210,9 +210,9 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 				md = md / (n - 1);
 				md = (double) Math.sqrt(md);
 
-				entry.setMb(entry.getMa20());
-				entry.setUp(entry.getMb() + 2f * md);
-				entry.setDn(entry.getMb() - 2f * md);
+				indicator.setMb(indicator.getMa20());
+				indicator.setUp(indicator.getMb() + 2f * md);
+				indicator.setDn(indicator.getMb() - 2f * md);
 			}
 		}
 	}
@@ -220,7 +220,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	/**
 	 * 计算 RSI
 	 */
-	private static void computeRSI(List<Indicators> entries) {
+	private static void computeRSI(List<Indicator> list) {
 		double rsi1 = 0;
 		double rsi2 = 0;
 		double rsi3 = 0;
@@ -231,8 +231,8 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 		double rsi2MaxEma = 0;
 		double rsi3MaxEma = 0;
 
-		for (int i = 0; i < entries.size(); i++) {
-			Indicators entry = entries.get(i);
+		for (int i = 0; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
 
 			if (i == 0) {
 				rsi1 = 0;
@@ -245,8 +245,8 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 				rsi2MaxEma = 0;
 				rsi3MaxEma = 0;
 			} else {
-				double Rmax = Math.max(0, entry.getClose() - entries.get(i - 1).getClose());
-				double RAbs = Math.abs(entry.getClose() - entries.get(i - 1).getClose());
+				double Rmax = Math.max(0, indicator.getClose() - list.get(i - 1).getClose());
+				double RAbs = Math.abs(indicator.getClose() - list.get(i - 1).getClose());
 
 				rsi1MaxEma = (Rmax + (6f - 1) * rsi1MaxEma) / 6f;
 				rsi1ABSEma = (RAbs + (6f - 1) * rsi1ABSEma) / 6f;
@@ -262,21 +262,21 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 				rsi3 = (rsi3MaxEma / rsi3ABSEma) * 100;
 			}
 
-			entry.setRsi1(rsi1);
-			entry.setRsi2(rsi2);
-			entry.setRsi3(rsi3);
+			indicator.setRsi1(rsi1);
+			indicator.setRsi2(rsi2);
+			indicator.setRsi3(rsi3);
 		}
 	}
 
 	/**
 	 * 计算 KDJ
 	 */
-	private static void computeKDJ(List<Indicators> entries) {
+	private static void computeKDJ(List<Indicator> list) {
 		double k = 0;
 		double d = 0;
 
-		for (int i = 0; i < entries.size(); i++) {
-			Indicators entry = entries.get(i);
+		for (int i = 0; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
 
 			int startIndex = i - 8;
 			if (startIndex < 0) {
@@ -286,11 +286,11 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 			double max9 = Double.MIN_VALUE;
 			double min9 = Double.MAX_VALUE;
 			for (int index = startIndex; index <= i; index++) {
-				max9 = Math.max(max9, entries.get(index).getHigh());
-				min9 = Math.min(min9, entries.get(index).getLow());
+				max9 = Math.max(max9, list.get(index).getHigh());
+				min9 = Math.min(min9, list.get(index).getLow());
 			}
 
-			double rsv = 100f * (entry.getClose() - min9) / (max9 - min9);
+			double rsv = 100f * (indicator.getClose() - min9) / (max9 - min9);
 			if (i == 0) {
 				k = rsv;
 				d = rsv;
@@ -299,9 +299,9 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 				d = (k + 2f * d) / 3f;
 			}
 
-			entry.setK(k);
-			entry.setD(d);
-			entry.setJ(3f * k - 2 * d);
+			indicator.setK(k);
+			indicator.setD(d);
+			indicator.setJ(3f * k - 2 * d);
 		}
 	}
 
@@ -444,7 +444,7 @@ public class Indicators extends StockQuote {// extends MovingAverage,
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Indicators [date=");
+		builder.append("Indicator [date=");
 		builder.append(date);
 		builder.append(", close=");
 		builder.append(close);

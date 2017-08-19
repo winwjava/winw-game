@@ -8,17 +8,22 @@ import java.util.List;
 
 import winw.game.stock.util.HttpUtils;
 
+/**
+ * @author winw
+ *
+ */
 public class TencentStockQuoteService implements StockQuoteService {
 
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
 	// 获取前复权的数据
-	protected String historicalQuoteUrlKLine = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,100,qfq";
+	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,100,qfq";
 
-	protected String historicalQuoteUrl = "http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js";
+	// protected String historicalQuoteUrl =
+	// "http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js";
 
 	// http://qt.gtimg.cn/q=s_sh600233
-	
+
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
 	//
@@ -27,11 +32,11 @@ public class TencentStockQuoteService implements StockQuoteService {
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
-	public Stock getStock(String code) throws IOException, ParseException {
+	public StockQuote get(String code) throws IOException, ParseException {
 		String response = HttpUtils.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] split = response.split("~");
 
-		Stock quote = new Stock();
+		StockQuote quote = new StockQuote();
 
 		// v_sh600233="1~圆通速递~600233~18.07~18.11~18.10~17984~7724~10260~18.07~158~18.06~703~18.05~453~18.04~552~18.03~426~18.08~210~18.09~61~18.10~414~18.11~15~18.12~111~15:00:02/18.07/5/S/9035/23371|15:00:00/18.07/1/S/1807/23368|14:59:57/18.07/1/S/1807/23364|14:59:50/18.07/17/S/30724/23355|14:59:44/18.07/7/S/12655/23349|14:59:44/18.07/1/S/1807/23346~20170804150557~-0.04~-0.22~18.14~18.03~18.07/17978/32487500~17984~3250~0.54~31.11~~18.14~18.03~0.61~59.63~509.80~6.01~19.92~16.30~0.83";
 		// 看返回数据是以 ~ 分割字符串中内容，下标从0开始，依次为
@@ -85,8 +90,8 @@ public class TencentStockQuoteService implements StockQuoteService {
 		return quote;
 	}
 
-	public List<StockQuote> getHistoricalQuote(String code) throws IOException {
-		String response = HttpUtils.get(historicalQuoteUrlKLine.replaceFirst("V_CODE", code));
+	public List<StockQuote> get(String code, QuoteType quoteType) throws IOException {
+		String response = HttpUtils.get(dailyQuoteUrl.replaceFirst("V_CODE", code));
 		// latest_daily_data="\n\
 		// num:100 total:4024 start:000608 00:140 01:237 02:236 03:240 04:242
 		// 05:218 06:240 07:240 08:245 09:243 10:241 11:242 12:242 13:238 14:245

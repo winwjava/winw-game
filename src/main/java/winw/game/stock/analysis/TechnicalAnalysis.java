@@ -44,10 +44,10 @@ public class TechnicalAnalysis {
 	 * 
 	 * @param list
 	 */
-	public static Advise macdAnalysis(List<Indicators> list) {// MACD信号线交叉分析、零交叉分析。
+	public static Advise macdAnalysis(List<Indicator> list) {// MACD信号线交叉分析、零交叉分析。
 		Advise advise = new Advise();
-		Indicators today = list.get(list.size() - 1);
-		Indicators yesterday = list.get(list.size() - 2);
+		Indicator today = list.get(list.size() - 1);
+		Indicator yesterday = list.get(list.size() - 2);
 		StringBuilder result = new StringBuilder();
 
 		// TODO 如何避免虚假信号
