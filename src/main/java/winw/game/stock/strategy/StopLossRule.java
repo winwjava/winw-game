@@ -9,6 +9,6 @@ package winw.game.stock.strategy;
  * @author winw
  *
  */
-public class StopLossRule {
+public class StopLossRule {// TODO 止盈止损规则
 
 }

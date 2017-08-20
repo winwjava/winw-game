@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Test;
 
 import winw.game.stock.QuoteType;
+import winw.game.stock.StockList;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
@@ -16,20 +17,14 @@ public class TechnicalAnalysisTest {
 
 	@Test
 	public void testAll() throws Exception {
-		for (int i = 1; i < 100; i++) {
-			try {
-				test("sh" + (600000 + i));
-			} catch (Exception e) {
-				// e.printStackTrace();
-			}
+		for (String temp : StockList.SSE_50) {
+			test(temp);
 		}
-		test("sz002714");
-		test("sz002352");
 	}
 
 	@Test
 	public void testOne() throws Exception {
-		List<Indicator> indicatorList = test("sh600516");
+		List<Indicator> indicatorList = test("sh600066");
 		for (int i = 50; i < indicatorList.size(); i++) {
 			Advise advise = TechnicalAnalysis.macdAnalysis(indicatorList.subList(0, i));
 

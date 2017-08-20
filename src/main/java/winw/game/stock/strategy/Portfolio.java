@@ -54,19 +54,9 @@ public class Portfolio {
 
 	public int maxBuy(double price) {
 		// 假设全部买入
-		return (int) ((cash - commission(cash)) / price)/100*100;
+		return (int) ((cash - commission(cash)) / price) / 100 * 100;
 	}
 
-//	 public static double profit(List<Trade> tradeLog, double currentPrice) {
-//	 double profit = 0;// 收益
-//	 int position = 0; // 持仓
-//	 for (Trade trade : tradeLog) {
-//	 profit += -trade.getAmount() - trade.getCommission();
-//	 position += trade.count;
-//	 }
-//	 return profit + position * currentPrice;
-//	 }
-	 
 	public double getCash() {
 		return cash;
 	}

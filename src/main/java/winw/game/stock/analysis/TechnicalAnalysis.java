@@ -57,9 +57,6 @@ public class TechnicalAnalysis {
 		boolean intersect = Line2D.linesIntersect(0, yesterday.getDiff(), 1, today.getDiff(), 0, yesterday.getDea(), 1,
 				today.getDea());
 
-//		if(intersect) {
-//			System.out.println("intersect--------");
-//		}
 		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
 		if (intersect && today.getDiff() > today.getDea()) {
 			advise.setSignal(Signal.BUY_SIGNAL);

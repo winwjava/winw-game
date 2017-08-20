@@ -92,15 +92,8 @@ public class TencentStockQuoteService implements StockQuoteService {
 
 	public List<StockQuote> get(String code, QuoteType quoteType) throws IOException {
 		String response = HttpUtils.get(dailyQuoteUrl.replaceFirst("V_CODE", code));
-		// latest_daily_data="\n\
-		// num:100 total:4024 start:000608 00:140 01:237 02:236 03:240 04:242
-		// 05:218 06:240 07:240 08:245 09:243 10:241 11:242 12:242 13:238 14:245
-		// 15:236 16:155 17:144\n\
-		// 170804 18.10 18.07 18.14 18.03 17984\n\
-		// ";
 
-		// date open close high low volume
-		String data = response.substring(response.indexOf("qfqday") + 10, response.indexOf("\"]],"));
+		String data = response.substring(response.indexOf("qfqday") + 10, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["
 
 		List<StockQuote> quoteList = new ArrayList<StockQuote>();
@@ -109,7 +102,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 			if (fileds == null || fileds.length < 6) {
 				continue;
 			}
-
+			// date open close high low volume
 			StockQuote quote = new StockQuote();
 			quote.setDate(fileds[0]);
 			quote.setOpen(Double.parseDouble(fileds[1]));

@@ -1,11 +1,13 @@
 package winw.game.stock.strategy;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.junit.Test;
 
 import winw.game.stock.QuoteType;
+import winw.game.stock.StockList;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
@@ -19,20 +21,14 @@ public class TrendTradingStrategyTest {
 
 	@Test
 	public void testAll() throws Exception {
-		for (int i = 1; i < 700; i++) {
-			try {
-				test("sh" + (600000 + i));
-			} catch (Exception e) {
-				// e.printStackTrace();
-			}
+		for (String temp : StockList.CSI_300) {
+			test(temp);
 		}
-		test("sz002714");
-		test("sz002352");
 	}
 
 	@Test
 	public void testOne() throws Exception {
-		Portfolio portfolio = test("sh600516");
+		Portfolio portfolio = test("sh600233");
 
 		// print trade Log
 		for (Trade trade : portfolio.getTradeLog()) {
@@ -41,9 +37,10 @@ public class TrendTradingStrategyTest {
 	}
 
 	DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+	NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
 	public Portfolio test(String code) throws Exception {
-		double init = 15000;
+		double init = 100000;
 
 		StockQuote stockQuote = service.get(code);
 		String name = stockQuote.getName();
@@ -55,10 +52,13 @@ public class TrendTradingStrategyTest {
 		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
 
 		Portfolio portfolio = new Portfolio(init);// 初始金额
-		double profit = strategy.test(portfolio, Indicator.compute(quoteList));
+		double assets = strategy.test(portfolio, Indicator.compute(quoteList));
 
-		// print profit
-		System.out.println(stockQuote.getName() + "\t" + decimalFormat.format(profit - init));
+		double profit = assets - init;
+		percentFormat.setMinimumFractionDigits(2);
+
+		System.out.println(stockQuote.getName() + "\t" + decimalFormat.format(profit) + "\t"
+				+ percentFormat.format(profit / init));
 		return portfolio;
 	}
 
