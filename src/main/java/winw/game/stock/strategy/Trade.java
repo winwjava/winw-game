@@ -1,7 +1,5 @@
 package winw.game.stock.strategy;
 
-import java.util.List;
-
 /**
  * 交易。
  * 
@@ -9,8 +7,6 @@ import java.util.List;
  *
  */
 public class Trade {
-
-	// private double capital;
 
 	private String date;// 日期
 
@@ -32,22 +28,6 @@ public class Trade {
 		this.price = price;
 		this.count = count;
 		this.amount = price * count;
-
-		// 计算佣金，买入时万3，卖出是千分之1.3,不足5元以五元计
-		this.commission = count > 0 ? amount * 0.0003 : Math.abs(amount) * 0.0013;
-		if (commission < 5) {
-			commission = 5;
-		}
-	}
-
-	public static double profit(List<Trade> tradeLog, double currentPrice) {
-		double profit = 0;// 收益
-		int position = 0; // 持仓
-		for (Trade trade : tradeLog) {
-			profit += -trade.getAmount() - trade.getCommission();
-			position += trade.count;
-		}
-		return profit + position * currentPrice;
 	}
 
 	public String getDate() {

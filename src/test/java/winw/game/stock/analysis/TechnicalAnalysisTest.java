@@ -1,51 +1,68 @@
 package winw.game.stock.analysis;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.junit.Test;
 
 import winw.game.stock.QuoteType;
 import winw.game.stock.StockQuote;
+import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
 
 public class TechnicalAnalysisTest {
 
-	private TencentStockQuoteService service = new TencentStockQuoteService();
-
-	// @Test
-	// public void test() throws IOException, ParseException {
-	// for (int i = 1; i < 100; i++) {
-	// try {
-	// macdAnalysis("sh" + (600000 + i));
-	// } catch (Exception e) {
-	// // e.printStackTrace();
-	// }
-	// }
-	//
-	// macdAnalysis("sz002714");
-	// macdAnalysis("sh600233");
-	// macdAnalysis("sz002120");
-	// macdAnalysis("sz002352");
-	// }
+	private StockQuoteService service = new TencentStockQuoteService();
 
 	@Test
-	public void test() throws IOException, ParseException {
-		StockQuote stockQuote = service.get("sh600161");
-		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
-		List<Indicator> indicatorsList = Indicator.compute(quoteList);
-
-		for (Indicator indicator : indicatorsList) {
-			System.out.println(indicator.toString());
+	public void testAll() throws Exception {
+		for (int i = 1; i < 100; i++) {
+			try {
+				test("sh" + (600000 + i));
+			} catch (Exception e) {
+				// e.printStackTrace();
+			}
 		}
-
-		Advise advise = TechnicalAnalysis.macdAnalysis(indicatorsList);
-
-		// Advise
-		System.out.println(stockQuote.getCode() + " " + stockQuote.getName() + " " + stockQuote.getPrice() + ", "
-				+ advise.toString());
-
+		test("sz002714");
+		test("sz002352");
 	}
 
+	@Test
+	public void testOne() throws Exception {
+		List<Indicator> indicatorList = test("sh600516");
+		for (int i = 50; i < indicatorList.size(); i++) {
+			Advise advise = TechnicalAnalysis.macdAnalysis(indicatorList.subList(0, i));
+
+			// Advise
+			System.out.println(toString(indicatorList.get(i -1)) + "\t" + advise.toString());
+		}
+	}
+	
+	public List<Indicator> test(String code) throws Exception {
+		StockQuote stockQuote = service.get(code);
+		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
+
+		List<Indicator> indicatorList = Indicator.compute(quoteList);
+		Advise advise = TechnicalAnalysis.macdAnalysis(indicatorList);
+		System.out.println(stockQuote.getName() +"\t"+advise.toString());
+		return indicatorList;
+	}
+
+	DecimalFormat decimalFormat = new DecimalFormat("##0.000");
+
+	protected String toString(Indicator indicator) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Indicator [date=");
+		builder.append(indicator.getDate());
+		builder.append(", close=");
+		builder.append(indicator.getClose());
+		builder.append(", diff=");
+		builder.append(decimalFormat.format(indicator.getDiff()));
+		builder.append(", dea=");
+		builder.append(decimalFormat.format(indicator.getDea()));
+		builder.append(", macd=");
+		builder.append(decimalFormat.format(indicator.getMacd()));
+		builder.append("]");
+		return builder.toString();
+	}
 }

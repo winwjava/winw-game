@@ -1,5 +1,6 @@
 package winw.game.stock.analysis;
 
+import java.awt.geom.Line2D;
 import java.util.List;
 
 import winw.game.stock.analysis.Advise.Market;
@@ -52,14 +53,20 @@ public class TechnicalAnalysis {
 
 		// TODO 如何避免虚假信号
 
-		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
-		if (today.getDiff() > yesterday.getDiff() && today.getDea() < yesterday.getDea()) {
+		// DIFF和DEA的两条线交叉
+		boolean intersect = Line2D.linesIntersect(0, yesterday.getDiff(), 1, today.getDiff(), 0, yesterday.getDea(), 1,
+				today.getDea());
 
+//		if(intersect) {
+//			System.out.println("intersect--------");
+//		}
+		// 1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
+		if (intersect && today.getDiff() > today.getDea()) {
 			advise.setSignal(Signal.BUY_SIGNAL);
 			result.append("1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。");
 		}
 		// 2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
-		if (today.getDiff() < yesterday.getDiff() && today.getDea() > yesterday.getDea()) {
+		if (intersect && today.getDiff() < today.getDea()) {
 			advise.setSignal(Signal.SELL_SIGNAL);
 			result.append("2. MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。");
 		}
@@ -72,14 +79,14 @@ public class TechnicalAnalysis {
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
 			result.append("4. MACD 红转绿：MACD 值由正变负，市场由多头转为空头。");
 			advise.setMarket(Market.BEAR_MARKET);
-			advise.setSignal(Signal.SELL_SIGNAL);
+			// advise.setSignal(Signal.SELL_SIGNAL);
 		}
 
-//		if (today.getDiff() < yesterday.getDiff()) {
-//			result.append("MACD 比昨天小，卖掉");
-//			advise.setSignal(Signal.SELL_SIGNAL);
-//		}
-		
+		// if (today.getDiff() < yesterday.getDiff()) {
+		// result.append("MACD 比昨天小，卖掉");
+		// advise.setSignal(Signal.SELL_SIGNAL);
+		// }
+
 		advise.setMarket(today.getMacd() > 0 ? Market.BULL_MARKET : Market.BEAR_MARKET);
 
 		if (result.length() > 0) {

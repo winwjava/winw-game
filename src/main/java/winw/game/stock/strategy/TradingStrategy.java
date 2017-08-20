@@ -12,5 +12,11 @@ import winw.game.stock.analysis.Indicator;
  */
 public interface TradingStrategy {
 
-	List<Trade> test(List<Indicator> indicator);
+	/**
+	 * 回测
+	 * @param portfolio
+	 * @param indicator
+	 * @return
+	 */
+	double test(Portfolio portfolio, List<Indicator> indicator);
 }

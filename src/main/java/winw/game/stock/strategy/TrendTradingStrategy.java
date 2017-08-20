@@ -1,6 +1,5 @@
 package winw.game.stock.strategy;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import winw.game.stock.analysis.Advise;
@@ -14,25 +13,26 @@ import winw.game.stock.analysis.TechnicalAnalysis;
  * @author winw
  *
  */
-public class TrendTradingStrategy implements TradingStrategy{
+public class TrendTradingStrategy implements TradingStrategy {
 
-	public List<Trade> test(List<Indicator> indicator) {
-		boolean isHold = false; // 是否持仓
-		List<Trade> tradeLog = new ArrayList<Trade>();
-		for (int i = 40; i < indicator.size(); i++) {
-			Indicator current = indicator.get(i);
+	public double test(Portfolio portfolio, List<Indicator> indicator) {
+		int position = 0; // 持仓
+		for (int i = 50; i < indicator.size(); i++) {
+			Indicator current = indicator.get(i - 1);
 			Advise advise = TechnicalAnalysis.macdAnalysis(indicator.subList(0, i));
-			if (advise.getSignal() == Signal.BUY_SIGNAL && !isHold) {
-				isHold = true;
-				tradeLog.add(new Trade(current.getDate(), current.getClose(), 500));
+			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {
+				position = portfolio.maxBuy(current.getClose());
+				portfolio.trading(
+						new Trade(current.getDate(), current.getClose(), portfolio.maxBuy(current.getClose())));
 			}
 
-			if (advise.getSignal() == Signal.SELL_SIGNAL && isHold) {
-				isHold = false;
-				tradeLog.add(new Trade(current.getDate(), current.getClose(), -500));
+			if (advise.getSignal() == Signal.SELL_SIGNAL && position > 0) {
+				portfolio.trading(new Trade(current.getDate(), current.getClose(), -position));
+				position = 0;
 			}
 		}
-		return tradeLog;
+		
+		return portfolio.getCash() + position * indicator.get(indicator.size() -1).getClose();
 	}
 
 }
