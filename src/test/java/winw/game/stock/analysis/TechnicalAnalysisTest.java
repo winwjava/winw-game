@@ -35,6 +35,9 @@ public class TechnicalAnalysisTest {
 	
 	public List<Indicator> test(String code) throws Exception {
 		StockQuote stockQuote = service.get(code);
+		if (stockQuote == null) {
+			return null;// FIXME Warn
+		}
 		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);

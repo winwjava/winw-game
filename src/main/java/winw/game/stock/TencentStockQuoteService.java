@@ -35,6 +35,9 @@ public class TencentStockQuoteService implements StockQuoteService {
 	public StockQuote get(String code) throws IOException, ParseException {
 		String response = HttpUtils.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] split = response.split("~");
+		if(split == null || split.length <= 1) {
+			return null;
+		}
 
 		StockQuote quote = new StockQuote();
 

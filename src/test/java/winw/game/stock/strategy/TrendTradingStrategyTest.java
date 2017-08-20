@@ -28,7 +28,7 @@ public class TrendTradingStrategyTest {
 
 	@Test
 	public void testOne() throws Exception {
-		Portfolio portfolio = test("sh600233");
+		Portfolio portfolio = test("sz600006");
 
 		// print trade Log
 		for (Trade trade : portfolio.getTradeLog()) {
@@ -43,6 +43,9 @@ public class TrendTradingStrategyTest {
 		double init = 100000;
 
 		StockQuote stockQuote = service.get(code);
+		if (stockQuote == null) {
+			return null;// FIXME Warn
+		}
 		String name = stockQuote.getName();
 		if (name.startsWith("S") || name.startsWith("ST") || name.startsWith("*ST") || name.startsWith("S*ST")
 				|| name.startsWith("SST") || name.startsWith("退市")) {
