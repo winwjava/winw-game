@@ -1,12 +1,22 @@
 package winw.game.stock;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * 报价。
  * 
  * @author winw
  *
  */
+@Entity
+@Table(name="QUOTE")
 public class Quote {
+    @Id
+    @GeneratedValue
+    private long id;
 
 	protected QuoteType quoteType;// 报价类型
 
