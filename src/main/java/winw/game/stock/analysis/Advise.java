@@ -27,7 +27,16 @@ public class Advise {
 		/**
 		 * 空头市场
 		 */
-		BEAR_MARKET
+		BEAR_MARKET,
+
+		/**
+		 * 市场顶部
+		 */
+		MARKET_TOP,
+		/**
+		 * 市场底部
+		 */
+		MARKET_BOTTOM
 	}
 
 	/**
@@ -76,6 +85,8 @@ public class Advise {
 		builder.append(signal);
 		builder.append(", advise=");
 		builder.append(advise);
+		builder.append(", market=");
+		builder.append(market);
 		builder.append("]");
 		return builder.toString();
 	}

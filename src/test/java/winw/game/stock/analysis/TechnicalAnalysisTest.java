@@ -24,15 +24,22 @@ public class TechnicalAnalysisTest {
 
 	@Test
 	public void testOne() throws Exception {
-		List<Indicator> indicatorList = test("sh600066");
+		List<Indicator> indicatorList = test("sz000503");
 		for (int i = 50; i < indicatorList.size(); i++) {
-			Advise advise = TechnicalAnalysis.macdAnalysis(indicatorList.subList(0, i));
+			Advise advise = TechnicalAnalysis.analysisMACD(indicatorList.subList(0, i));
+			if (advise.getSignal() != null) {// Advise
+				System.out.println(toString(indicatorList.get(i - 1)) + "\t" + advise.toString());
+			}
+			// Advise obv = TechnicalAnalysis.analysisOBV(indicatorList.subList(0, i));
+			// System.out.println(toStringOBV(indicatorList.get(i)) + "\t" + obv.toString()
+			// + "\t" + obv.toString());
 
-			// Advise
-			System.out.println(toString(indicatorList.get(i -1)) + "\t" + advise.toString());
+			// Advise vpt = TechnicalAnalysis.analysisVPT(indicatorList.subList(0, i));
+			// System.out.println(indicatorList.get(i).getDate()+ "\t"
+			// +indicatorList.get(i).getVpt());
 		}
 	}
-	
+
 	public List<Indicator> test(String code) throws Exception {
 		StockQuote stockQuote = service.get(code);
 		if (stockQuote == null) {
@@ -41,12 +48,12 @@ public class TechnicalAnalysisTest {
 		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);
-		Advise advise = TechnicalAnalysis.macdAnalysis(indicatorList);
-		System.out.println(stockQuote.getName() +"\t"+advise.toString());
+		Advise advise = TechnicalAnalysis.analysisMACD(indicatorList);
+		System.out.println(stockQuote.getName() + "\t" + advise.toString());
 		return indicatorList;
 	}
 
-	DecimalFormat decimalFormat = new DecimalFormat("##0.000");
+	final DecimalFormat decimalFormat = new DecimalFormat("##0.000");
 
 	protected String toString(Indicator indicator) {
 		StringBuilder builder = new StringBuilder();
@@ -60,6 +67,32 @@ public class TechnicalAnalysisTest {
 		builder.append(decimalFormat.format(indicator.getDea()));
 		builder.append(", macd=");
 		builder.append(decimalFormat.format(indicator.getMacd()));
+		builder.append("]");
+		return builder.toString();
+	}
+
+	protected String toStringOBV(Indicator indicator) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Indicator [date=");
+		builder.append(indicator.getDate());
+		builder.append(", volume=");
+		builder.append(indicator.getVolume());
+		builder.append(", obv=");
+		builder.append(decimalFormat.format(indicator.getObv()));
+		builder.append(", obvma=");
+		builder.append(decimalFormat.format(indicator.getObvma()));
+		builder.append("]");
+		return builder.toString();
+	}
+
+	protected String toStringVPT(Indicator indicator) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Indicator [date=");
+		builder.append(indicator.getDate());
+		builder.append(", volume=");
+		builder.append(indicator.getVolume());
+		builder.append(", vpt=");
+		builder.append(decimalFormat.format(indicator.getVpt()));
 		builder.append("]");
 		return builder.toString();
 	}

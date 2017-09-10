@@ -14,9 +14,9 @@ public interface TradingStrategy {
 
 	/**
 	 * 回测
+	 * 
 	 * @param portfolio
 	 * @param indicator
-	 * @return
 	 */
-	double test(Portfolio portfolio, List<Indicator> indicator);
+	void test(Portfolio portfolio, List<Indicator> indicator);
 }

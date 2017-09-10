@@ -16,6 +16,7 @@ public class Indicator extends Quote {
 	private double ma5;// 5日均价
 	private double ma10;// 10日均价
 	private double ma20;// 20日均价
+	private double ma60;// 60日均价
 
 	private double volumeMa5;// 5日均量
 	private double volumeMa10;// 10日均量
@@ -40,6 +41,14 @@ public class Indicator extends Quote {
 	private double up; // 上轨线
 	private double mb; // 中轨线
 	private double dn; // 下轨线
+
+	// OBV 指标
+	private double obv;
+	private double obvma;
+
+	// VPT 指标
+	private double vpt;
+	private double vptema;
 
 	public Indicator(Quote o) {
 		super();
@@ -68,16 +77,19 @@ public class Indicator extends Quote {
 		computeBOLL(list);
 		computeRSI(list);
 		computeKDJ(list);
+		// computeOBV(list);
+		// computeVPT(list);
 		return list;
 	}
 
 	/**
 	 * 计算 MA
 	 */
-	private static void computeMA(List<Indicator> list) {
+	protected static void computeMA(List<Indicator> list) {
 		double ma5 = 0;
 		double ma10 = 0;
 		double ma20 = 0;
+		double ma60 = 0;
 		double volumeMa5 = 0;
 		double volumeMa10 = 0;
 
@@ -87,6 +99,7 @@ public class Indicator extends Quote {
 			ma5 += indicator.getClose();
 			ma10 += indicator.getClose();
 			ma20 += indicator.getClose();
+			ma60 += indicator.getClose();
 
 			volumeMa5 += indicator.getVolume();
 			volumeMa10 += indicator.getVolume();
@@ -121,35 +134,36 @@ public class Indicator extends Quote {
 			} else {
 				indicator.setMa20(ma20 / (i + 1f));
 			}
+
+			if (i >= 60) {
+				ma60 -= list.get(i - 60).getClose();
+				indicator.setMa60(ma60 / 60f);
+			} else {
+				indicator.setMa60(ma60 / (i + 1f));
+			}
 		}
 	}
 
 	/**
-	 * 计算 MACD
+	 * 计算 MACD （moving average convergence/divergence）
+	 * <p>
+	 * EMAtoday=α * Price today + ( 1 - α ) * EMAyesterday;
+	 * <p>
+	 * The most commonly used values are 12, 26, and 9 days, that is, MACD(12,26,9).
+	 * <p>
+	 * As true with most of the technical indicators, MACD also finds its period
+	 * settings from the old days when technical analysis used to be mainly based on
+	 * the daily charts. The reason was the lack of the modern trading platforms
+	 * which show the changing prices every moment.
+	 * <p>
+	 * As the working week used to be 6-days, the period settings of (12, 26, 9)
+	 * represent 2 weeks, 1 month and one and a half week. Now when the trading
+	 * weeks have only 5 days, possibilities of changing the period settings cannot
+	 * be overruled. However, it is always better to stick to the period settings
+	 * which are used by the majority of traders as the buying and selling decisions
+	 * based on the standard settings further push the prices in that direction.
 	 */
-	private static void computeMACD(List<Indicator> list) {// moving average convergence/divergence
-		// 指数平均数指标 （Exponential Moving Average）
-
-		// EMAtoday=α * Price today + ( 1 - α ) * EMAyesterday;
-
-		/*
-		 * The most commonly used values are 12, 26, and 9 days, that is, MACD(12,26,9).
-		 */
-		/*
-		 * 
-		 * As true with most of the technical indicators, MACD also finds its period
-		 * settings from the old days when technical analysis used to be mainly based on
-		 * the daily charts. The reason was the lack of the modern trading platforms
-		 * which show the changing prices every moment.
-		 */
-		/*
-		 * As the working week used to be 6-days, the period settings of (12, 26, 9)
-		 * represent 2 weeks, 1 month and one and a half week. Now when the trading
-		 * weeks have only 5 days, possibilities of changing the period settings cannot
-		 * be overruled. However, it is always better to stick to the period settings
-		 * which are used by the majority of traders as the buying and selling decisions
-		 * based on the standard settings further push the prices in that direction.
-		 */
+	protected static void computeMACD(List<Indicator> list) {
 		double ema12 = 0;
 		double ema26 = 0;
 		double diff = 0;
@@ -185,7 +199,7 @@ public class Indicator extends Quote {
 	/**
 	 * 计算 BOLL 需要在计算 MA 之后进行
 	 */
-	private static void computeBOLL(List<Indicator> list) {
+	protected static void computeBOLL(List<Indicator> list) {
 		for (int i = 0; i < list.size(); i++) {
 			Indicator indicator = list.get(i);
 
@@ -220,7 +234,7 @@ public class Indicator extends Quote {
 	/**
 	 * 计算 RSI
 	 */
-	private static void computeRSI(List<Indicator> list) {
+	protected static void computeRSI(List<Indicator> list) {
 		double rsi1 = 0;
 		double rsi2 = 0;
 		double rsi3 = 0;
@@ -271,7 +285,7 @@ public class Indicator extends Quote {
 	/**
 	 * 计算 KDJ
 	 */
-	private static void computeKDJ(List<Indicator> list) {
+	protected static void computeKDJ(List<Indicator> list) {
 		double k = 0;
 		double d = 0;
 
@@ -290,6 +304,7 @@ public class Indicator extends Quote {
 				min9 = Math.min(min9, list.get(index).getLow());
 			}
 
+			// Raw Stochastic Value
 			double rsv = 100f * (indicator.getClose() - min9) / (max9 - min9);
 			if (i == 0) {
 				k = rsv;
@@ -302,6 +317,83 @@ public class Indicator extends Quote {
 			indicator.setK(k);
 			indicator.setD(d);
 			indicator.setJ(3f * k - 2 * d);
+		}
+	}
+
+	/**
+	 * 计算 OBV
+	 */
+	protected static void computeOBV(List<Indicator> list) {
+		// OBV:SUM(IF(CLOSE>REF(CLOSE,1),VOL,IF(CLOSE<REF(CLOSE,1),-VOL,0)),0);
+		// OBVMA:=EMA(OBV, N);
+
+		double obv = 0;
+		double obvMA = 0;
+
+		double vptema = 0;
+
+		float n = 60;
+
+		for (int i = 1; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
+			int volume = indicator.getVolume();
+			double close = indicator.getClose();
+			double lastClose = list.get(i - 1).getClose();
+			if (close > lastClose) {
+				obv = obv + volume;
+			} else if (close < lastClose) {
+				obv = obv - volume;
+			}
+
+			indicator.setObv(obv);
+
+			obvMA += obv;
+			if (i >= 30) {
+				obvMA -= list.get(i - 30).getObv();
+				indicator.setObvma(obvMA / 30f);
+			} else {
+				indicator.setObvma(obvMA / (i + 1f));
+			}
+
+			if (i == 1) {
+				vptema = obv;
+			} else {// n = 12
+				// EMA(C,N)=2*C/(N+1)+(N-1)/(N+1)*昨天的指数收盘平均值；
+				vptema = vptema * (n - 1) / (n + 1) + obv * 2f / (n + 1);// 快速移动平均线
+			}
+			indicator.setObvma(obvMA / (i + 1f));
+
+		}
+	}
+
+	/**
+	 * 计算 VPT
+	 */
+	protected static void computeVPT(List<Indicator> list) {
+		// OBV:SUM(IF(CLOSE>REF(CLOSE,1),VOL,IF(CLOSE<REF(CLOSE,1),-VOL,0)),0);
+		// OBVMA:=EMA(OBV, N);
+
+		double vpt = 0;
+		double vptema = 0;
+
+		float n = 60;
+		for (int i = 1; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
+			int volume = indicator.getVolume();
+			double close = indicator.getClose();
+			double lastClose = list.get(i - 1).getClose();
+
+			vpt = vpt + volume * (close - lastClose) / lastClose;
+
+			if (i == 1) {
+				vptema = vpt;
+			} else {// n = 12
+				// EMA(C,N)=2*C/(N+1)+(N-1)/(N+1)*昨天的指数收盘平均值；
+				vptema = vptema * (n - 1) / (n + 1) + vpt * 2f / (n + 1);// 快速移动平均线
+			}
+
+			indicator.setVpt(vpt);
+			indicator.setVptema(vptema);
 		}
 	}
 
@@ -327,6 +419,14 @@ public class Indicator extends Quote {
 
 	public void setMa20(double ma20) {
 		this.ma20 = ma20;
+	}
+
+	public double getMa60() {
+		return ma60;
+	}
+
+	public void setMa60(double ma60) {
+		this.ma60 = ma60;
 	}
 
 	public double getVolumeMa5() {
@@ -439,6 +539,38 @@ public class Indicator extends Quote {
 
 	public void setDn(double dn) {
 		this.dn = dn;
+	}
+
+	public double getObv() {
+		return obv;
+	}
+
+	public void setObv(double obv) {
+		this.obv = obv;
+	}
+
+	public double getObvma() {
+		return obvma;
+	}
+
+	public void setObvma(double obvma) {
+		this.obvma = obvma;
+	}
+
+	public double getVpt() {
+		return vpt;
+	}
+
+	public void setVpt(double vpt) {
+		this.vpt = vpt;
+	}
+
+	public double getVptema() {
+		return vptema;
+	}
+
+	public void setVptema(double vptema) {
+		this.vptema = vptema;
 	}
 
 	@Override

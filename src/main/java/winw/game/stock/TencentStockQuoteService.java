@@ -14,19 +14,17 @@ import winw.game.stock.util.HttpUtils;
  */
 public class TencentStockQuoteService implements StockQuoteService {
 
+	// http://qt.gtimg.cn/q=s_sh600233
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
-	// 获取前复权的数据
+	// 获取每日报价数据（前复权）
 	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,120,qfq";
 
-	// protected String historicalQuoteUrl =
-	// "http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js";
-
-	// http://qt.gtimg.cn/q=s_sh600233
+	// 获取每月报价数据（前复权）
+	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,,,120,qfq";
 
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
-	//
 	// http://data.gtimg.cn/flashdata/hushen/daily/17/sh600233.js
 	// http://data.gtimg.cn/flashdata/hushen/weekly/sh600233.js
 
@@ -35,7 +33,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 	public StockQuote get(String code) throws IOException, ParseException {
 		String response = HttpUtils.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] split = response.split("~");
-		if(split == null || split.length <= 1) {
+		if (split == null || split.length <= 1) {
 			return null;
 		}
 
@@ -77,7 +75,6 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// 37: 成交额（万）
 		// 38: 换手率
 		// 39: 市盈率
-		// TODO 市盈率
 		// quote.setPe(Double.parseDouble(split[39]));
 		// 40:
 		// 41: 最高
@@ -94,9 +91,21 @@ public class TencentStockQuoteService implements StockQuoteService {
 	}
 
 	public List<StockQuote> get(String code, QuoteType quoteType) throws IOException {
-		String response = HttpUtils.get(dailyQuoteUrl.replaceFirst("V_CODE", code));
+		if (quoteType == null) {
+		} else if (quoteType == QuoteType.DAILY_QUOTE) {
+			return get(code, dailyQuoteUrl);
+		} else if (quoteType == QuoteType.WEEKLY_QUOTE) {
+			return null; // TODO WEEKLY_QUOTE
+		} else if (quoteType == QuoteType.MONTHLY_QUOTE) {
+			return get(code, monthlyQuoteUrl);
+		}
+		return null;
+	}
 
-		String data = response.substring(response.indexOf("qfqday") + 10, response.indexOf("]],"));
+	public List<StockQuote> get(String code, String url) throws IOException {
+		String response = HttpUtils.get(url.replaceFirst("V_CODE", code));
+
+		String data = response.substring(response.indexOf("[[") + 2, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["
 
 		List<StockQuote> quoteList = new ArrayList<StockQuote>();
