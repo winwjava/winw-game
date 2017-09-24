@@ -2,6 +2,8 @@ package winw.game.stock.strategy;
 
 import java.util.List;
 
+import winw.game.stock.Portfolio;
+import winw.game.stock.Trade;
 import winw.game.stock.analysis.Advise;
 import winw.game.stock.analysis.Advise.Market;
 import winw.game.stock.analysis.Advise.Signal;
@@ -9,7 +11,7 @@ import winw.game.stock.analysis.Indicator;
 import winw.game.stock.analysis.TechnicalAnalysis;
 
 /**
- * 趋势交易策略。
+ * 趋势跟踪策略。
  * 
  * <p>
  * A trend can only be determined in hindsight, since at any time prices in the
@@ -26,7 +28,7 @@ import winw.game.stock.analysis.TechnicalAnalysis;
  * @author winw
  *
  */
-public class TrendTradingStrategy implements TradingStrategy {
+public class TrendFollowingStrategy implements InvestmentStrategy {
 
 	/**
 	 * 50日均线确认趋势，MACD零交叉（金叉、死叉）确定买入卖出，

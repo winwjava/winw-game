@@ -1,4 +1,4 @@
-package winw.game.stock.strategy;
+package winw.game.stock;
 
 /**
  * 交易。

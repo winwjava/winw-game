@@ -1,4 +1,4 @@
-package winw.game.stock.strategy;
+package winw.game.stock;
 
 import java.util.ArrayList;
 import java.util.HashMap;

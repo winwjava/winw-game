@@ -18,7 +18,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
 	// 获取每日报价数据（前复权）
-	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,120,qfq";
+	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,200,qfq";
 
 	// 获取每月报价数据（前复权）
 	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,,,120,qfq";

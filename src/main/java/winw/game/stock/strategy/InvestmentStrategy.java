@@ -2,15 +2,16 @@ package winw.game.stock.strategy;
 
 import java.util.List;
 
+import winw.game.stock.Portfolio;
 import winw.game.stock.analysis.Indicator;
 
 /**
- * 交易策略。
+ * 投资策略。
  * 
  * @author winw
  *
  */
-public interface TradingStrategy {
+public interface InvestmentStrategy {
 
 	/**
 	 * 回测
