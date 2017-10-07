@@ -13,16 +13,13 @@ import java.util.List;
  */
 public class StockQuote extends Quote {
 
-	private String code;// 代码
-	private String name;// 名称
-
 	private Date time;// 报价时间
 
 	private double price = 0.0;// 价格
 
 	private double previousClose = 0.0;// 昨日收盘价
 
-	private double pe = 0.0;// 市盈率
+	// private double pe = 0.0;// 市盈率
 
 	// private double eps = 0.0;
 	// private double marketcap = 0.0;
@@ -105,14 +102,6 @@ public class StockQuote extends Quote {
 
 	public void setPreviousClose(double previousClose) {
 		this.previousClose = previousClose;
-	}
-
-	public double getPe() {
-		return pe;
-	}
-
-	public void setPe(double pe) {
-		this.pe = pe;
 	}
 
 	@Override

@@ -27,6 +27,6 @@ public interface StockQuoteService {
 	 * @return
 	 * @throws Exception
 	 */
-	List<StockQuote> get(String code, QuoteType quoteType) throws Exception;
+	List<Quote> get(String code, QuoteType quoteType) throws Exception;
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import winw.game.stock.Quote;
 import winw.game.stock.QuoteType;
 import winw.game.stock.StockList;
 import winw.game.stock.StockQuote;
@@ -45,7 +46,7 @@ public class TechnicalAnalysisTest {
 		if (stockQuote == null) {
 			return null;// FIXME Warn
 		}
-		List<StockQuote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
+		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);
 		Advise advise = TechnicalAnalysis.analysisMACD(indicatorList);

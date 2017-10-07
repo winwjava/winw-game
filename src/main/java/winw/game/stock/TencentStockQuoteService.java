@@ -90,32 +90,35 @@ public class TencentStockQuoteService implements StockQuoteService {
 		return quote;
 	}
 
-	public List<StockQuote> get(String code, QuoteType quoteType) throws IOException {
+	public String getURL(String code, QuoteType quoteType) throws IOException {
 		if (quoteType == null) {
 		} else if (quoteType == QuoteType.DAILY_QUOTE) {
-			return get(code, dailyQuoteUrl);
+			return dailyQuoteUrl;
 		} else if (quoteType == QuoteType.WEEKLY_QUOTE) {
 			return null; // TODO WEEKLY_QUOTE
 		} else if (quoteType == QuoteType.MONTHLY_QUOTE) {
-			return get(code, monthlyQuoteUrl);
+			return monthlyQuoteUrl;
 		}
 		return null;
 	}
 
-	public List<StockQuote> get(String code, String url) throws IOException {
+	public List<Quote> get(String code, QuoteType quoteType) throws IOException {
+		String url = getURL(code, quoteType);
 		String response = HttpUtils.get(url.replaceFirst("V_CODE", code));
 
 		String data = response.substring(response.indexOf("[[") + 2, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["
 
-		List<StockQuote> quoteList = new ArrayList<StockQuote>();
+		List<Quote> quoteList = new ArrayList<Quote>();
 		for (int i = 2; i < lines.length; i++) {
 			String[] fileds = lines[i].replaceAll("\"", "").split("\\,");
 			if (fileds == null || fileds.length < 6) {
 				continue;
 			}
 			// date open close high low volume
-			StockQuote quote = new StockQuote();
+			Quote quote = new Quote();
+			quote.setCode(code);
+			quote.setQuoteType(quoteType);
 			quote.setDate(fileds[0]);
 			quote.setOpen(Double.parseDouble(fileds[1]));
 			quote.setClose(Double.parseDouble(fileds[2]));

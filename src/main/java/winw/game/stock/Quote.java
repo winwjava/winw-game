@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 报价。
@@ -11,14 +12,18 @@ import javax.persistence.Table;
  * @author winw
  *
  */
-@Entity
-@Table(name="QUOTE")
-public class Quote {
-    @Id
-    @GeneratedValue
-    private long id;
 
-	protected QuoteType quoteType;// 报价类型
+@Entity
+@Table(name = "QUOTE")
+public class Quote {
+	@Id
+	@GeneratedValue
+	protected long id;
+
+	protected String code;// 代码
+
+	@Transient
+	protected String name;// 名称
 
 	protected String date;// 交易日期
 
@@ -29,6 +34,8 @@ public class Quote {
 
 	protected int volume; // 成交量
 	protected double amount; // 成交金额
+
+	protected QuoteType quoteType;// 报价类型
 
 	public Quote() {
 		super();
@@ -44,13 +51,29 @@ public class Quote {
 		this.volume = volume;
 		this.amount = amount;
 	}
-	
-	public QuoteType getQuoteType() {
-		return quoteType;
+
+	public long getId() {
+		return id;
 	}
 
-	public void setQuoteType(QuoteType quoteType) {
-		this.quoteType = quoteType;
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getDate() {
@@ -107,6 +130,14 @@ public class Quote {
 
 	public void setAmount(double amount) {
 		this.amount = amount;
+	}
+
+	public QuoteType getQuoteType() {
+		return quoteType;
+	}
+
+	public void setQuoteType(QuoteType quoteType) {
+		this.quoteType = quoteType;
 	}
 
 	@Override

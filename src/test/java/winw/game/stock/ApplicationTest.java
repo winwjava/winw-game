@@ -10,7 +10,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ApplicationTest {
 
 	@Test
-	public void contextLoads() {
+	public void contextLoads() throws InterruptedException {
+		Thread.sleep(1000000);
 	}
 
 }

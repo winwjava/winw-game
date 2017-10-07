@@ -7,14 +7,15 @@ import java.util.List;
 import org.junit.Test;
 
 import winw.game.stock.Portfolio;
+import winw.game.stock.Quote;
 import winw.game.stock.QuoteType;
 import winw.game.stock.StockList;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
 import winw.game.stock.Trade;
-import winw.game.stock.analysis.Advise.Market;
 import winw.game.stock.analysis.Advise;
+import winw.game.stock.analysis.Advise.Market;
 import winw.game.stock.analysis.Indicator;
 import winw.game.stock.analysis.TechnicalAnalysis;
 
@@ -75,7 +76,7 @@ public class TrendFollowingStrategyTest {
 		// System.out.println(stockQuote.getName() + "\tMarket=BEAR_MARKET");
 		// return null;
 		// }
-		List<StockQuote> dailyQuote = service.get(code, QuoteType.DAILY_QUOTE);
+		List<Quote> dailyQuote = service.get(code, QuoteType.DAILY_QUOTE);
 
 		Portfolio portfolio = new Portfolio(init);// 初始金额
 		strategy.test(portfolio, Indicator.compute(dailyQuote));
@@ -89,7 +90,7 @@ public class TrendFollowingStrategyTest {
 	}
 
 	public Market getMarket(String code) throws Exception {
-		List<StockQuote> monthlyQuote = service.get(code, QuoteType.MONTHLY_QUOTE);
+		List<Quote> monthlyQuote = service.get(code, QuoteType.MONTHLY_QUOTE);
 		List<Indicator> indicator = Indicator.compute(monthlyQuote);
 
 		Advise advise = TechnicalAnalysis.analysisMACD(indicator.subList(0, indicator.size() - 2));
