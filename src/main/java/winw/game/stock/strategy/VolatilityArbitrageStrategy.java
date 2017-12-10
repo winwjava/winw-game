@@ -2,7 +2,7 @@ package winw.game.stock.strategy;
 
 import java.util.List;
 
-import winw.game.stock.Portfolio;
+import winw.game.stock.analysis.Advise;
 import winw.game.stock.analysis.Indicator;
 
 /**
@@ -17,12 +17,12 @@ import winw.game.stock.analysis.Indicator;
  * @author winw
  *
  */
-public class VolatilityArbitrageStrategy implements InvestmentStrategy {
+public class VolatilityArbitrageStrategy implements Strategy {
 
 	@Override
-	public void test(Portfolio portfolio, List<Indicator> indicator) {
+	public Advise analysis(List<Indicator> indicator) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 }

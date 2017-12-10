@@ -1,5 +1,6 @@
 package winw.game.stock;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,7 @@ public class Portfolio {
 	private double sellCost = 0.0013;// 卖出，千分之1.3
 	private double minCost = 5;// 不足5元以5元计
 
-	private List<Trade> tradeLog = new ArrayList<Trade>();// 交易记录
+	private List<Trade> tradeList = new ArrayList<Trade>();// 交易记录
 
 	private Map<String, Integer> positions = new HashMap<String, Integer>();// 持仓
 
@@ -49,12 +50,47 @@ public class Portfolio {
 		}
 
 		cash = cash - trade.getAmount() - trade.getCommission();
-		return tradeLog.add(trade);
+		return tradeList.add(trade);
 	}
 
 	public int maxBuy(double price) {
 		// 假设全部买入
 		return (int) ((cash - commission(cash)) / price) / 100 * 100;
+	}
+
+	private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+	private final DecimalFormat decimal4Format = new DecimalFormat("##0.0000");
+
+	public List<TradeLog> getTradeLog(String code, String name) {
+		List<TradeLog> logs = new ArrayList<TradeLog>();
+		for (int i = 0; i < tradeList.size(); i += 2) {
+			Trade buy = tradeList.get(i);
+			Trade sell = tradeList.get(i + 1);
+
+			TradeLog log = new TradeLog();
+			log.setCode(code);
+			log.setName(name);
+
+			log.setBuyDate(buy.getDate());
+			log.setBuyPrice(buy.getPrice());
+			log.setBuyDiff(Double.parseDouble(decimal4Format.format(buy.getDiff())));
+			log.setBuyDea(Double.parseDouble(decimal4Format.format(buy.getDea())));
+
+			log.setSellDate(sell.getDate());
+			log.setSellPrice(sell.getPrice());
+			log.setSellDiff(Double.parseDouble(decimal4Format.format(sell.getDiff())));
+			log.setSellDea(Double.parseDouble(decimal4Format.format(sell.getDea())));
+
+			double profit = Math.abs(sell.getAmount()) - Math.abs(buy.getAmount()) - sell.getCommission()
+					- buy.getCommission();
+			log.setProfit(Double.parseDouble(decimalFormat.format(profit)));
+
+			double profitRate = profit / (Math.abs(buy.getAmount()) + buy.getCommission());
+
+			log.setProfitRate(Double.parseDouble(decimal4Format.format(profitRate)));
+			logs.add(log);
+		}
+		return logs;
 	}
 
 	public double getCash() {
@@ -89,20 +125,20 @@ public class Portfolio {
 		this.minCost = minCost;
 	}
 
-	public List<Trade> getTradeLog() {
-		return tradeLog;
-	}
-
-	public void setTradeLog(List<Trade> tradeLog) {
-		this.tradeLog = tradeLog;
-	}
-
 	public Map<String, Integer> getPositions() {
 		return positions;
 	}
 
 	public void setPositions(Map<String, Integer> positions) {
 		this.positions = positions;
+	}
+
+	public List<Trade> getTradeList() {
+		return tradeList;
+	}
+
+	public void setTradeList(List<Trade> tradeList) {
+		this.tradeList = tradeList;
 	}
 
 }

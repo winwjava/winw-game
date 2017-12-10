@@ -2,7 +2,7 @@ package winw.game.stock.strategy;
 
 import java.util.List;
 
-import winw.game.stock.Portfolio;
+import winw.game.stock.analysis.Advise;
 import winw.game.stock.analysis.Indicator;
 
 /**
@@ -11,13 +11,14 @@ import winw.game.stock.analysis.Indicator;
  * @author winw
  *
  */
-public interface InvestmentStrategy {
+public interface Strategy {
 
 	/**
-	 * 回测
+	 * 分析并返回 Advise。
 	 * 
-	 * @param portfolio
 	 * @param indicator
+	 * @return Advise
 	 */
-	void test(Portfolio portfolio, List<Indicator> indicator);
+	Advise analysis(List<Indicator> indicator);
+
 }

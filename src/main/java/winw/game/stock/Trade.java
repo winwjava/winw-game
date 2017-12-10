@@ -8,6 +8,10 @@ package winw.game.stock;
  */
 public class Trade {
 
+	private String code;
+	
+	private String name;
+	
 	private String date;// 日期
 
 	private double price;// 价格
@@ -22,10 +26,6 @@ public class Trade {
 
 	private double dea;
 
-	public Trade() {
-		super();
-	}
-
 	public Trade(String date, double price, int count) {
 		super();
 		this.date = date;
@@ -34,14 +34,20 @@ public class Trade {
 		this.amount = price * count;
 	}
 
-	public Trade(String date, double price, int count,double diff,double dea) {
-		super();
-		this.date = date;
-		this.price = price;
-		this.count = count;
-		this.amount = price * count;
-		this.diff = diff;
-		this.dea = dea;
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getDate() {
