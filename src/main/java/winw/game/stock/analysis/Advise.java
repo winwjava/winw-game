@@ -54,6 +54,15 @@ public class Advise {
 	 */
 	private String advise;
 
+	public Advise() {
+		super();
+	}
+
+	public Advise(Signal signal) {
+		super();
+		this.signal = signal;
+	}
+
 	public Signal getSignal() {
 		return signal;
 	}
