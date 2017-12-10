@@ -28,7 +28,7 @@ import winw.game.stock.analysis.TechnicalAnalysis;
  * @author winw
  *
  */
-public class TrendFollowingStrategy implements InvestmentStrategy {
+public class TrendFollowingStrategy implements InvestmentStrategy {// TODO 成交量指标
 
 	/**
 	 * 50日均线确认趋势，MACD零交叉（金叉、死叉）确定买入卖出，
@@ -38,23 +38,27 @@ public class TrendFollowingStrategy implements InvestmentStrategy {
 		// double buyPrice = 0;
 		for (int i = 50; i < indicator.size(); i++) {
 			Indicator current = indicator.get(i - 1);
-			Advise advise = TechnicalAnalysis.analysisMACD(indicator.subList(0, i));
+			Advise macd = TechnicalAnalysis.analysisMACD(indicator.subList(0, i));
 			Market market = null;
 			// market = TechnicalAnalysis.analysisOBV(indicator.subList(0, i)).getMarket();
 			// market = TechnicalAnalysis.analysisVPT(indicator.subList(0, i)).getMarket();
-			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {
+
+			// 买入
+			if (macd.getSignal() == Signal.BUY_SIGNAL && position == 0) {
 				if (Market.BEAR_MARKET.equals(market)) {
 					// System.out.println(current.getDate() + "\tBEAR_MARKET");
 					continue;
 				}
 				// buyPrice = current.getClose();
 				position = portfolio.maxBuy(current.getClose());
-				portfolio.trading(
-						new Trade(current.getDate(), current.getClose(), portfolio.maxBuy(current.getClose())));
+				portfolio.trading(new Trade(current.getDate(), current.getClose(), portfolio.maxBuy(current.getClose()),
+						current.getDiff(), current.getDea()));
 			}
 
-			if (position > 0 && advise.getSignal() == Signal.SELL_SIGNAL) {
-				portfolio.trading(new Trade(current.getDate(), current.getClose(), -position));
+			// 卖出
+			if (position > 0 && macd.getSignal() == Signal.SELL_SIGNAL) {
+				portfolio.trading(new Trade(current.getDate(), current.getClose(), -position, current.getDiff(),
+						current.getDea()));
 				position = 0;
 			}
 
@@ -68,7 +72,9 @@ public class TrendFollowingStrategy implements InvestmentStrategy {
 		}
 		if (position > 0) {// 清算
 			Indicator last = indicator.get(indicator.size() - 1);
-			portfolio.trading(new Trade(last.getDate(), last.getClose(), -position));
+
+			Trade trade = new Trade(last.getDate(), last.getClose(), -position, last.getDiff(), last.getDea());
+			portfolio.trading(trade);
 		}
 	}
 

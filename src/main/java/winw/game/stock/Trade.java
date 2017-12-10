@@ -18,6 +18,10 @@ public class Trade {
 
 	private double commission;// 佣金
 
+	private double diff;
+
+	private double dea;
+
 	public Trade() {
 		super();
 	}
@@ -28,6 +32,16 @@ public class Trade {
 		this.price = price;
 		this.count = count;
 		this.amount = price * count;
+	}
+
+	public Trade(String date, double price, int count,double diff,double dea) {
+		super();
+		this.date = date;
+		this.price = price;
+		this.count = count;
+		this.amount = price * count;
+		this.diff = diff;
+		this.dea = dea;
 	}
 
 	public String getDate() {
@@ -68,6 +82,22 @@ public class Trade {
 
 	public void setCommission(double commission) {
 		this.commission = commission;
+	}
+
+	public double getDiff() {
+		return diff;
+	}
+
+	public void setDiff(double diff) {
+		this.diff = diff;
+	}
+
+	public double getDea() {
+		return dea;
+	}
+
+	public void setDea(double dea) {
+		this.dea = dea;
 	}
 
 	@Override

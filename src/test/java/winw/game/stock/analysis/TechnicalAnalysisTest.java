@@ -25,12 +25,18 @@ public class TechnicalAnalysisTest {
 
 	@Test
 	public void testOne() throws Exception {
-		List<Indicator> indicatorList = test("sz000503");
+		List<Indicator> indicatorList = test("sz002839");
 		for (int i = 50; i < indicatorList.size(); i++) {
+
 			Advise advise = TechnicalAnalysis.analysisMACD(indicatorList.subList(0, i));
 			if (advise.getSignal() != null) {// Advise
 				System.out.println(toString(indicatorList.get(i - 1)) + "\t" + advise.toString());
 			}
+			
+//			Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList.subList(0, i));
+//			if (advise.getSignal() != null) {// Advise
+//				System.out.println(toStringKDJ(indicatorList.get(i - 1)) + "\t" + advise.toString());
+//			}
 			// Advise obv = TechnicalAnalysis.analysisOBV(indicatorList.subList(0, i));
 			// System.out.println(toStringOBV(indicatorList.get(i)) + "\t" + obv.toString()
 			// + "\t" + obv.toString());
@@ -46,7 +52,7 @@ public class TechnicalAnalysisTest {
 		if (stockQuote == null) {
 			return null;// FIXME Warn
 		}
-		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE);
+		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE, 300);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);
 		Advise advise = TechnicalAnalysis.analysisMACD(indicatorList);
@@ -68,6 +74,22 @@ public class TechnicalAnalysisTest {
 		builder.append(decimalFormat.format(indicator.getDea()));
 		builder.append(", macd=");
 		builder.append(decimalFormat.format(indicator.getMacd()));
+		builder.append("]");
+		return builder.toString();
+	}
+
+	protected String toStringKDJ(Indicator indicator) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Indicator [date=");
+		builder.append(indicator.getDate());
+		builder.append(", close=");
+		builder.append(indicator.getClose());
+		builder.append(", k=");
+		builder.append(decimalFormat.format(indicator.getK()));
+		builder.append(", d=");
+		builder.append(decimalFormat.format(indicator.getD()));
+		builder.append(", j=");
+		builder.append(decimalFormat.format(indicator.getJ()));
 		builder.append("]");
 		return builder.toString();
 	}

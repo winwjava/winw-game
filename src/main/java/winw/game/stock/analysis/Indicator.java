@@ -303,9 +303,15 @@ public class Indicator extends Quote {
 				max9 = Math.max(max9, list.get(index).getHigh());
 				min9 = Math.min(min9, list.get(index).getLow());
 			}
+			
 
 			// Raw Stochastic Value
 			double rsv = 100f * (indicator.getClose() - min9) / (max9 - min9);
+			
+			if (max9 == min9) {
+				rsv = 0;
+			}
+			
 			if (i == 0) {
 				k = rsv;
 				d = rsv;

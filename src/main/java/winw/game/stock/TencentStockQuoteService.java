@@ -18,10 +18,10 @@ public class TencentStockQuoteService implements StockQuoteService {
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
 	// 获取每日报价数据（前复权）
-	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,200,qfq";
+	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,V_NUM,qfq";
 
 	// 获取每月报价数据（前复权）
-	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,,,120,qfq";
+	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,,,V_NUM,qfq";
 
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
@@ -102,9 +102,9 @@ public class TencentStockQuoteService implements StockQuoteService {
 		return null;
 	}
 
-	public List<Quote> get(String code, QuoteType quoteType) throws IOException {
+	public List<Quote> get(String code, QuoteType quoteType, int num) throws IOException {
 		String url = getURL(code, quoteType);
-		String response = HttpUtils.get(url.replaceFirst("V_CODE", code));
+		String response = HttpUtils.get(url.replaceFirst("V_CODE", code).replaceFirst("V_NUM", String.valueOf(num)));
 
 		String data = response.substring(response.indexOf("[[") + 2, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["

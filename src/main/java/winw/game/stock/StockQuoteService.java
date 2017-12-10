@@ -24,9 +24,10 @@ public interface StockQuoteService {
 	 * 
 	 * @param code
 	 * @param quoteType
+	 * @param num
 	 * @return
 	 * @throws Exception
 	 */
-	List<Quote> get(String code, QuoteType quoteType) throws Exception;
+	List<Quote> get(String code, QuoteType quoteType, int num) throws Exception;
 
 }

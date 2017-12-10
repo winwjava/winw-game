@@ -51,7 +51,16 @@ public class TechnicalAnalysis {
 		boolean intersect = Line2D.linesIntersect(0, yesterday.getDiff(), 1, today.getDiff(), 0, yesterday.getDea(), 1,
 				today.getDea());
 
-		if (intersect && today.getDiff() > today.getDea()) {// && today.getDiff() > 0 && today.getDea() > 0
+
+		boolean positive = true;// 最近若干天的DIFF 有正的
+//		for (int i = 1; i <= 50; i++) {
+//			if (list.get(list.size() - i).getDiff() > 0) {
+//				positive = true;
+//				break;
+//			}
+//		}
+		
+		if (intersect && today.getDiff() > today.getDea() && positive) {// && today.getDiff() > 0 && today.getDea() > 0
 			advise.setSignal(Signal.BUY_SIGNAL);
 			result.append("1. MACD金叉：DIFF 由下向上突破 DEA，为买入信号。");
 		}
