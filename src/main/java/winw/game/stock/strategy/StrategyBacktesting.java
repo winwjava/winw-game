@@ -35,13 +35,16 @@ public class StrategyBacktesting {
 			return;
 		}
 
-		testing(portfolio, Indicator.compute(service.get(code, QuoteType.DAILY_QUOTE, days)));
+		testing(stockQuote, portfolio, Indicator.compute(service.get(code, QuoteType.DAILY_QUOTE, days)));
 	}
 
-	protected void testing(Portfolio portfolio, List<Indicator> indicator) {
+	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {
 		int position = 0; // 持仓
 		for (int i = 50; i < indicator.size(); i++) {// 从第50开始，各种指标的误差可以忽略
 			Indicator current = indicator.get(i - 1);
+			current.setCode(stockQuote.getCode());
+			current.setName(stockQuote.getName());
+			
 			Advise advise = strategy.analysis(indicator.subList(0, i));
 
 			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {// 买入
