@@ -1,5 +1,6 @@
 package winw.game.stock;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -25,18 +26,32 @@ public class TradeLog {
 	private String buyDate;
 	private String sellDate;
 
-	private double buyPrice;
-	private double sellPrice;
+	private Double buyPrice;
+	private Double sellPrice;
 
-	private double buyDiff;
-	private double sellDiff;
+	private Double buyDiff;
+	private Double sellDiff;
 
-	private double buyDea;
-	private double sellDea;
+	private Double buyDea;
+	private Double sellDea;
 
-	private double profit;
+	@Column(nullable = true)
+	private Double buyMacd;
 
-	private double profitRate;
+	@Column(nullable = true)
+	private Double sellMacd;
+
+	private Double profit;
+
+	private Double profitRate;
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
 
 	public String getCode() {
 		return code;
@@ -62,27 +77,27 @@ public class TradeLog {
 		this.buyDate = buyDate;
 	}
 
-	public double getBuyPrice() {
+	public Double getBuyPrice() {
 		return buyPrice;
 	}
 
-	public void setBuyPrice(double buyPrice) {
+	public void setBuyPrice(Double buyPrice) {
 		this.buyPrice = buyPrice;
 	}
 
-	public double getBuyDiff() {
+	public Double getBuyDiff() {
 		return buyDiff;
 	}
 
-	public void setBuyDiff(double buyDiff) {
+	public void setBuyDiff(Double buyDiff) {
 		this.buyDiff = buyDiff;
 	}
 
-	public double getBuyDea() {
+	public Double getBuyDea() {
 		return buyDea;
 	}
 
-	public void setBuyDea(double buyDea) {
+	public void setBuyDea(Double buyDea) {
 		this.buyDea = buyDea;
 	}
 
@@ -94,52 +109,60 @@ public class TradeLog {
 		this.sellDate = sellDate;
 	}
 
-	public double getSellPrice() {
+	public Double getSellPrice() {
 		return sellPrice;
 	}
 
-	public void setSellPrice(double sellPrice) {
+	public void setSellPrice(Double sellPrice) {
 		this.sellPrice = sellPrice;
 	}
 
-	public double getSellDiff() {
+	public Double getSellDiff() {
 		return sellDiff;
 	}
 
-	public void setSellDiff(double sellDiff) {
+	public void setSellDiff(Double sellDiff) {
 		this.sellDiff = sellDiff;
 	}
 
-	public double getSellDea() {
+	public Double getSellDea() {
 		return sellDea;
 	}
 
-	public void setSellDea(double sellDea) {
+	public void setSellDea(Double sellDea) {
 		this.sellDea = sellDea;
 	}
 
-	public double getProfit() {
+	public Double getBuyMacd() {
+		return buyMacd;
+	}
+
+	public void setBuyMacd(Double buyMacd) {
+		this.buyMacd = buyMacd;
+	}
+
+	public Double getSellMacd() {
+		return sellMacd;
+	}
+
+	public void setSellMacd(Double sellMacd) {
+		this.sellMacd = sellMacd;
+	}
+
+	public Double getProfit() {
 		return profit;
 	}
 
-	public void setProfit(double profit) {
+	public void setProfit(Double profit) {
 		this.profit = profit;
 	}
 
-	public double getProfitRate() {
+	public Double getProfitRate() {
 		return profitRate;
 	}
 
-	public void setProfitRate(double profitRate) {
+	public void setProfitRate(Double profitRate) {
 		this.profitRate = profitRate;
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	@Override

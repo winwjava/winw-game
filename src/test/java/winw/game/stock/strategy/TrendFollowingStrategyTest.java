@@ -6,12 +6,17 @@ import java.text.NumberFormat;
 import javax.annotation.Resource;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import winw.game.stock.Portfolio;
 import winw.game.stock.StockList;
 import winw.game.stock.Trade;
 import winw.game.stock.TradeLogRepository;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class TrendFollowingStrategyTest {
 
 	@Resource
@@ -23,6 +28,7 @@ public class TrendFollowingStrategyTest {
 
 	@Test
 	public void testAll() throws Exception {
+		tradeLogRepository.deleteAll();
 		int count = 0;
 		double total = 0;
 		for (String temp : StockList.CSI_300) {
@@ -30,6 +36,7 @@ public class TrendFollowingStrategyTest {
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
 			}
+			tradeLogRepository.save(portfolio.getTradeLog());
 			count++;
 			total += portfolio.getCash();
 		}
@@ -38,7 +45,7 @@ public class TrendFollowingStrategyTest {
 				+ percentFormat.format(profit / (init * count)));
 	}
 
-	@Test
+	// @Test
 	public void testOne() throws Exception {
 		Portfolio portfolio = test("sz002839");
 		if (portfolio == null) {

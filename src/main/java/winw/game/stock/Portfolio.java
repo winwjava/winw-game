@@ -61,25 +61,27 @@ public class Portfolio {
 	private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 	private final DecimalFormat decimal4Format = new DecimalFormat("##0.0000");
 
-	public List<TradeLog> getTradeLog(String code, String name) {
+	public List<TradeLog> getTradeLog() {
 		List<TradeLog> logs = new ArrayList<TradeLog>();
 		for (int i = 0; i < tradeList.size(); i += 2) {
 			Trade buy = tradeList.get(i);
 			Trade sell = tradeList.get(i + 1);
 
 			TradeLog log = new TradeLog();
-			log.setCode(code);
-			log.setName(name);
+			log.setCode(buy.getCode());
+			log.setName(buy.getName());
 
 			log.setBuyDate(buy.getDate());
 			log.setBuyPrice(buy.getPrice());
 			log.setBuyDiff(Double.parseDouble(decimal4Format.format(buy.getDiff())));
 			log.setBuyDea(Double.parseDouble(decimal4Format.format(buy.getDea())));
+			log.setBuyMacd(Double.parseDouble(decimal4Format.format(buy.getMacd())));
 
 			log.setSellDate(sell.getDate());
 			log.setSellPrice(sell.getPrice());
 			log.setSellDiff(Double.parseDouble(decimal4Format.format(sell.getDiff())));
 			log.setSellDea(Double.parseDouble(decimal4Format.format(sell.getDea())));
+			log.setSellMacd(Double.parseDouble(decimal4Format.format(sell.getMacd())));
 
 			double profit = Math.abs(sell.getAmount()) - Math.abs(buy.getAmount()) - sell.getCommission()
 					- buy.getCommission();

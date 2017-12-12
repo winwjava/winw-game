@@ -67,6 +67,7 @@ public class StrategyBacktesting {
 		trade.setName(current.getName());
 		trade.setDiff(current.getDiff());
 		trade.setDea(current.getDea());
+		trade.setMacd(current.getMacd());
 
 		portfolio.trading(trade);
 	}

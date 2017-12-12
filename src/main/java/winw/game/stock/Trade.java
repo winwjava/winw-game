@@ -25,6 +25,8 @@ public class Trade {
 	private double diff;
 
 	private double dea;
+	
+	private double macd;
 
 	public Trade(String date, double price, int count) {
 		super();
@@ -104,6 +106,14 @@ public class Trade {
 
 	public void setDea(double dea) {
 		this.dea = dea;
+	}
+
+	public double getMacd() {
+		return macd;
+	}
+
+	public void setMacd(double macd) {
+		this.macd = macd;
 	}
 
 	@Override
