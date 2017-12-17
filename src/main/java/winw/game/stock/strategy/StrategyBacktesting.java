@@ -1,8 +1,13 @@
 package winw.game.stock.strategy;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import winw.game.stock.Portfolio;
+import winw.game.stock.Quote;
 import winw.game.stock.QuoteType;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
@@ -35,7 +40,21 @@ public class StrategyBacktesting {
 			return;
 		}
 
-		testing(stockQuote, portfolio, Indicator.compute(service.get(code, QuoteType.DAILY_QUOTE, days)));
+		List<Quote> list = service.get(code, QuoteType.DAILY_QUOTE, days);
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, (int) (-days - (50 * 1.2)));
+		Date start = calendar.getTime();
+		DateFormat dateFormat = new SimpleDateFormat(Quote.DATE_PATTERN);
+		int fromIndex = -1;
+		for (int i = 0; i < list.size(); i++) {
+			if (start.before(dateFormat.parse(list.get(i).getDate()))) {
+				fromIndex = i;
+				break;
+			}
+		}
+
+		testing(stockQuote, portfolio, Indicator.compute(list.subList(fromIndex, list.size())));
 	}
 
 	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {
@@ -44,7 +63,7 @@ public class StrategyBacktesting {
 			Indicator current = indicator.get(i - 1);
 			current.setCode(stockQuote.getCode());
 			current.setName(stockQuote.getName());
-			
+
 			Advise advise = strategy.analysis(indicator.subList(0, i));
 
 			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {// 买入

@@ -37,6 +37,8 @@ public class Quote {
 
 	protected QuoteType quoteType;// 报价类型
 
+	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期
+	
 	public Quote() {
 		super();
 	}

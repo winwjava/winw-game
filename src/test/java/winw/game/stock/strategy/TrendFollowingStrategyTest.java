@@ -1,7 +1,9 @@
 package winw.game.stock.strategy;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.Resource;
 
@@ -31,7 +33,11 @@ public class TrendFollowingStrategyTest {
 		tradeLogRepository.deleteAll();
 		int count = 0;
 		double total = 0;
-		for (String temp : StockList.CSI_300) {
+
+		Set<String> set = new TreeSet<String>();
+		set.addAll(Arrays.asList(StockList.CSI_300));
+		set.addAll(Arrays.asList(StockList.CSI_500));
+		for (String temp : set) {
 			Portfolio portfolio = test(temp);
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
@@ -41,8 +47,7 @@ public class TrendFollowingStrategyTest {
 			total += portfolio.getCash();
 		}
 		double profit = total - init * count;
-		System.out.println("CSI_300(" + count + ")\t" + decimalFormat.format(profit) + "\t"
-				+ percentFormat.format(profit / (init * count)));
+		System.out.println("Total: "+count + "\t" + percentFormat.format(profit / (init * count)));
 	}
 
 	// @Test
@@ -58,7 +63,7 @@ public class TrendFollowingStrategyTest {
 		}
 	}
 
-	private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 	private final NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
 	public Portfolio test(String code) throws Exception {
@@ -76,7 +81,7 @@ public class TrendFollowingStrategyTest {
 
 		double profit = portfolio.getCash() - init;
 
-		System.out.println(code + "\t" + decimalFormat.format(profit) + "\t" + percentFormat.format(profit / init));
+		System.out.println(code + "\t" + percentFormat.format(profit / init));
 		return portfolio;
 	}
 

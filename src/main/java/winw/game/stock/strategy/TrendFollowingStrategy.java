@@ -83,7 +83,7 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 		// 信号线交叉
 		// MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
 		// MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
-		if (today.getMacd() > 0 && yesterday.getMacd() < 0) {
+		if (today.getMacd() > 0 && yesterday.getMacd() < 0 && isReliable(today.getDiff())) {
 			return new Advise(Signal.BUY_SIGNAL);
 		}
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
@@ -94,6 +94,21 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 		// 由于MACD是基于移动平均线，因此本质上是滞后指标。
 		// FIXME 作为价格趋势的指标，MACD对于没有趋势（在一定范围内交易）或正在以不稳定的价格行动进行交易的股票不太有用。
 		return new Advise();
+	}
+
+	private boolean useReliable = false;
+
+	protected boolean isReliable(double diff) {
+		// BUY_DIFF BETWEEN -0.51 AND 0.23 OR BUY_DIFF BETWEEN 0.29 AND 0.84
+		if (!useReliable) {
+			return true;
+		} else if (diff >= -0.51 && diff < 0.23) {
+			return true;
+		} else if (diff >= 0.29 && diff < 0.84) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
