@@ -75,13 +75,15 @@ public class Portfolio {
 			log.setBuyPrice(buy.getPrice());
 			log.setBuyDiff(Double.parseDouble(decimal4Format.format(buy.getDiff())));
 			log.setBuyDea(Double.parseDouble(decimal4Format.format(buy.getDea())));
-			log.setBuyMacd(Double.parseDouble(decimal4Format.format(buy.getMacd())));
+			// log.setBuyMacd(Double.parseDouble(decimal4Format.format(buy.getMacd())));
+			log.setBuySlope(Double.parseDouble(decimal4Format.format(buy.getSlope())));
 
 			log.setSellDate(sell.getDate());
 			log.setSellPrice(sell.getPrice());
 			log.setSellDiff(Double.parseDouble(decimal4Format.format(sell.getDiff())));
 			log.setSellDea(Double.parseDouble(decimal4Format.format(sell.getDea())));
-			log.setSellMacd(Double.parseDouble(decimal4Format.format(sell.getMacd())));
+			// log.setSellMacd(Double.parseDouble(decimal4Format.format(sell.getMacd())));
+			log.setSellSlope(Double.parseDouble(decimal4Format.format(sell.getSlope())));
 
 			double profit = Math.abs(sell.getAmount()) - Math.abs(buy.getAmount()) - sell.getCommission()
 					- buy.getCommission();

@@ -61,6 +61,7 @@ public class StrategyBacktesting {
 		int position = 0; // 持仓
 		for (int i = 50; i < indicator.size(); i++) {// 从第50开始，各种指标的误差可以忽略
 			Indicator current = indicator.get(i - 1);
+			Indicator yestday = indicator.get(i - 2);
 			current.setCode(stockQuote.getCode());
 			current.setName(stockQuote.getName());
 
@@ -68,22 +69,22 @@ public class StrategyBacktesting {
 
 			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {// 买入
 				position = portfolio.maxBuy(current.getClose());
-				trading(portfolio, current, position);
+				trading(portfolio, current, yestday, position);
 			}
 
 			if (advise.getSignal() == Signal.SELL_SIGNAL && position > 0) {// 卖出
-				trading(portfolio, current, -position);
+				trading(portfolio, current, yestday, -position);
 				position = 0;
 			}
 
 			// if (position > 0 && (buyPrice - current.getLow()) / buyPrice >= 0.13) {// 止损
 		}
 		if (position > 0) {// 清算
-			trading(portfolio, indicator.get(indicator.size() - 1), -position);
+			trading(portfolio, indicator.get(indicator.size() - 1), indicator.get(indicator.size() - 2), -position);
 		}
 	}
 
-	protected void trading(Portfolio portfolio, Indicator current, int position) {
+	protected void trading(Portfolio portfolio, Indicator current, Indicator yestday, int position) {
 		Trade trade = new Trade(current.getDate(), current.getClose(), position);
 		trade.setCode(current.getCode());
 		trade.setName(current.getName());
@@ -91,6 +92,7 @@ public class StrategyBacktesting {
 		trade.setDea(current.getDea());
 		trade.setMacd(current.getMacd());
 
+		trade.setSlope((current.getDiff() - yestday.getDiff()) / (1 - 0));
 		portfolio.trading(trade);
 	}
 }

@@ -35,11 +35,17 @@ public class TradeLog {
 	private Double buyDea;
 	private Double sellDea;
 
-	@Column(nullable = true)
-	private Double buyMacd;
+	// @Column(nullable = true)
+	// private Double buyMacd;
+	//
+	// @Column(nullable = true)
+	// private Double sellMacd;
 
 	@Column(nullable = true)
-	private Double sellMacd;
+	private Double buySlope;
+
+	@Column(nullable = true)
+	private Double sellSlope;
 
 	private Double profit;
 
@@ -133,20 +139,20 @@ public class TradeLog {
 		this.sellDea = sellDea;
 	}
 
-	public Double getBuyMacd() {
-		return buyMacd;
+	public Double getBuySlope() {
+		return buySlope;
 	}
 
-	public void setBuyMacd(Double buyMacd) {
-		this.buyMacd = buyMacd;
+	public void setBuySlope(Double buySlope) {
+		this.buySlope = buySlope;
 	}
 
-	public Double getSellMacd() {
-		return sellMacd;
+	public Double getSellSlope() {
+		return sellSlope;
 	}
 
-	public void setSellMacd(Double sellMacd) {
-		this.sellMacd = sellMacd;
+	public void setSellSlope(Double sellSlope) {
+		this.sellSlope = sellSlope;
 	}
 
 	public Double getProfit() {

@@ -27,6 +27,8 @@ public class Trade {
 	private double dea;
 	
 	private double macd;
+	
+	private double slope;
 
 	public Trade(String date, double price, int count) {
 		super();
@@ -114,6 +116,14 @@ public class Trade {
 
 	public void setMacd(double macd) {
 		this.macd = macd;
+	}
+
+	public double getSlope() {
+		return slope;
+	}
+
+	public void setSlope(double slope) {
+		this.slope = slope;
 	}
 
 	@Override
