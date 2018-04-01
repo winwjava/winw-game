@@ -1,17 +1,27 @@
 package winw.game.stock;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * 交易。
  * 
  * @author winw
  *
  */
+@Entity
+@Table(name = "TRADE_LOG")
 public class Trade {
+	@Id
+	@GeneratedValue
+	protected long id;
 
 	private String code;
-	
+
 	private String name;
-	
+
 	private String date;// 日期
 
 	private double price;// 价格
@@ -25,10 +35,14 @@ public class Trade {
 	private double diff;
 
 	private double dea;
-	
+
 	private double macd;
-	
+
 	private double slope;
+
+	public Trade() {
+		super();
+	}
 
 	public Trade(String date, double price, int count) {
 		super();

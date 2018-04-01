@@ -8,7 +8,7 @@ package winw.game.stock.analysis;
  */
 public class Advise {
 
-	public enum Signal {
+	public enum Trading {
 		/**
 		 * 买入信号
 		 */
@@ -42,7 +42,7 @@ public class Advise {
 	/**
 	 * <tt>null</tt>表示没有信号。
 	 */
-	private Signal signal;
+	private Trading trading;
 
 	/**
 	 * 市场行情。
@@ -58,17 +58,17 @@ public class Advise {
 		super();
 	}
 
-	public Advise(Signal signal) {
+	public Advise(Trading trading) {
 		super();
-		this.signal = signal;
+		this.trading = trading;
 	}
 
-	public Signal getSignal() {
-		return signal;
+	public Trading getSignal() {
+		return trading;
 	}
 
-	public void setSignal(Signal signal) {
-		this.signal = signal;
+	public void setSignal(Trading trading) {
+		this.trading = trading;
 	}
 
 	public Market getMarket() {
@@ -91,7 +91,7 @@ public class Advise {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Advise [signal=");
-		builder.append(signal);
+		builder.append(trading);
 		builder.append(", advise=");
 		builder.append(advise);
 		builder.append(", market=");

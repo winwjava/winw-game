@@ -16,6 +16,8 @@ public class Portfolio {
 
 	private double cash;// 现金
 
+	private double maxInvestment;// 最大投资
+
 	private double buyCost = 0.0003;// 买入，万3
 	private double sellCost = 0.0013;// 卖出，千分之1.3
 	private double minCost = 5;// 不足5元以5元计
@@ -50,6 +52,9 @@ public class Portfolio {
 		}
 
 		cash = cash - trade.getAmount() - trade.getCommission();
+
+		maxInvestment = Math.max(maxInvestment, trade.getAmount() + trade.getCommission());
+
 		return tradeList.add(trade);
 	}
 
@@ -58,43 +63,18 @@ public class Portfolio {
 		return (int) ((cash - commission(cash)) / price) / 100 * 100;
 	}
 
-	private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 	private final DecimalFormat decimal4Format = new DecimalFormat("##0.0000");
 
-	public List<TradeLog> getTradeLog() {
-		List<TradeLog> logs = new ArrayList<TradeLog>();
+	public List<Trade> getTradeLog() {
 		for (int i = 0; i < tradeList.size(); i += 2) {
-			Trade buy = tradeList.get(i);
-			Trade sell = tradeList.get(i + 1);
-
-			TradeLog log = new TradeLog();
-			log.setCode(buy.getCode());
-			log.setName(buy.getName());
-
-			log.setBuyDate(buy.getDate());
-			log.setBuyPrice(buy.getPrice());
-			log.setBuyDiff(Double.parseDouble(decimal4Format.format(buy.getDiff())));
-			log.setBuyDea(Double.parseDouble(decimal4Format.format(buy.getDea())));
-			// log.setBuyMacd(Double.parseDouble(decimal4Format.format(buy.getMacd())));
-			log.setBuySlope(Double.parseDouble(decimal4Format.format(buy.getSlope())));
-
-			log.setSellDate(sell.getDate());
-			log.setSellPrice(sell.getPrice());
-			log.setSellDiff(Double.parseDouble(decimal4Format.format(sell.getDiff())));
-			log.setSellDea(Double.parseDouble(decimal4Format.format(sell.getDea())));
-			// log.setSellMacd(Double.parseDouble(decimal4Format.format(sell.getMacd())));
-			log.setSellSlope(Double.parseDouble(decimal4Format.format(sell.getSlope())));
-
-			double profit = Math.abs(sell.getAmount()) - Math.abs(buy.getAmount()) - sell.getCommission()
-					- buy.getCommission();
-			log.setProfit(Double.parseDouble(decimalFormat.format(profit)));
-
-			double profitRate = profit / (Math.abs(buy.getAmount()) + buy.getCommission());
-
-			log.setProfitRate(Double.parseDouble(decimal4Format.format(profitRate)));
-			logs.add(log);
+			Trade log = tradeList.get(i);
+			log.setDiff(Double.parseDouble(decimal4Format.format(log.getDiff())));
+			log.setDea(Double.parseDouble(decimal4Format.format(log.getDea())));
+			// log.setMacd(Double.parseDouble(decimal4Format.format(.getMacd())));
+			log.setSlope(Double.parseDouble(decimal4Format.format(log.getSlope())));
 		}
-		return logs;
+		return tradeList;
 	}
 
 	public double getCash() {
@@ -103,6 +83,14 @@ public class Portfolio {
 
 	public void setCash(double cash) {
 		this.cash = cash;
+	}
+
+	public double getMaxInvestment() {
+		return maxInvestment;
+	}
+
+	public void setMaxInvestment(double maxInvestment) {
+		this.maxInvestment = maxInvestment;
 	}
 
 	public double getBuyCost() {

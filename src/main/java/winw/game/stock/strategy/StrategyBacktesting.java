@@ -1,6 +1,7 @@
 package winw.game.stock.strategy;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,8 +15,9 @@ import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
 import winw.game.stock.Trade;
 import winw.game.stock.analysis.Advise;
-import winw.game.stock.analysis.Advise.Signal;
+import winw.game.stock.analysis.Advise.Trading;
 import winw.game.stock.analysis.Indicator;
+import winw.game.stock.analysis.TechnicalAnalysis;
 
 /**
  * 投资策略回溯测试。
@@ -42,19 +44,27 @@ public class StrategyBacktesting {
 
 		List<Quote> list = service.get(code, QuoteType.DAILY_QUOTE, days);
 
+		// 计算技术指标
+		List<Indicator> indicators = Indicator.compute(list.subList(formIndex(days, list), list.size()));
+		// 技术分析
+		TechnicalAnalysis.analysis(indicators);
+
+		testing(stockQuote, portfolio, indicators);
+	}
+
+	private int formIndex(int days, List<Quote> list) throws ParseException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_YEAR, (int) (-days - (50 * 1.2)));
 		Date start = calendar.getTime();
 		DateFormat dateFormat = new SimpleDateFormat(Quote.DATE_PATTERN);
-		int fromIndex = -1;
+		int from = 0;// -1
 		for (int i = 0; i < list.size(); i++) {
 			if (start.before(dateFormat.parse(list.get(i).getDate()))) {
-				fromIndex = i;
+				from = i;
 				break;
 			}
 		}
-
-		testing(stockQuote, portfolio, Indicator.compute(list.subList(fromIndex, list.size())));
+		return from;
 	}
 
 	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {
@@ -67,12 +77,17 @@ public class StrategyBacktesting {
 
 			Advise advise = strategy.analysis(indicator.subList(0, i));
 
-			if (advise.getSignal() == Signal.BUY_SIGNAL && position == 0) {// 买入
-				position = portfolio.maxBuy(current.getClose());
-				trading(portfolio, current, yestday, position);
+			if (advise.getSignal() == Trading.BUY_SIGNAL && position == 0) {// 买入
+				int buy = portfolio.maxBuy(current.getClose()) / 2;// 建仓
+				trading(portfolio, current, yestday, buy);
+				position += buy;
+			} else if (advise.getSignal() == Trading.BUY_SIGNAL && position > 0) {// 买入
+				int buy = portfolio.maxBuy(current.getClose());// 加仓
+				trading(portfolio, current, yestday, buy);
+				position += buy;
 			}
 
-			if (advise.getSignal() == Signal.SELL_SIGNAL && position > 0) {// 卖出
+			if (advise.getSignal() == Trading.SELL_SIGNAL && position > 0) {// 卖出
 				trading(portfolio, current, yestday, -position);
 				position = 0;
 			}

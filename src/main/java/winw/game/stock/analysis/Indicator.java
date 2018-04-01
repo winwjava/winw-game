@@ -50,6 +50,8 @@ public class Indicator extends Quote {
 	private double vpt;
 	private double vptema;
 
+	private List<Signal> signalList = new ArrayList<Signal>(1);
+	
 	public Indicator(Quote o) {
 		super();
 		this.date = o.getDate();
@@ -577,6 +579,14 @@ public class Indicator extends Quote {
 
 	public void setVptema(double vptema) {
 		this.vptema = vptema;
+	}
+
+	public List<Signal> getSignalList() {
+		return signalList;
+	}
+
+	public void setSignalList(List<Signal> signalList) {
+		this.signalList = signalList;
 	}
 
 	@Override

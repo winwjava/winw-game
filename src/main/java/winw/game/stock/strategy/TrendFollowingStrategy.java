@@ -1,10 +1,12 @@
 package winw.game.stock.strategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import winw.game.stock.analysis.Advise;
-import winw.game.stock.analysis.Advise.Signal;
+import winw.game.stock.analysis.Advise.Trading;
 import winw.game.stock.analysis.Indicator;
+import winw.game.stock.analysis.Signal;
 
 /**
  * 趋势跟踪策略。
@@ -53,47 +55,60 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 	@Override
 	public Advise analysis(List<Indicator> list) {
 		Indicator today = list.get(list.size() - 1);
-		Indicator yesterday = list.get(list.size() - 2);
 
-		// 当DIF和DEA处于0轴以上时，属于多头市场。
-		// 当DIF和DEA处于0轴以下时，属于空头市场。
-		// boolean bullMarket = today.getDiff() > 0 && today.getDea() > 0;
-
-		// if (cross && today.getDiff() > today.getDea()) {
-		// return new Advise(Signal.BUY_SIGNAL);
-		// }
-
-		// 零交叉
-		// if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0) {
-		// return new Advise(Signal.BUY_SIGNAL);
-		// }
-		// if (today.getDiff() < 0 && yesterday.getDiff() > 0) {
-		// return new Advise(Signal.SELL_SIGNAL);
-		// }
-
-		// 熊市
-		// boolean bullMarket = false;
-		// for (int i = list.size() - 12; i < list.size() - 1; i++) {
-		// if (list.get(i).getDiff() > 0) {
-		// bullMarket = true;
-		// break;
-		// }
-		// }
-
-		// 信号线交叉
-		// MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
-		// MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
-		if (today.getMacd() > 0 && yesterday.getMacd() < 0 && isReliable(today.getDiff())) {
-			return new Advise(Signal.BUY_SIGNAL);
-		}
-		if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
-			return new Advise(Signal.SELL_SIGNAL);
+		if (today.getSignalList().contains(Signal.ZERO_CROSSOVER)
+				|| today.getSignalList().contains(Signal.GOLDEN_CROSSOVER)) {
+			return new Advise(Trading.BUY_SIGNAL);
 		}
 
-		// MACD信号线交叉分析、零交叉分析。
-		// 由于MACD是基于移动平均线，因此本质上是滞后指标。
-		// FIXME 作为价格趋势的指标，MACD对于没有趋势（在一定范围内交易）或正在以不稳定的价格行动进行交易的股票不太有用。
+		if (today.getSignalList().contains(Signal.DEATH_CROSSOVER)) {
+			return new Advise(Trading.SELL_SIGNAL);
+		}
+
+		// 成交量萎缩
+		if (today.getSignalList().contains(Signal.VOLUME_SHRINK)) {
+			return new Advise(Trading.SELL_SIGNAL);
+		}
+
+		if (!today.getSignalList().contains(Signal.VOLUME_ENLARGE)) {
+			return new Advise();
+		}
+
+		// 金叉之后，成交量明显放大
+		// 查看最近10天有无金叉，如果有金叉，并且成交量明显放大，则买入
+		ArrayList<Signal> signalList = new ArrayList<Signal>();
+		for (int i = 0; i <= 10; i++) {
+			signalList.addAll(list.get(list.size() - 1 - i).getSignalList());
+		}
+		if (signalList.contains(Signal.GOLDEN_CROSSOVER) && !signalList.contains(Signal.DEATH_CROSSOVER)) {
+			System.out.println(today.getCode() + "\t" + today.getDate() + "\t金叉之后，成交量明显放大");
+			return new Advise(Trading.BUY_SIGNAL);
+		}
+
 		return new Advise();
+	}
+
+	protected boolean isReliable(List<Indicator> list, Indicator today) {
+
+		// TODO 在0轴以下反复交叉，不参与，只有零交叉时参与。
+
+		List<Double> deaList = new ArrayList<Double>();
+
+		for (int i = 50; i < list.size(); i++) {// 从第50开始，各种指标的误差可以忽略
+			Indicator current = list.get(i - 1);
+			Indicator yestday = list.get(i - 2);
+			if (current.getMacd() > 0 && yestday.getMacd() < 0) {
+				deaList.add(current.getDea());
+			}
+		}
+
+		// for (int i = deaList.size(); i < deaList.size() - 3; i--) {
+		// if (deaList.get(i) > 0 ) {
+		// return true;
+		// }
+		// }
+		// System.out.println(today.getDate() + " 在0轴以下反复交叉，不参与，只有零交叉时参与。");
+		return false;
 	}
 
 	private boolean useReliable = false;

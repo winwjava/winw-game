@@ -28,10 +28,10 @@ public class TechnicalAnalysisTest {
 		List<Indicator> indicatorList = test("sz002839");
 		for (int i = 50; i < indicatorList.size(); i++) {
 
-			Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList.subList(0, i));
-			if (advise.getSignal() != null) {// Advise
-				System.out.println(toString(indicatorList.get(i - 1)) + "\t" + advise.toString());
-			}
+//			Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList.subList(0, i));
+//			if (advise.getSignal() != null) {// Advise
+//				System.out.println(toString(indicatorList.get(i - 1)) + "\t" + advise.toString());
+//			}
 			
 //			Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList.subList(0, i));
 //			if (advise.getSignal() != null) {// Advise
@@ -55,8 +55,8 @@ public class TechnicalAnalysisTest {
 		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE, 300);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);
-		Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList);
-		System.out.println(stockQuote.getName() + "\t" + advise.toString());
+//		Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList);
+//		System.out.println(stockQuote.getName() + "\t" + advise.toString());
 		return indicatorList;
 	}
 

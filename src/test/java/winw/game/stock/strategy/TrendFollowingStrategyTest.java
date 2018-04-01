@@ -5,24 +5,16 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.annotation.Resource;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import winw.game.stock.Portfolio;
 import winw.game.stock.StockList;
 import winw.game.stock.Trade;
-import winw.game.stock.TradeLogRepository;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class TrendFollowingStrategyTest {
 
-	@Resource
-	private TradeLogRepository tradeLogRepository;
+//	@Resource
+//	private TradeRepository tradeRepository;
 
 	private StrategyBacktesting backtesting = new StrategyBacktesting(new TrendFollowingStrategy());
 
@@ -30,29 +22,39 @@ public class TrendFollowingStrategyTest {
 
 	@Test
 	public void testAll() throws Exception {
-		tradeLogRepository.deleteAll();
+		// tradeRepository.deleteAll();
 		int count = 0;
-		double total = 0;
+		double totalInvestment = 0;
+		double profit = 0;
 
 		Set<String> set = new TreeSet<String>();
+		// set.addAll(Arrays.asList(StockList.CSI_300));
 		set.addAll(Arrays.asList(StockList.CSI_300));
-		set.addAll(Arrays.asList(StockList.CSI_500));
 		for (String temp : set) {
+			if (temp.startsWith("sz300")) {// 去掉创业板
+				continue;
+			}
+			
 			Portfolio portfolio = test(temp);
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
 			}
-			tradeLogRepository.save(portfolio.getTradeLog());
+			// tradeRepository.save(portfolio.getTradeLog());
 			count++;
-			total += portfolio.getCash();
+			totalInvestment += portfolio.getMaxInvestment();
+
+			profit += portfolio.getCash() - init;
 		}
-		double profit = total - init * count;
-		System.out.println("Total: "+count + "\t" + percentFormat.format(profit / (init * count)));
+
+		// double profit = total - init * count;
+		System.out.println("Total: " + count + "\t" + percentFormat.format(profit / totalInvestment));
+		// System.out.println("Total: " + count + "\t" + percentFormat.format(profit /
+		// (init * count)));
 	}
 
-	// @Test
+	@Test
 	public void testOne() throws Exception {
-		Portfolio portfolio = test("sz002839");
+		Portfolio portfolio = test("sz000718");
 		if (portfolio == null) {
 			return;
 		}
