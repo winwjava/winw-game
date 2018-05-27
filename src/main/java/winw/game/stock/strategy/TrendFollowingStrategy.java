@@ -66,24 +66,26 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 		}
 
 		// 成交量萎缩
-		if (today.getSignalList().contains(Signal.VOLUME_SHRINK)) {
-			return new Advise(Trading.SELL_SIGNAL);
-		}
+		// if (today.getSignalList().contains(Signal.VOLUME_SHRINK)) {
+		// return new Advise(Trading.SELL_SIGNAL);
+		// }
 
-		if (!today.getSignalList().contains(Signal.VOLUME_ENLARGE)) {
-			return new Advise();
-		}
+		// if (!today.getSignalList().contains(Signal.VOLUME_ENLARGE)) {
+		// return new Advise();
+		// }
 
 		// 金叉之后，成交量明显放大
 		// 查看最近10天有无金叉，如果有金叉，并且成交量明显放大，则买入
-		ArrayList<Signal> signalList = new ArrayList<Signal>();
-		for (int i = 0; i <= 10; i++) {
-			signalList.addAll(list.get(list.size() - 1 - i).getSignalList());
-		}
-		if (signalList.contains(Signal.GOLDEN_CROSSOVER) && !signalList.contains(Signal.DEATH_CROSSOVER)) {
-			System.out.println(today.getCode() + "\t" + today.getDate() + "\t金叉之后，成交量明显放大");
-			return new Advise(Trading.BUY_SIGNAL);
-		}
+		// ArrayList<Signal> signalList = new ArrayList<Signal>();
+		// for (int i = 0; i <= 10; i++) {
+		// signalList.addAll(list.get(list.size() - 1 - i).getSignalList());
+		// }
+		// if (signalList.contains(Signal.GOLDEN_CROSSOVER) &&
+		// !signalList.contains(Signal.DEATH_CROSSOVER)) {
+		// System.out.println(today.getCode() + "\t" + today.getDate() +
+		// "\t金叉之后，成交量明显放大");
+		// return new Advise(Trading.BUY_SIGNAL);
+		// }
 
 		return new Advise();
 	}

@@ -36,7 +36,7 @@ public class StrategyBacktesting {
 		this.strategy = strategy;
 	}
 
-	public void testing(String code, int days, Portfolio portfolio) throws Exception {
+	public void testing(Portfolio portfolio, String code, int days) throws Exception {//TODO , Date from, Date to
 		StockQuote stockQuote = service.get(code);
 		if (stockQuote == null) {
 			return;
@@ -44,6 +44,8 @@ public class StrategyBacktesting {
 
 		List<Quote> list = service.get(code, QuoteType.DAILY_QUOTE, days);
 
+		// 过滤
+		
 		// 计算技术指标
 		List<Indicator> indicators = Indicator.compute(list.subList(formIndex(days, list), list.size()));
 		// 技术分析
@@ -52,6 +54,13 @@ public class StrategyBacktesting {
 		testing(stockQuote, portfolio, indicators);
 	}
 
+	/**
+	 * 取不超过days时间的天
+	 * @param days
+	 * @param list
+	 * @return
+	 * @throws ParseException
+	 */
 	private int formIndex(int days, List<Quote> list) throws ParseException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_YEAR, (int) (-days - (50 * 1.2)));
