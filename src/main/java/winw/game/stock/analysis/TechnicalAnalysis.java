@@ -15,8 +15,8 @@ public class TechnicalAnalysis {
 
 	public static void analysis(List<Indicator> list) {
 		for (int i = 50; i < list.size(); i++) {// 从第50开始，各种指标的误差可以忽略
-			Indicator today = list.get(i - 1);
-			Indicator yesterday = list.get(i - 2);
+			Indicator today = list.get(i);
+			Indicator yesterday = list.get(i - 1);
 			analysisMACD(today, yesterday, list);
 			// analysisKDJ(today, yesterday, list);
 		}

@@ -3,6 +3,8 @@ package winw.game.stock.strategy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
 import winw.game.stock.analysis.Advise;
 import winw.game.stock.analysis.Advise.Trading;
 import winw.game.stock.analysis.Indicator;
@@ -55,15 +57,50 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 	@Override
 	public Advise analysis(List<Indicator> list) {
 		Indicator today = list.get(list.size() - 1);
-
-		if (today.getSignalList().contains(Signal.ZERO_CROSSOVER)
-				|| today.getSignalList().contains(Signal.GOLDEN_CROSSOVER)) {
+		if (today.getSignalList().contains(Signal.ZERO_CROSSOVER) || today.getSignalList().contains(Signal.GOLDEN_CROSSOVER)) {
 			return new Advise(Trading.BUY_SIGNAL);
 		}
 
 		if (today.getSignalList().contains(Signal.DEATH_CROSSOVER)) {
 			return new Advise(Trading.SELL_SIGNAL);
 		}
+
+		// 曲线拟合
+		// GaussianCurveFitter
+		// HarmonicCurveFitter
+		// PolynomialCurveFitter
+//		WeightedObservedPoints points = new WeightedObservedPoints();
+//		for (int i = list.size() - 3; i < list.size(); i++) {
+//			points.add(new Integer(i).doubleValue(), list.get(i).getClose());
+//		}
+//		PolynomialCurveFitter curveFitter = PolynomialCurveFitter.create(2);
+//		System.out.println("PolynomialCurveFitter: " + curveFitter.fit(points.toList()));
+
+		int index = list.size() - 3;
+		// 当天发生金叉，今天计算斜率
+		if (!today.getSignalList().contains(Signal.GOLDEN_CROSSOVER)) {// && !list.get(index + 1).getSignalList().contains(Signal.ZERO_CROSSOVER)
+			return new Advise();
+		}
+		// 线性回归
+		SimpleRegression regression = new SimpleRegression();
+		double f = list.get(index).getClose();
+		// System.out.println(today.getDate());
+		for (int i = index; i < list.size(); i++) {
+			regression.addData(f ++ , list.get(i).getClose());
+			// System.out.println(list.get(i).getDate() +": "+f+", "+ list.get(i).getClose());
+		}
+		if (regression.getSlope() > 0.5) {
+			// displays slope of regression line
+			System.out.println(today.getCode() +"\t"+ list.get(index).getDate() + "~" + today.getDate() +", Slope: " + regression.getSlope());
+			// return new Advise(Trading.BUY_SIGNAL);
+		}
+
+		// displays intercept of regression line
+//		System.out.println("Intercept: " + regression.getIntercept());
+		// displays slope standard error
+//		System.out.println("SlopeStdErr: " + regression.getSlopeStdErr());
+//		System.out.println("predict: " + regression.predict(1.5d));
+		// displays predicted y value for x = 1.5
 
 		// 成交量萎缩
 		// if (today.getSignalList().contains(Signal.VOLUME_SHRINK)) {
@@ -90,6 +127,7 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 		return new Advise();
 	}
 
+	@Deprecated
 	protected boolean isReliable(List<Indicator> list, Indicator today) {
 
 		// TODO 在0轴以下反复交叉，不参与，只有零交叉时参与。
@@ -115,6 +153,7 @@ public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
 
 	private boolean useReliable = false;
 
+	@Deprecated
 	protected boolean isReliable(double diff) {
 		// BUY_DIFF BETWEEN -0.51 AND 0.23 OR BUY_DIFF BETWEEN 0.29 AND 0.84
 		if (!useReliable) {

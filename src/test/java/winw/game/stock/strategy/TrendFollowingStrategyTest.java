@@ -30,12 +30,18 @@ public class TrendFollowingStrategyTest {
 
 	private StrategyBacktesting backtesting = new StrategyBacktesting(new TrendFollowingStrategy());
 
-	private final double init = 1000000;
+	private final double init = 100000;
+
+	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
+	private final NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
 	@Test
 	public void testAll() throws Exception {
+		int count = 0;
+		double profit = 0;
+		double totalInvestment = 0;
 		List<Portfolio> portfolios = new ArrayList<Portfolio>();
-		for (String temp : Arrays.asList(StockList.CSI_300)) {
+		for (String temp : Arrays.asList(StockList.CSI_300)) {// "sh600436","sz000671", "sh600276", "sh601877"
 			if (temp.startsWith("sz300")) {// 去掉创业板
 				continue;
 			}
@@ -43,8 +49,15 @@ public class TrendFollowingStrategyTest {
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
 			}
+			count++;
+			profit += portfolio.getCash() - init;
+			totalInvestment += portfolio.getMaxInvestment();
 			portfolios.add(portfolio);
 		}
+		System.out.println(profit);
+		System.out.println(totalInvestment);
+		System.out.println("Total: " + count + "\t" + percentFormat.format(profit / totalInvestment));
+
 		Collections.sort(portfolios, Comparator.comparing(Portfolio::getCash));
 		Collections.reverse(portfolios);
 		// 排序后取Top 10 交易
@@ -53,27 +66,24 @@ public class TrendFollowingStrategyTest {
 			Portfolio portfolio = portfolios.get(i);
 			List<Trade> tradeList = portfolio.getTradeList();
 			System.out.println(tradeList.get(0).getCode() + "\t" + tradeList.get(0).getName() + "\t"
-					+ percentFormat.format((portfolio.getCash() - init) / init));
+					+ percentFormat.format((portfolio.getCash() - init) / portfolio.getMaxInvestment()));
 		}
-		// System.out.println("Total: " + count + "\t" + percentFormat.format(profit /
-		// totalInvestment));
+		
+		// 将所有交易记录合并起来，然后在时间轴上显示收益率
 	}
 
 	@Test
 	public void testOne() throws Exception {
-		Portfolio portfolio = test("sz399300");
+		Portfolio portfolio = test("sz002120");
 		if (portfolio == null) {
 			return;
 		}
 
 		// print trade Log
-		for (Trade trade : portfolio.getTradeList()) {
-			System.out.println(trade.toString());
-		}
+		// for (Trade trade : portfolio.getTradeList()) {
+		// System.out.println(trade.toString());
+		// }
 	}
-
-	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
-	private final NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
 	public Portfolio test(String code) throws Exception {
 		// if (name.startsWith("S") || name.startsWith("ST") || name.startsWith("*ST")
@@ -101,14 +111,13 @@ public class TrendFollowingStrategyTest {
 			TechnicalAnalysis.analysis(indicatorList);
 
 			Indicator today = indicatorList.get(indicatorList.size() - 1);
-
 			if (today.getSignalList().contains(Signal.ZERO_CROSSOVER)
 					|| today.getSignalList().contains(Signal.GOLDEN_CROSSOVER)) {
-				System.out.println(stockQuote.getCode() + "\t" + stockQuote.getName() + "\tB");
+				System.out.println(stockQuote.getCode() + "\t" + today.getDate() + "\t" + stockQuote.getName() + "\tB");
 			}
 
 			if (today.getSignalList().contains(Signal.DEATH_CROSSOVER)) {
-				System.out.println(stockQuote.getCode() + "\t" + stockQuote.getName() + "\tS");
+				System.out.println(stockQuote.getCode() + "\t" + today.getDate() + "\t" + stockQuote.getName() + "\tS");
 			}
 		}
 	}

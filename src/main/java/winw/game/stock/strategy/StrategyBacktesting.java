@@ -78,7 +78,7 @@ public class StrategyBacktesting {
 
 	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {
 		int position = 0; // 持仓
-		for (int i = 50; i < indicator.size(); i++) {// 从第50开始，各种指标的误差可以忽略
+		for (int i = 50; i < indicator.size(); i++) {// 从第50天开始，各种指标的误差可以忽略
 			Indicator current = indicator.get(i - 1);
 			Indicator yestday = indicator.get(i - 2);
 			current.setCode(stockQuote.getCode());
