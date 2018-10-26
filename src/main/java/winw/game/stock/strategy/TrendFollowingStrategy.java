@@ -1,7 +1,10 @@
 package winw.game.stock.strategy;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -50,6 +53,59 @@ import winw.game.stock.analysis.Signal;
  *
  */
 public class TrendFollowingStrategy implements Strategy {// TODO 成交量指标
+	private LinkedHashMap<String, String> rangeMap = new LinkedHashMap<String, String>();
+
+	private LinkedList<String> bigTrend = new LinkedList<String>();
+	
+	// TODO 大盘趋势向下时，切忌持有标的。
+	/**
+	 * 返回趋势向上的时间段，【开始时间，结尾时间】，如果向上趋势的结尾时间还没有确定则放置的是null。
+	 * 
+	 * @param indicator
+	 * @return
+	 */
+	public Map<String, String> getRange(List<Indicator> indicator) {
+
+		String start = null;
+		for (int i = 50; i < indicator.size(); i++) {// 从第50天开始，各种指标的误差可以忽略
+			Indicator current = indicator.get(i - 1);
+			// Indicator yestday = indicator.get(i - 2);
+
+			Advise advise = analysis(indicator.subList(0, i));
+
+			if (advise.getSignal() == Trading.BUY_SIGNAL) {// 买入
+				start = current.getDate();
+				bigTrend.add(current.getDate()+"B");
+				rangeMap.put(start, null);
+			}
+
+			if (advise.getSignal() == Trading.SELL_SIGNAL && start != null) {// 卖出
+				bigTrend.add(current.getDate()+"S");
+				rangeMap.put(start, current.getDate());
+				start = null;
+			}
+		}
+		return rangeMap;
+	}
+
+	/**
+	 * 是否在上涨趋势中。
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public boolean isInRange(String date) {
+		for (int i = 0; i < bigTrend.size(); i++) {
+			if (bigTrend.get(i).endsWith("S")) {
+				continue;
+			}
+			if (date.compareTo(bigTrend.get(i)) >= 0
+					&& (i + 1 >= bigTrend.size() || date.compareTo(bigTrend.get(i + 1)) <= 0)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * MACD信号线交叉（金叉、死叉）确定买入卖出，

@@ -21,7 +21,6 @@ public class VolatilityArbitrageStrategy implements Strategy {
 
 	@Override
 	public Advise analysis(List<Indicator> indicator) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

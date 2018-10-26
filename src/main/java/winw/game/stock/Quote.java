@@ -87,6 +87,7 @@ public class Quote {
 	}
 
 	public double getOpen() {
+		
 		return open;
 	}
 

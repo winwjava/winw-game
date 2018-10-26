@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -25,16 +26,40 @@ public class TrendFollowingStrategyTest {
 
 	// @Resource
 	// private TradeRepository tradeRepository;
-
+	private TrendFollowingStrategy strategy = new TrendFollowingStrategy();
 	private StockQuoteService service = new TencentStockQuoteService();
 
-	private StrategyBacktesting backtesting = new StrategyBacktesting(new TrendFollowingStrategy());
+	private StrategyBacktesting backtesting = new StrategyBacktesting(strategy);
 
 	private final double init = 100000;
+	
+	private int days = 365;
 
 	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 	private final NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
+	@Test
+	public void getRange() throws Exception {
+		String code = "sh000001";
+		StockQuote stockQuote = service.get(code);
+		if (stockQuote == null) {
+			return;
+		}
+
+		List<Quote> list = service.get(code, QuoteType.DAILY_QUOTE, days);
+
+		// 过滤
+		
+		// 计算技术指标
+		List<Indicator> indicators = Indicator.compute(list);
+
+		TechnicalAnalysis.analysis(indicators);
+		
+		Map<String, String> range = strategy.getRange(indicators);
+		
+		System.out.println(range);
+	}
+	
 	@Test
 	public void testAll() throws Exception {
 		int count = 0;

@@ -1,10 +1,5 @@
 package winw.game.stock.strategy;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import winw.game.stock.Portfolio;
@@ -47,33 +42,11 @@ public class StrategyBacktesting {
 		// 过滤
 		
 		// 计算技术指标
-		List<Indicator> indicators = Indicator.compute(list.subList(formIndex(days, list), list.size()));
+		List<Indicator> indicators = Indicator.compute(list, days);
 		// 技术分析
 		TechnicalAnalysis.analysis(indicators);
 
 		testing(stockQuote, portfolio, indicators);
-	}
-
-	/**
-	 * 取不超过days时间的天
-	 * @param days
-	 * @param list
-	 * @return
-	 * @throws ParseException
-	 */
-	private int formIndex(int days, List<Quote> list) throws ParseException {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_YEAR, (int) (-days - (50 * 1.2)));
-		Date start = calendar.getTime();
-		DateFormat dateFormat = new SimpleDateFormat(Quote.DATE_PATTERN);
-		int from = 0;// -1
-		for (int i = 0; i < list.size(); i++) {
-			if (start.before(dateFormat.parse(list.get(i).getDate()))) {
-				from = i;
-				break;
-			}
-		}
-		return from;
 	}
 
 	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {

@@ -129,5 +129,20 @@ public class TencentStockQuoteService implements StockQuoteService {
 		}
 		return quoteList;
 	}
+	
+	public static void main(String[] args) throws IOException, ParseException {
+		TencentStockQuoteService tencentStockQuoteService = new TencentStockQuoteService();
+		
+		StockQuote stockQuote = tencentStockQuoteService.get("sz002714");
+		
+		System.out.println(stockQuote.toString());
+		
+		List<Quote> list = tencentStockQuoteService.get("sz002714", QuoteType.DAILY_QUOTE, 100);
+		for (Quote quote : list) {
+			
+			System.out.println(quote);
+		}
+		
+	}
 
 }
