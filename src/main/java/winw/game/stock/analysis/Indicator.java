@@ -1,12 +1,16 @@
 package winw.game.stock.analysis;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import winw.game.stock.Quote;
 
@@ -22,6 +26,9 @@ public class Indicator extends Quote {
 	private double ma10;// 10日均价
 	private double ma20;// 20日均价
 	private double ma60;// 60日均价
+
+	private double ema5;
+	private double ema60;
 
 	private double volumeMa5;// 5日均量
 	private double volumeMa10;// 10日均量
@@ -55,10 +62,14 @@ public class Indicator extends Quote {
 	private double vpt;
 	private double vptema;
 
-	private List<Signal> signalList = new ArrayList<Signal>(1);
-	
+	// MA60的斜率
+	private double slope60;
+	private double slope5;
+
 	public Indicator(Quote o) {
 		super();
+		this.code = o.getCode();
+		this.name = o.getName();
 		this.date = o.getDate();
 		this.open = o.getOpen();
 		this.high = o.getHigh();
@@ -70,6 +81,7 @@ public class Indicator extends Quote {
 
 	/**
 	 * 取不超过days时间的天
+	 * 
 	 * @param days
 	 * @param list
 	 * @return
@@ -90,11 +102,10 @@ public class Indicator extends Quote {
 		return from;
 	}
 
-
 	public static List<Indicator> compute(List<? extends Quote> quoteList, int days) throws ParseException {
 		return compute(quoteList.subList(formIndex(days, quoteList), quoteList.size()));
 	}
-	
+
 	/**
 	 * 计算 MA MACD BOLL RSI KDJ 指标
 	 * 
@@ -107,12 +118,15 @@ public class Indicator extends Quote {
 			list.add(new Indicator(quote));
 		}
 		computeMA(list);
+		computeEMA(list);
 		computeMACD(list);
-		computeBOLL(list);
-		computeRSI(list);
-		computeKDJ(list);
+		// computeBOLL(list);
+		// computeRSI(list);
+		// computeKDJ(list);
 		// computeOBV(list);
 		// computeVPT(list);
+
+		computeSlope(list);
 		return list;
 	}
 
@@ -175,6 +189,22 @@ public class Indicator extends Quote {
 			} else {
 				indicator.setMa60(ma60 / (i + 1f));
 			}
+		}
+	}
+
+	/**
+	 * 计算 EMA
+	 */
+	protected static void computeEMA(List<Indicator> list) {
+		Double k5 = 2.0 / (5 + 1.0);
+		Double k60 = 2.0 / (60 + 1.0);
+		Double ema5 = list.get(0).getClose();
+		Double ema60 = list.get(0).getClose();
+		for (Indicator quote : list) {
+			ema5 = quote.getClose() * k5 + ema5 * (1 - k5);
+			ema60 = quote.getClose() * k60 + ema60 * (1 - k60);
+			quote.setEma5(ema5);
+			quote.setEma60(ema60);
 		}
 	}
 
@@ -337,15 +367,14 @@ public class Indicator extends Quote {
 				max9 = Math.max(max9, list.get(index).getHigh());
 				min9 = Math.min(min9, list.get(index).getLow());
 			}
-			
 
 			// Raw Stochastic Value
 			double rsv = 100f * (indicator.getClose() - min9) / (max9 - min9);
-			
+
 			if (max9 == min9) {
 				rsv = 0;
 			}
-			
+
 			if (i == 0) {
 				k = rsv;
 				d = rsv;
@@ -435,6 +464,60 @@ public class Indicator extends Quote {
 			indicator.setVpt(vpt);
 			indicator.setVptema(vptema);
 		}
+	}
+
+	/**
+	 * 计算 slope
+	 */
+	protected static void computeSlope(List<Indicator> list) {
+		// 线性回归，计算斜率
+		SimpleRegression regression = new SimpleRegression();
+		for (int i = 1; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
+			if (i < 6) {
+				continue;
+			}
+
+			// 模拟X轴，X点的间隔用Y点的0.005倍（y * 30% / 60）
+			regression.clear();
+			double xInterval5 = indicator.getEma5() * 0.005;
+			for (int j = 0; j < 3; j++) {
+				regression.addData(j * xInterval5, list.get(i - 3 + j).getEma5());
+			}
+			indicator.setSlope5(regression.getSlope());
+
+			regression.clear();
+			double xInterval60 = indicator.getEma60() * 0.005;
+			for (int j = 0; j < 6; j++) {
+				if (indicator.getDate().equals("2018-01-15")) {
+					System.out.println("===="+list.get(i - 5 + j).getEma60());
+				}
+				regression.addData(j * xInterval60, list.get(i - 5 + j).getEma60());
+			}
+			if (indicator.getDate().equals("2018-01-15")) {
+			System.out.println("===="+regression.getSlope());
+			}
+			indicator.setSlope60(regression.getSlope());
+		}
+	}
+	
+	public static void main(String[] args) {
+		double[] points60 = new double[] {
+				16.2441,
+				16.2296,
+				16.2048,
+				16.2129,
+				16.2746,
+				16.3092};
+
+		SimpleRegression regression = new SimpleRegression();
+		double xInterval5 = points60[5] * 0.15;
+		for (int j = 0; j <= 5; j++) {
+		regression.addData(j * xInterval5, points60[j]);
+		}
+
+		NumberFormat percentFormat = new DecimalFormat("##.##%");
+		System.out.println(percentFormat.format(regression.getSlope()));
 	}
 
 	public double getMa5() {
@@ -613,12 +696,36 @@ public class Indicator extends Quote {
 		this.vptema = vptema;
 	}
 
-	public List<Signal> getSignalList() {
-		return signalList;
+	public double getEma5() {
+		return ema5;
 	}
 
-	public void setSignalList(List<Signal> signalList) {
-		this.signalList = signalList;
+	public void setEma5(double ema5) {
+		this.ema5 = ema5;
+	}
+
+	public double getEma60() {
+		return ema60;
+	}
+
+	public void setEma60(double ema60) {
+		this.ema60 = ema60;
+	}
+
+	public double getSlope60() {
+		return slope60;
+	}
+
+	public void setSlope60(double slope60) {
+		this.slope60 = slope60;
+	}
+
+	public double getSlope5() {
+		return slope5;
+	}
+
+	public void setSlope5(double slope5) {
+		this.slope5 = slope5;
 	}
 
 	@Override

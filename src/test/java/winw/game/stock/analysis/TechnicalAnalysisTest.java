@@ -52,7 +52,7 @@ public class TechnicalAnalysisTest {
 		if (stockQuote == null) {
 			return null;// FIXME Warn
 		}
-		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE, 300);
+		List<Quote> quoteList = service.get(stockQuote.getCode(), QuoteType.DAILY_QUOTE, null, null, 300);
 
 		List<Indicator> indicatorList = Indicator.compute(quoteList);
 //		Advise advise = TechnicalAnalysis.analysisKDJ(indicatorList);

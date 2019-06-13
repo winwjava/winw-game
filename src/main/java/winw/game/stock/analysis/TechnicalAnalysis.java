@@ -11,6 +11,7 @@ import winw.game.stock.analysis.Advise.Market;
  * @author winw
  *
  */
+@Deprecated
 public class TechnicalAnalysis {
 
 	public static void analysis(List<Indicator> list) {
@@ -30,7 +31,7 @@ public class TechnicalAnalysis {
 
 		// 信号线交叉
 		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0) {
-			today.getSignalList().add(Signal.GOLDEN_CROSSOVER);
+//			today.getSignalList().add(Signal.GOLDEN_CROSSOVER);
 		}
 		// if (today.getDiff() < 0 && yesterday.getDiff() > 0) {
 		// return new Advise(Signal.SELL_SIGNAL);
@@ -40,10 +41,10 @@ public class TechnicalAnalysis {
 		// MACD金叉：DIFF 由下向上突破 DEA，为买入信号。
 		// MACD死叉：DIFF 由上向下突破 DEA，为卖出信号。
 		if (today.getMacd() > 0 && yesterday.getMacd() < 0) {
-			today.getSignalList().add(Signal.ZERO_CROSSOVER);
+//			today.getSignalList().add(Signal.ZERO_CROSSOVER);
 		}
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
-			today.getSignalList().add(Signal.DEATH_CROSSOVER);
+//			today.getSignalList().add(Signal.DEATH_CROSSOVER);
 		}
 
 		// MACD信号线交叉分析、零交叉分析。
@@ -52,7 +53,7 @@ public class TechnicalAnalysis {
 
 		// 成交量明显放大，并且价格上涨，量价齐升
 		if (today.getVolume() / today.getVolumeMa10() > 1.5 && today.getClose() > yesterday.getClose()) {// 在金叉或之后，按交易量放大百分比的股票排序
-			today.getSignalList().add(Signal.VOLUME_ENLARGE);
+//			today.getSignalList().add(Signal.VOLUME_ENLARGE);
 		}
 		// TODO 成交量明显放大或萎缩，并且价格下降
 		// if ((today.getVolume() / today.getVolumeMa10() < 0.5 || today.getVolume() /
@@ -82,7 +83,6 @@ public class TechnicalAnalysis {
 		}
 		// 2. K值小于D值，K线向下跌破D线时，为卖出信号。
 		if (today.getK() < today.getD() && yesterday.getK() > yesterday.getD()) {
-			today.getSignalList().add(Signal.DEATH_CROSSOVER);
 		}
 		// FIXME 经常被主力操纵
 		// 5.KDJ指标比RSI准确率高，且有明确的买、卖点出现，但K、D线交叉时须注意“骗线”出现，主要因为KDJ指标过于敏感且此指标群众基础较好，所以经常被主力操纵。

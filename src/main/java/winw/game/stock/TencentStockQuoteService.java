@@ -18,10 +18,9 @@ public class TencentStockQuoteService implements StockQuoteService {
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
 	// 获取每日报价数据（前复权）
-	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,,,V_NUM,qfq";
-
+	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,V_FROM,V_TO,V_NUM,qfq";
 	// 获取每月报价数据（前复权）
-	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,,,V_NUM,qfq";
+	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,V_FROM,V_TO,V_NUM,qfq";
 
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
@@ -102,10 +101,39 @@ public class TencentStockQuoteService implements StockQuoteService {
 		return null;
 	}
 
-	public List<Quote> get(String code, QuoteType quoteType, int num) throws IOException {
-		String url = getURL(code, quoteType);
-		String response = HttpUtils.get(url.replaceFirst("V_CODE", code).replaceFirst("V_NUM", String.valueOf(num)));
+	public String get(String code, QuoteType quoteType) throws IOException {
 
+		return null;
+	}
+
+	@Override
+	public List<Quote> get(String code, QuoteType quoteType, String from, String to, int num) throws IOException {
+		String url = null;
+		if (quoteType == null) {
+		} else if (quoteType == QuoteType.DAILY_QUOTE) {
+			url = dailyQuoteUrl;
+		} else if (quoteType == QuoteType.WEEKLY_QUOTE) {
+			url = null; // TODO WEEKLY_QUOTE
+		} else if (quoteType == QuoteType.MONTHLY_QUOTE) {
+			url = monthlyQuoteUrl;
+		}
+		from = from == null ? "" : from;
+		to = to == null ? "" : to;
+		String response = HttpUtils.get(url.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code)
+				.replace("V_NUM", String.valueOf(num)));
+
+		try {
+			return parse(code, quoteType, response);
+		} catch (Exception e) {
+			System.out.println(response);
+			throw e;
+		}
+	}
+
+	private List<Quote> parse(String code, QuoteType quoteType, String response) {
+		if (response.indexOf("[[") == -1) {
+			return null;
+		}
 		String data = response.substring(response.indexOf("[[") + 2, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["
 
@@ -129,20 +157,20 @@ public class TencentStockQuoteService implements StockQuoteService {
 		}
 		return quoteList;
 	}
-	
+
 	public static void main(String[] args) throws IOException, ParseException {
 		TencentStockQuoteService tencentStockQuoteService = new TencentStockQuoteService();
-		
+
 		StockQuote stockQuote = tencentStockQuoteService.get("sz002714");
-		
+
 		System.out.println(stockQuote.toString());
-		
-		List<Quote> list = tencentStockQuoteService.get("sz002714", QuoteType.DAILY_QUOTE, 100);
+
+		List<Quote> list = tencentStockQuoteService.get("sz002714", QuoteType.DAILY_QUOTE, null, null, 100);
 		for (Quote quote : list) {
-			
+
 			System.out.println(quote);
 		}
-		
+
 	}
 
 }

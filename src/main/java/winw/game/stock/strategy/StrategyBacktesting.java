@@ -1,18 +1,20 @@
 package winw.game.stock.strategy;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import winw.game.stock.Portfolio;
 import winw.game.stock.Quote;
 import winw.game.stock.QuoteType;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
-import winw.game.stock.TencentStockQuoteService;
-import winw.game.stock.Trade;
-import winw.game.stock.analysis.Advise;
-import winw.game.stock.analysis.Advise.Trading;
 import winw.game.stock.analysis.Indicator;
-import winw.game.stock.analysis.TechnicalAnalysis;
+import winw.game.stock.util.MailService;
 
 /**
  * 投资策略回溯测试。
@@ -20,76 +22,57 @@ import winw.game.stock.analysis.TechnicalAnalysis;
  * @author winw
  *
  */
-public class StrategyBacktesting {
+public abstract class StrategyBacktesting {
 
-	private Strategy strategy;
+	protected MailService mailService = new MailService();
 
-	private StockQuoteService service = new TencentStockQuoteService();
+	protected StockQuoteService stockQuoteService;
 
-	public StrategyBacktesting(Strategy strategy) {
-		super();
-		this.strategy = strategy;
+	public StockQuoteService getStockQuoteService() {
+		return stockQuoteService;
 	}
 
-	public void testing(Portfolio portfolio, String code, int days) throws Exception {//TODO , Date from, Date to
-		StockQuote stockQuote = service.get(code);
+	public void setStockQuoteService(StockQuoteService stockQuoteService) {
+		this.stockQuoteService = stockQuoteService;
+	}
+
+	private final int observation = 50;
+
+	protected Portfolio portfolio;
+
+	protected static final NumberFormat percentFormat = new DecimalFormat("##.##%");
+
+	public void testing(String code, String from, String to, int days) throws Exception {
+		StockQuote stockQuote = stockQuoteService.get(code);
 		if (stockQuote == null) {
 			return;
 		}
+		List<Quote> list = stockQuoteService.get(code, QuoteType.DAILY_QUOTE, from, to, days);
+		if (list == null || list.isEmpty()) {
+			return;
+		}
 
-		List<Quote> list = service.get(code, QuoteType.DAILY_QUOTE, days);
-
-		// 过滤
-		
 		// 计算技术指标
 		List<Indicator> indicators = Indicator.compute(list, days);
-		// 技术分析
-		TechnicalAnalysis.analysis(indicators);
 
-		testing(stockQuote, portfolio, indicators);
-	}
-
-	protected void testing(StockQuote stockQuote, Portfolio portfolio, List<Indicator> indicator) {
-		int position = 0; // 持仓
-		for (int i = 50; i < indicator.size(); i++) {// 从第50天开始，各种指标的误差可以忽略
-			Indicator current = indicator.get(i - 1);
-			Indicator yestday = indicator.get(i - 2);
-			current.setCode(stockQuote.getCode());
-			current.setName(stockQuote.getName());
-
-			Advise advise = strategy.analysis(indicator.subList(0, i));
-
-			if (advise.getSignal() == Trading.BUY_SIGNAL && position == 0) {// 买入
-				int buy = portfolio.maxBuy(current.getClose()) / 2;// 建仓
-				trading(portfolio, current, yestday, buy);
-				position += buy;
-			} else if (advise.getSignal() == Trading.BUY_SIGNAL && position > 0) {// 买入
-				int buy = portfolio.maxBuy(current.getClose());// 加仓
-				trading(portfolio, current, yestday, buy);
-				position += buy;
-			}
-
-			if (advise.getSignal() == Trading.SELL_SIGNAL && position > 0) {// 卖出
-				trading(portfolio, current, yestday, -position);
-				position = 0;
-			}
-
-			// if (position > 0 && (buyPrice - current.getLow()) / buyPrice >= 0.13) {// 止损
+		for (int i = observation; i < indicators.size(); i++) {// 从第50天开始，各种指标的误差可以忽略
+			List<Indicator> subList = indicators.subList(0, i);
+			trading(subList);
 		}
-		if (position > 0) {// 清算
-			trading(portfolio, indicator.get(indicator.size() - 1), indicator.get(indicator.size() - 2), -position);
+
+		String offsetDate = DateFormatUtils.format(DateUtils.addDays(DateUtils.parseDate(to, "yyyy-MM-dd"), -15),
+				"yyyy-MM-dd");
+
+		double marketValue = 0;
+		Map<String, Integer> positions = portfolio.getPositions();
+		for (String c : positions.keySet()) {
+			if (positions.get(c) > 0) {
+				List<Quote> temp = stockQuoteService.get(c, QuoteType.DAILY_QUOTE, offsetDate, to, 50);
+				marketValue += positions.get(c) * temp.get(temp.size() - 1).getClose();
+			}
 		}
+		portfolio.setMarketValue(marketValue);
 	}
 
-	protected void trading(Portfolio portfolio, Indicator current, Indicator yestday, int position) {
-		Trade trade = new Trade(current.getDate(), current.getClose(), position);
-		trade.setCode(current.getCode());
-		trade.setName(current.getName());
-		trade.setDiff(current.getDiff());
-		trade.setDea(current.getDea());
-		trade.setMacd(current.getMacd());
-
-		trade.setSlope((current.getDiff() - yestday.getDiff()) / (1 - 0));
-		portfolio.trading(trade);
-	}
+	public abstract void trading(List<Indicator> indicators);
 }

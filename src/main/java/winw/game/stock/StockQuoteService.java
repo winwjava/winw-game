@@ -21,13 +21,14 @@ public interface StockQuoteService {
 
 	/**
 	 * 返回历史报价，向前复权（保持现有价位不变，将以前的价格缩减）。
-	 * 
 	 * @param code
 	 * @param quoteType
+	 * @param from
+	 * @param to
 	 * @param num
 	 * @return
 	 * @throws Exception
 	 */
-	List<Quote> get(String code, QuoteType quoteType, int num) throws Exception;
+	List<Quote> get(String code, QuoteType quoteType, String from, String to, int num) throws Exception;
 
 }

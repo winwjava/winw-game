@@ -6,6 +6,7 @@ package winw.game.stock.analysis;
  * @author winw
  *
  */
+@Deprecated
 public class Advise {
 
 	public enum Trading {
