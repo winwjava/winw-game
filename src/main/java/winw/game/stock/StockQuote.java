@@ -19,10 +19,11 @@ public class StockQuote extends Quote {
 
 	private double previousClose = 0.0;// 昨日收盘价
 
-	// private double pe = 0.0;// 市盈率
+	private double pe = 0.0;// 市盈率
 
 	// private double eps = 0.0;
-	// private double marketcap = 0.0;
+	private double marketCap = 0.0;// 总市值
+	private double marketVal = 0.0;// 流通市值
 	// private String currency = "";
 	// private double shortRatio = 0.0;
 	// private String exchange;
@@ -102,6 +103,30 @@ public class StockQuote extends Quote {
 
 	public void setPreviousClose(double previousClose) {
 		this.previousClose = previousClose;
+	}
+
+	public double getPe() {
+		return pe;
+	}
+
+	public void setPe(double pe) {
+		this.pe = pe;
+	}
+
+	public double getMarketCap() {
+		return marketCap;
+	}
+
+	public void setMarketCap(double marketCap) {
+		this.marketCap = marketCap;
+	}
+
+	public double getMarketVal() {
+		return marketVal;
+	}
+
+	public void setMarketVal(double marketVal) {
+		this.marketVal = marketVal;
 	}
 
 	@Override

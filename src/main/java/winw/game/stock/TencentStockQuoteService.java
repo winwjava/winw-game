@@ -74,7 +74,7 @@ public class TencentStockQuoteService implements StockQuoteService {
 		// 37: 成交额（万）
 		// 38: 换手率
 		// 39: 市盈率
-		// quote.setPe(Double.parseDouble(split[39]));
+		//quote.setPe(Double.parseDouble(split[39]));
 		// 40:
 		// 41: 最高
 		quote.setHigh(Double.parseDouble(split[41]));
@@ -82,7 +82,9 @@ public class TencentStockQuoteService implements StockQuoteService {
 		quote.setLow(Double.parseDouble(split[42]));
 		// 43: 振幅
 		// 44: 流通市值
+		//quote.setMarketVal(Double.parseDouble(split[44]));
 		// 45: 总市值
+		//quote.setMarketCap(Double.parseDouble(split[45]));
 		// 46: 市净率
 		// 47: 涨停价
 		// 48: 跌停价

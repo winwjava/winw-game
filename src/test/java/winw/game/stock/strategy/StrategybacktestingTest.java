@@ -12,17 +12,21 @@ import org.junit.Test;
 
 import winw.game.stock.Portfolio;
 import winw.game.stock.StockList;
+import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
 
 public class StrategybacktestingTest {
 
+	// TrendFollowingStrategy GoldenCrossStrategy
 	private StrategyBacktesting strategy = new TrendFollowingStrategy();
+
+	// YahooStockQuoteService TencentStockQuoteService
 	private StockQuoteService service = new TencentStockQuoteService();
 
 	private final double init = 1000000;
 
-	private final NumberFormat percentFormat = new DecimalFormat("##.##%");
+	private final NumberFormat percentFormat = new DecimalFormat("#.##%");
 
 	@Before
 	public void before() throws Exception {
@@ -30,16 +34,26 @@ public class StrategybacktestingTest {
 	}
 
 	@Test
+	public void testOne() throws Exception {
+		// '000300.SS'
+		// '香港恒生'=>'0011.hk',
+		// 新兴市场国家
+		// '道琼指数'=>'INDU',
+		// '纳斯达克'=>'^IXIC',
+		// sh000300
+		strategy.testing("sh000300", "2008-01-01", "2019-06-22", 12640, new Portfolio(init));
+	}
+
+	@Test
 	public void testAll() throws Exception {
 		int count = 0;
 		double profit = 0;
 		List<Portfolio> portfolios = new ArrayList<Portfolio>();
-		for (String temp : StockList.CSI_300) {// "sh600436","sz000671", "sh600276",
-												// "sh601877"//
+		for (String temp : StockList.CSI_300) {
 			if (temp.startsWith("sz300")) {
 				continue;
 			}
-			Portfolio portfolio = test(temp, "2017-10-15", "2019-01-01", 640);
+			Portfolio portfolio = strategy.testing(temp, "2018-01-01", "2019-06-22", 11640, new Portfolio(init));
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
 			}
@@ -47,46 +61,20 @@ public class StrategybacktestingTest {
 			profit += portfolio.getProfit();
 			portfolios.add(portfolio);
 		}
-		System.out.println(profit);
-		System.out.println(strategy.getClass().getSimpleName() + ", test: " + count + ", profit: "
-				+ percentFormat.format(profit / (init * count)));
 
 		Collections.sort(portfolios, Comparator.comparing(Portfolio::getProfit));
 		Collections.reverse(portfolios);
-		System.out.println("detail: ");
+		System.out.println("test CSI_300: ");
 		for (int i = 0; i < portfolios.size(); i++) {
 			Portfolio portfolio = portfolios.get(i);
 			String code = portfolio.getTradeList().get(0).getCode();
-			System.out.println(
-					code + "\t" + service.get(code).getName() + "\t" + percentFormat.format(portfolio.getProfitRate()));
+			StockQuote quote = service.get(code);
+			// "\t" + quote.getMarketVal()+ "/" + quote.getMarketCap() +
+			System.out.println(code + "\t" + quote.getName() + "\t" + percentFormat.format(portfolio.getProfitRate()));
 		}
-
-	}
-
-	@Test
-	public void testOne() throws Exception {
-		// '上证指数'=>'000001.SS',
-		// '深圳成指'=>'399001.sz',
-		// '香港恒生'=>'0011.hk',
-		// '英国FTSE'=>'^FTSE',
-		// '法国CAC'=>'^FCHI',
-		// '德国DAX'=>'^GDAXI',
-		// '道琼指数'=>'INDU',
-
-		// '纳斯达克'=>'^IXIC',
-		// strategy.testing("sh000300", "2017-10-15", "2019-06-09", 1116400);
-
-		Portfolio portfolio = test("sh000300", "2017-10-15", "2019-06-01", 640);
-		System.out.println("return: " + percentFormat.format(portfolio.getProfitRate()));
-	}
-
-	public Portfolio test(String code, String from, String to, int days) throws Exception {
-		System.out.println("Backtesting: " + code + "\t" + from + " ~ " + to);
-
-		Portfolio portfolio = new Portfolio(init);// 初始金额
-		strategy.portfolio = portfolio;
-		strategy.testing(code, from, to, days);
-		return portfolio;
+		// System.out.println(profit);
+		System.out.println(strategy.getClass().getSimpleName() + ", test: " + count + ", profit: "
+				+ percentFormat.format(profit / (init * count)));
 	}
 
 }

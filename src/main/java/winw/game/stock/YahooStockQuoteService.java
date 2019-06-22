@@ -42,16 +42,20 @@ public class YahooStockQuoteService implements StockQuoteService {
 
 		List<Quote> quoteList = new ArrayList<Quote>();
 		for (HistoricalQuote q : h) {
-			Quote quote = new Quote();
-			quote.setCode(code);
-			quote.setQuoteType(quoteType);
-			quote.setDate(DateFormatUtils.format(q.getDate(), Quote.DATE_PATTERN));
-			quote.setOpen(q.getOpen().doubleValue());
-			quote.setClose(q.getClose().doubleValue());
-			quote.setHigh(q.getHigh().doubleValue());
-			quote.setLow(q.getLow().doubleValue());
-			quote.setVolume(q.getVolume().intValue());
-			quoteList.add(quote);
+			try {
+				Quote quote = new Quote();
+				quote.setCode(code);
+				quote.setQuoteType(quoteType);
+				quote.setDate(DateFormatUtils.format(q.getDate(), Quote.DATE_PATTERN));
+				quote.setClose(q.getClose().doubleValue());
+				quote.setOpen(q.getOpen().doubleValue());
+				quote.setHigh(q.getHigh().doubleValue());
+				quote.setLow(q.getLow().doubleValue());
+				quote.setVolume(q.getVolume().intValue());
+				quoteList.add(quote);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return quoteList;
 	}

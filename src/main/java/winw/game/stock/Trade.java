@@ -52,7 +52,7 @@ public class Trade {
 		this.amount = price * count;
 	}
 
-	public Trade(String date, String code,String name, double price, int count, double commission) {
+	public Trade(String date, String code, String name, double price, int count, double commission) {
 		super();
 		this.date = date;
 		this.code = code;
@@ -61,7 +61,7 @@ public class Trade {
 		this.amount = price * count;
 		this.commission = commission;
 	}
-	
+
 	public String getCode() {
 		return code;
 	}
@@ -157,10 +157,11 @@ public class Trade {
 		builder.append(date);
 		builder.append(", code=");
 		builder.append(code);
+		builder.append(", count");
+		builder.append(count > 0 ? "+=" : "-=");
+		builder.append(Math.abs(count));
 		builder.append(", price=");
 		builder.append(price);
-		builder.append(", count=");
-		builder.append(count);
 		builder.append("]");
 		return builder.toString();
 	}

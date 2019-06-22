@@ -1,12 +1,12 @@
 package winw.game.stock.analysis;
 
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -61,6 +61,9 @@ public class Indicator extends Quote {
 	// VPT 指标
 	private double vpt;
 	private double vptema;
+
+	private double ema60max;
+	private double ema60min;
 
 	// MA60的斜率
 	private double slope60;
@@ -200,11 +203,31 @@ public class Indicator extends Quote {
 		Double k60 = 2.0 / (60 + 1.0);
 		Double ema5 = list.get(0).getClose();
 		Double ema60 = list.get(0).getClose();
+
 		for (Indicator quote : list) {
 			ema5 = quote.getClose() * k5 + ema5 * (1 - k5);
 			ema60 = quote.getClose() * k60 + ema60 * (1 - k60);
 			quote.setEma5(ema5);
 			quote.setEma60(ema60);
+
+		}
+
+		for (int i = 1; i < list.size(); i++) {
+			Indicator indicator = list.get(i);
+			indicator.ema60max = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<Indicator>() {
+
+				@Override
+				public int compare(Indicator o1, Indicator o2) {
+					return new Double(o1.getEma60()).compareTo(o2.getEma60());
+				}
+			}).getEma60();
+			indicator.ema60min = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<Indicator>() {
+
+				@Override
+				public int compare(Indicator o1, Indicator o2) {
+					return new Double(o2.getEma60()).compareTo(o1.getEma60());
+				}
+			}).getEma60();
 		}
 	}
 
@@ -474,50 +497,62 @@ public class Indicator extends Quote {
 		SimpleRegression regression = new SimpleRegression();
 		for (int i = 1; i < list.size(); i++) {
 			Indicator indicator = list.get(i);
-			if (i < 6) {
+			if (i < 5) {
 				continue;
 			}
 
-			// 模拟X轴，X点的间隔用Y点的0.005倍（y * 30% / 60）
+			// 设面板的高宽比例为：1700 * 350，放60天的数据
+			// 每个Y的坐标已经确定，按照比例缩放，顶坐标是MAX(CLOSE, 60)，底坐标是MIN(CLOSE, 50)
+			// Y = (MAX(CLOSE, 60) - MIN(CLOSE, 60) ) * (EMA - MIN(CLOSE, 60) ) / 350
+			// X = (1700 / 60) * N
 			regression.clear();
-			double xInterval5 = indicator.getEma5() * 0.005;
-			for (int j = 0; j < 3; j++) {
-				regression.addData(j * xInterval5, list.get(i - 3 + j).getEma5());
+
+			double hight = list.get(i).ema60max - list.get(i).ema60min;
+			double bottom = list.get(i).ema60min;
+
+			for (int j = 1; j <= 3; j++) {
+				Indicator temp = list.get(i - 3 + j);
+				regression.addData(j * (1500 / 60), 300d * (temp.ema5 - bottom) / hight);
 			}
 			indicator.setSlope5(regression.getSlope());
-
 			regression.clear();
-			double xInterval60 = indicator.getEma60() * 0.005;
-			for (int j = 0; j < 6; j++) {
-				if (indicator.getDate().equals("2018-01-15")) {
-					System.out.println("===="+list.get(i - 5 + j).getEma60());
-				}
-				regression.addData(j * xInterval60, list.get(i - 5 + j).getEma60());
-			}
-			if (indicator.getDate().equals("2018-01-15")) {
-			System.out.println("===="+regression.getSlope());
+			for (int j = 1; j <= 5; j++) {
+				Indicator temp = list.get(i - 5 + j);
+				regression.addData(j * (1500d / 60), 300d * (temp.ema60 - bottom) / hight);
 			}
 			indicator.setSlope60(regression.getSlope());
+
+			// double xInterval5 = indicator.getEma5() * 0.005;
+			// for (int j = 0; j < 3; j++) {
+			// regression.addData(j * xInterval5, list.get(i - 3 + j).getEma5());
+			// }
+			// indicator.setSlope5(regression.getSlope());
+			//
+			// regression.clear();
+			// double xInterval60 = indicator.getEma60() * 0.005;
+			// for (int j = 0; j < 6; j++) {
+			// if (indicator.getDate().equals("2018-01-15")) {
+			// System.out.println("====" + list.get(i - 5 + j).getEma60());
+			// }
+			// regression.addData(j * xInterval60, list.get(i - 5 + j).getEma60());
+			// }
+			// indicator.setSlope60(regression.getSlope());
+			// if (indicator.getDate().equals("2018-01-15")) {
+			// NumberFormat percentFormat = new DecimalFormat("##.00%");
+			// System.out.println("====" + percentFormat.format(regression.getSlope()));
+			// }
 		}
 	}
-	
+
 	public static void main(String[] args) {
-		double[] points60 = new double[] {
-				16.2441,
-				16.2296,
-				16.2048,
-				16.2129,
-				16.2746,
-				16.3092};
+		double[] points60 = new double[] { 16.2441, 16.2296, 16.2048, 16.2129, 16.2746, 16.3092 };
 
 		SimpleRegression regression = new SimpleRegression();
 		double xInterval5 = points60[5] * 0.15;
 		for (int j = 0; j <= 5; j++) {
-		regression.addData(j * xInterval5, points60[j]);
+			regression.addData(j * xInterval5, points60[j]);
 		}
 
-		NumberFormat percentFormat = new DecimalFormat("##.##%");
-		System.out.println(percentFormat.format(regression.getSlope()));
 	}
 
 	public double getMa5() {
@@ -710,6 +745,22 @@ public class Indicator extends Quote {
 
 	public void setEma60(double ema60) {
 		this.ema60 = ema60;
+	}
+
+	public double getEma60max() {
+		return ema60max;
+	}
+
+	public void setEma60max(double ema60max) {
+		this.ema60max = ema60max;
+	}
+
+	public double getEma60min() {
+		return ema60min;
+	}
+
+	public void setEma60min(double ema60min) {
+		this.ema60min = ema60min;
 	}
 
 	public double getSlope60() {

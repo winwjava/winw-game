@@ -51,7 +51,7 @@ public class GoldenCrossStrategy extends StoplossStrategy {
 		Indicator today = indicators.get(indicators.size() - 1);
 		Indicator yesterday = indicators.get(indicators.size() - 2);
 
-		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0
+		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0 && today.getSlope60() > 0.02
 				&& portfolio.getPosition(today.getCode()) == 0) {
 			Trade order = portfolio.order(today, 1);
 			String subject = today.getDate() + "[B]" + order.getCode() + " GOLDEN_CROSSOVER";
@@ -59,12 +59,14 @@ public class GoldenCrossStrategy extends StoplossStrategy {
 			mailService.send(subject, order);
 		}
 
-		if (today.getMacd() > 0 && yesterday.getMacd() < 0 && portfolio.getPosition(today.getCode()) == 0) {
-			Trade order = portfolio.order(today, 1);
-			String subject = today.getDate() + "[B]" + order.getCode() + " ZERO_CROSSOVER";
-			System.out.println(subject + ", " + order);
-			mailService.send(subject, order);
-		}
+		// if (today.getMacd() > 0 && yesterday.getMacd() < 0 &&
+		// portfolio.getPosition(today.getCode()) == 0) {
+		// Trade order = portfolio.order(today, 1);
+		// String subject = today.getDate() + "[B]" + order.getCode() + "
+		// ZERO_CROSSOVER";
+		// System.out.println(subject + ", " + order);
+		// mailService.send(subject, order);
+		// }
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0 && portfolio.getPosition(today.getCode()) > 0) {
 			Trade order = portfolio.order(today, 0);
 			String subject = today.getDate() + "[S]" + order.getCode() + " DEATH_CROSSOVER";

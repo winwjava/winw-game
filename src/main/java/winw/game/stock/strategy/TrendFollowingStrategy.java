@@ -11,25 +11,25 @@ import winw.game.stock.analysis.Indicator;
  * @author winw
  *
  */
-public class TrendFollowingStrategy extends StoplossStrategy {
+public class TrendFollowingStrategy extends StoplossStrategy {// TODO 成交量、流动性、市盈率
 
 	@Override
-	public void trading(List<Indicator> indicators) {// TODO 成交量
+	public void trading(List<Indicator> indicators) {
 		Indicator current = indicators.get(indicators.size() - 1);
-		if (current.getSlope60() > 0.05 && current.getSlope5() > 0.05
-				&& portfolio.getPosition(current.getCode()) == 0) {
-			System.out.println("Slope60: " + current.getSlope60() + ", Slope5: " + current.getSlope5());
+
+		if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1 && portfolio.getPosition(current.getCode()) == 0
+				&& emptyPositionDays.getOrDefault(current.getCode(), 100) > 2) {
 			Trade order = portfolio.order(current, 1);
-			String subject = current.getDate() + "[B]" + order.getCode();
-			System.out.println(subject + ", " + order);
-			mailService.send(subject, order);
+			emptyPositionDays.remove(current.getCode());
+			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "
+					+ floatFormat.format(current.getSlope5()));
 		}
 
-		if (current.getSlope60() < 0.04 && portfolio.getPosition(current.getCode()) > 0) {
+		if ((current.getSlope60() < 0.02) && portfolio.getPosition(current.getCode()) > 0) {
 			Trade order = portfolio.order(current, 0);
-			String subject = current.getDate() + "[S]" + order.getCode();
-			System.out.println(subject + ", " + order);
-			mailService.send(subject, order);
+			emptyPositionDays.put(current.getCode(), 0);
+			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "
+					+ floatFormat.format(current.getSlope5()));
 		}
 		super.trading(indicators);
 	}

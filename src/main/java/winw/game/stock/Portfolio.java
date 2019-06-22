@@ -26,6 +26,8 @@ public class Portfolio {
 	private List<Trade> tradeList = new ArrayList<Trade>();// 交易记录
 
 	private Map<String, Integer> positions = new HashMap<String, Integer>();// 持仓
+	// 持仓成本
+	private Map<String, Double> positionCost = new HashMap<String, Double>();
 
 	private double marketValue = 0;
 
@@ -54,19 +56,21 @@ public class Portfolio {
 		}
 
 		if (positions.containsKey(quote.getCode())) {
+			positionCost.put(quote.getCode(), (positionCost.get(quote.getCode()) * positions.get(quote.getCode())
+					+ trade.getAmount() + trade.getCommission()) / (positions.get(quote.getCode()) + count));
+
 			positions.put(quote.getCode(), positions.get(quote.getCode()) + count);
 		} else {
 			positions.put(quote.getCode(), count);
+			positionCost.put(quote.getCode(), (trade.getAmount() + trade.getCommission()) / count);
 		}
 
 		if (positions.get(quote.getCode()) <= 0) {
 			positions.remove(quote.getCode());
+			positionCost.remove(quote.getCode());
 		}
 
 		cash = cash - trade.getAmount() - trade.getCommission();
-
-		// maxInvestment = Math.max(maxInvestment, trade.getAmount() +
-		// trade.getCommission());
 
 		tradeList.add(trade);
 		return trade;
@@ -74,6 +78,10 @@ public class Portfolio {
 
 	public int getPosition(String symbol) {
 		return positions.getOrDefault(symbol, 0);
+	}
+
+	public double getPositionCost(String symbol) {
+		return positionCost.getOrDefault(symbol, 0d);
 	}
 
 	public double commission(double amount) {
@@ -84,7 +92,7 @@ public class Portfolio {
 
 	public int maxBuy(double price) {
 		// 假设全部买入
-		return (int) ((cash - commission(cash)) / price) / 100 * 100;
+		return (int) ((cash - commission(cash)) / price);
 	}
 
 	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
