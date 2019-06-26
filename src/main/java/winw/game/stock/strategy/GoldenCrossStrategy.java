@@ -54,9 +54,7 @@ public class GoldenCrossStrategy extends StoplossStrategy {
 		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0 && today.getSlope60() > 0.02
 				&& portfolio.getPosition(today.getCode()) == 0) {
 			Trade order = portfolio.order(today, 1);
-			String subject = today.getDate() + "[B]" + order.getCode() + " GOLDEN_CROSSOVER";
-			System.out.println(subject + ", " + order);
-			mailService.send(subject, order);
+			notify(order, ", GOLDEN_CROSSOVER");
 		}
 
 		// if (today.getMacd() > 0 && yesterday.getMacd() < 0 &&
@@ -69,9 +67,7 @@ public class GoldenCrossStrategy extends StoplossStrategy {
 		// }
 		if (today.getMacd() < 0 && yesterday.getMacd() > 0 && portfolio.getPosition(today.getCode()) > 0) {
 			Trade order = portfolio.order(today, 0);
-			String subject = today.getDate() + "[S]" + order.getCode() + " DEATH_CROSSOVER";
-			System.out.println(subject + ", " + order);
-			mailService.send(subject, order);
+			notify(order, ", DEATH_CROSSOVER");
 		}
 
 		// TODO 成交量

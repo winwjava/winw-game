@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import winw.game.stock.Portfolio;
-import winw.game.stock.StockList;
 import winw.game.stock.StockQuote;
 import winw.game.stock.StockQuoteService;
 import winw.game.stock.TencentStockQuoteService;
@@ -19,7 +18,7 @@ import winw.game.stock.TencentStockQuoteService;
 public class StrategybacktestingTest {
 
 	// TrendFollowingStrategy GoldenCrossStrategy
-	private StrategyBacktesting strategy = new TrendFollowingStrategy();
+	private StrategyBacktesting strategy = new GoldenCrossStrategy();
 
 	// YahooStockQuoteService TencentStockQuoteService
 	private StockQuoteService service = new TencentStockQuoteService();
@@ -41,15 +40,23 @@ public class StrategybacktestingTest {
 		// '道琼指数'=>'INDU',
 		// '纳斯达克'=>'^IXIC',
 		// sh000300
-		strategy.testing("sh000300", "2008-01-01", "2019-06-22", 12640, new Portfolio(init));
+		strategy.testing("sh510300", "2018-01-01", "2019-06-26", 12640, new Portfolio(init));
 	}
 
 	@Test
 	public void testAll() throws Exception {
+		String[] wight = new String[] { "sh601318", "sh600519", "sh600036", "sz000651", "sz000333", };
+
+		// "sh601166",
+		// "sz000858",
+		// "sh600887",
+		// "sh600276",
+		// "sh601328"
+
 		int count = 0;
 		double profit = 0;
 		List<Portfolio> portfolios = new ArrayList<Portfolio>();
-		for (String temp : StockList.CSI_300) {
+		for (String temp : wight) {
 			if (temp.startsWith("sz300")) {
 				continue;
 			}

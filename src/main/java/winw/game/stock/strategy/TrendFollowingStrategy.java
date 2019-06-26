@@ -17,8 +17,9 @@ public class TrendFollowingStrategy extends StoplossStrategy {// TODO 成交量�
 	public void trading(List<Indicator> indicators) {
 		Indicator current = indicators.get(indicators.size() - 1);
 
-		if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1 && portfolio.getPosition(current.getCode()) == 0
-				&& emptyPositionDays.getOrDefault(current.getCode(), 100) > 2) {
+		if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1
+				&& emptyPositionDays.getOrDefault(current.getCode(), 100) > 2 // 卖出后保持空仓天数
+				&& portfolio.getPosition(current.getCode()) == 0) {
 			Trade order = portfolio.order(current, 1);
 			emptyPositionDays.remove(current.getCode());
 			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "

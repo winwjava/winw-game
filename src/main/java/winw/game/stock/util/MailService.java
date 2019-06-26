@@ -15,8 +15,6 @@ import javax.mail.internet.MimeMessage;
 
 public class MailService {
 
-	private boolean mock = true;
-
 	private String username = "winwjava@aliyun.com";
 	private String password = "winw.game";
 	private String defaultRecipients = "winwgame@sina.com";
@@ -70,20 +68,12 @@ public class MailService {
 	 * @return Whether to send successfully
 	 */
 	public boolean send(String recipients, String subject, Object text) {
-		if (mock) {
-			return true;
-		}
 		try {
 			Message message = new MimeMessage(getSession());
 			message.setFrom(new InternetAddress(username));
 			message.setRecipients(RecipientType.TO, InternetAddress.parse(recipients));
 			message.setSubject(subject);
 			message.setText(text.toString());
-			// Transport transport = session.getTransport();
-			// transport.connect(username, password);
-			// transport.sendMessage(message, message.getAllRecipients());
-			// transport.close();
-
 			Transport.send(message);
 			return true;
 		} catch (AddressException e) {

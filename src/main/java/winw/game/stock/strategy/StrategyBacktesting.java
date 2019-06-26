@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import winw.game.stock.Portfolio;
 import winw.game.stock.Quote;
@@ -24,22 +26,23 @@ import winw.game.stock.util.MailService;
  *
  */
 public abstract class StrategyBacktesting {
+	private Logger logger = LoggerFactory.getLogger(StrategyBacktesting.class);
+
+	private boolean mailNotify = false;
 
 	protected MailService mailService = new MailService();
 
 	protected boolean notify(Trade order, String text) {
 		String ss = order + text;
 		if (order.getCount() > 0) {
-			System.out.println(ss);
+			logger.info(ss);
 		} else {
-			System.err.println(ss);
+			logger.info(ss);
 		}
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (mailNotify) {
+			return mailService.send(order.toString(), text);
 		}
-		return mailService.send(order.toString(), text);
+		return true;
 	}
 
 	protected StockQuoteService stockQuoteService;
@@ -63,8 +66,8 @@ public abstract class StrategyBacktesting {
 		// System.out.println("Backtesting: " + code + ", from " + from + " to " + to);
 		this.portfolio = portfolio;
 		testing(code, from, to, days);
-		System.out.println("Backtesting: " + code + ", from " + from + " to " + to + ", profit: "
-				+ percentFormat.format(portfolio.getProfitRate()));
+		logger.info("{} backtesting: {}, from {} to {}, profit: {}",this.getClass().getSimpleName(), code, from, to,
+				percentFormat.format(portfolio.getProfitRate()));
 		return this.portfolio;
 	}
 
@@ -114,6 +117,6 @@ public abstract class StrategyBacktesting {
 
 	public abstract void trading(List<Indicator> indicators);
 
-//	public abstract void close(List<Indicator> indicators);
-//	public abstract void open(List<Indicator> indicators);
+	// public abstract void close(List<Indicator> indicators);
+	// public abstract void open(List<Indicator> indicators);
 }

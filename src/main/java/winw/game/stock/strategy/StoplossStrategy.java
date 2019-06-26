@@ -47,10 +47,11 @@ public abstract class StoplossStrategy extends StrategyBacktesting {// 最大回
 		for (String code : positions.keySet()) {
 			Indicator current = indicators.get(indicators.size() - 1);
 			double positionCost = portfolio.getPositionCost(code);
-			// 横盘平仓，n天内涨幅小于m%
 			positionDays.put(code, positionDays.getOrDefault(code, -1) + 1);
 			double increase = (current.getClose() - positionCost) / positionCost;
-			if (increase < -0.01 || (positionDays.get(code) >= 3 && increase <= 0.01)) {
+			if (increase < -0.01 // 亏损超过1%，止损
+					|| (positionDays.get(code) >= 5 && increase <= 0.01 // n天内涨幅小于m%离场。
+					)) {
 				Trade order = portfolio.order(current, 0);
 				notify(order, ", SlowRise: " + percentFormat.format(increase) + ", Profit: "
 						+ percentFormat.format(increase));
@@ -59,7 +60,7 @@ public abstract class StoplossStrategy extends StrategyBacktesting {// 最大回
 				emptyPositionDays.put(code, 0);
 				continue;
 			}
-
+			// 最大回撤
 			double marketValue = positions.get(code) * current.getClose();
 			double largestValue = Math.max(marketValue, largestValues.getOrDefault(code, new Double(0)));
 			largestValues.put(code, largestValue);
