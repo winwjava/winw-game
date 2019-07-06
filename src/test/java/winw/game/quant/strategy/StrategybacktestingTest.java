@@ -40,7 +40,7 @@ public class StrategybacktestingTest {
 		// '道琼指数'=>'INDU',
 		// '纳斯达克'=>'^IXIC',
 		// sh000300
-		strategy.backtesting("sh510300", "2015-01-01", "2019-07-05", 12640, new Portfolio(init));
+		strategy.backtesting("2015-01-01", "2019-07-05", 12640, new Portfolio(init), "sh510300");
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class StrategybacktestingTest {
 			if (temp.startsWith("sz300")) {
 				continue;
 			}
-			Portfolio portfolio = strategy.backtesting(temp, "2018-01-01", "2019-06-22", 11640, new Portfolio(init));
+			Portfolio portfolio = strategy.backtesting("2018-01-01", "2019-06-22", 11640, new Portfolio(init), temp);
 			if (portfolio == null || portfolio.getTradeList().isEmpty()) {
 				continue;
 			}

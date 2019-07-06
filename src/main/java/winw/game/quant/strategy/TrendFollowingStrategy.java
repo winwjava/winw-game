@@ -19,7 +19,11 @@ public class TrendFollowingStrategy extends AbstractStrategy {// TODO 成交量�
 	// TODO 收益率与国债ETF收益率比较（斜率）
 
 	@Override
-	public void trading(List<Indicator> indicators) {
+	public void trading(String... code) {
+		List<Indicator> indicators = getHistoryQuote(code[0]);
+		if (indicators == null || indicators.isEmpty()) {
+			return;
+		}
 		Indicator current = indicators.get(indicators.size() - 1);
 
 		if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1
@@ -37,14 +41,13 @@ public class TrendFollowingStrategy extends AbstractStrategy {// TODO 成交量�
 			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "
 					+ floatFormat.format(current.getSlope5()));
 		}
-		super.stoploss(indicators);
 	}
 
 	public static void main(String[] args) throws Exception {
 		StockQuoteService service = new TencentStockQuoteService();
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy();
 		strategy.setStockQuoteService(service);
-		strategy.backtesting("sh600519", "2015-01-01", "2019-07-05", 12640, new Portfolio(1000000));
+		strategy.backtesting("2015-01-01", "2019-07-05", 12640, new Portfolio(1000000), "sh600519");
 	}
 
 }

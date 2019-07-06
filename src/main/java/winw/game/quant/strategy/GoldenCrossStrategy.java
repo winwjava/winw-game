@@ -47,7 +47,11 @@ import winw.game.quant.analysis.Indicator;
 public class GoldenCrossStrategy extends AbstractStrategy {
 
 	@Override
-	public void trading(List<Indicator> indicators) {
+	public void trading(String... code) {
+		List<Indicator> indicators = getHistoryQuote(code[0]);
+		if (indicators == null || indicators.isEmpty()) {
+			return;
+		}
 		Indicator today = indicators.get(indicators.size() - 1);
 		Indicator yesterday = indicators.get(indicators.size() - 2);
 
@@ -71,7 +75,6 @@ public class GoldenCrossStrategy extends AbstractStrategy {
 		}
 
 		// TODO 20日成交量
-		super.stoploss(indicators);
 	}
 
 }
