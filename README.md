@@ -1,2 +1,2 @@
 # winw-game
-stock game
+Quant trading strategy
