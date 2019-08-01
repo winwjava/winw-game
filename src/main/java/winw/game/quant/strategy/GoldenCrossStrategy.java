@@ -2,8 +2,11 @@ package winw.game.quant.strategy;
 
 import java.util.List;
 
-import winw.game.quant.Trade;
-import winw.game.quant.analysis.Indicator;
+import winw.game.quant.Portfolio;
+import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.QuantQuote;
+import winw.game.quant.QuoteService;
+import winw.game.quant.TencentQuoteService;
 
 /**
  * 金叉死叉策略。
@@ -44,21 +47,25 @@ import winw.game.quant.analysis.Indicator;
  * @author winw
  *
  */
-public class GoldenCrossStrategy extends AbstractStrategy {
+public class GoldenCrossStrategy extends QuantTradingStrategy {
 
 	@Override
-	public void trading(String... code) {
-		List<Indicator> indicators = getHistoryQuote(code[0]);
-		if (indicators == null || indicators.isEmpty()) {
+	public String[] samples() {
+		return CSI_300_TOP;
+	}
+
+	@Override
+	public void trading(Portfolio portfolio) {
+		List<QuantQuote> quantQuotes = getHistoryQuote(samples()[0]);
+		if (quantQuotes == null || quantQuotes.isEmpty()) {
 			return;
 		}
-		Indicator today = indicators.get(indicators.size() - 1);
-		Indicator yesterday = indicators.get(indicators.size() - 2);
+		QuantQuote today = quantQuotes.get(quantQuotes.size() - 1);
+		QuantQuote yesterday = quantQuotes.get(quantQuotes.size() - 2);
 
 		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0 && today.getSlope60() > 0.02
-				&& portfolio.getPosition(today.getCode()) == 0) {
-			Trade order = portfolio.order(today, 1);
-			notify(order, ", GOLDEN_CROSSOVER");
+				&& !portfolio.hasPosition(today.getCode())) {
+			portfolio.order(today, 1, "GOLDEN_CROSSOVER");
 		}
 
 		// if (today.getMacd() > 0 && yesterday.getMacd() < 0 &&
@@ -69,12 +76,17 @@ public class GoldenCrossStrategy extends AbstractStrategy {
 		// System.out.println(subject + ", " + order);
 		// mailService.send(subject, order);
 		// }
-		if (today.getMacd() < 0 && yesterday.getMacd() > 0 && portfolio.getPosition(today.getCode()) > 0) {
-			Trade order = portfolio.order(today, 0);
-			notify(order, ", DEATH_CROSSOVER");
+		if (today.getMacd() < 0 && yesterday.getMacd() > 0 && portfolio.hasPosition(today.getCode())) {
+			portfolio.order(today, -1, "DEATH_CROSSOVER");
 		}
+	}
 
-		// TODO 20日成交量
+	public static void main(String[] args) throws Exception {
+		QuoteService service = new TencentQuoteService();
+		GoldenCrossStrategy strategy = new GoldenCrossStrategy();
+		strategy.setStockQuoteService(service);
+
+		strategy.backTesting(new Portfolio(1000000, 1, 0.07, 0.05), "2018-01-01", "2019-07-08");
 	}
 
 }

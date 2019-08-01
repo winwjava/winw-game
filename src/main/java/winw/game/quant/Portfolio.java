@@ -1,9 +1,17 @@
 package winw.game.quant;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * 投资组合。
@@ -11,82 +19,57 @@ import java.util.Map;
  * @author winw
  *
  */
+@Entity
+@Table(name = "PORTFOLIO")
 public class Portfolio {
+	@Id
+	@GeneratedValue
+	private int pid;
+	private String name;// 名称。
+	private double init;// 初始资产。
+	private double cash;// 现金余额。
 
-	public final double init;// 现金
-	private double cash;// 现金
+	private String samples;// 样本代码。
 
-	// private double maxInvestment;// 最大投资
+	private int maxPosition = 1;// 最多持仓
 
-	private double buyCost = 0.0003;// 买入，万3
-	private double sellCost = 0.0013;// 卖出，千分之1.3
-	private double minCost = 5;// 不足5元以5元计
+	// 印花税0.1%，佣金0.03%，最小佣金5元。
+	private double closeTax = 0.001;// 千分之1
+	private double minCommission = 5;// 不足5元以5元计
+	private double openCommission = 0.0003;// 买入，万3
+	private double closeCommission = 0.0003;// 卖出，万3
 
-	private List<Trade> tradeList = new ArrayList<Trade>();// 交易记录
+	private double drawdownLimit = 1;// 回撤限制。
+	private double stoplossLimit = 1;// 亏损限制。
 
-	private Map<String, Integer> positions = new HashMap<String, Integer>();// 持仓
-	// 持仓成本
-	private Map<String, Double> positionCost = new HashMap<String, Double>();
+	private transient double marketValue = 0;// 持仓市值。
 
-	private double marketValue = 0;
+	// 交易记录。
+	private transient final List<Order> orderList = new ArrayList<Order>();
+	// 持仓记录。
+	private transient final Map<String, Position> positions = new HashMap<String, Position>();
 
-	public Portfolio(double init) {
-		super();
+	// 卖出后保持空仓天数
+	private transient Map<String, Integer> emptyPositionDays = new HashMap<String, Integer>();
+
+	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
+
+	public Portfolio() {
+	}
+
+	public Portfolio(double init, int maxPosition, double drawdownLimit, double stoplossLimit) {
 		this.init = init;
 		this.cash = init;
 	}
 
-	public Trade order(Quote quote, double percent) {
-		if (percent <= 0 && !positions.containsKey(quote.getCode())) {
-			return null;
-		}
-
-		int count = (percent <= 0) ? -positions.get(quote.getCode())
-				: new Double(maxBuy(quote.getClose()) * percent).intValue();
-
-		if (count == 0) {
-			return null;
-		}
-
-		Trade trade = new Trade(quote.getDate(), quote.getCode(), quote.getName(), quote.getClose(), count,
-				commission(quote.getClose() * count));
-		if (percent > 0 && cash - trade.getAmount() - trade.getCommission() < 0) {
-			return null;
-		}
-
-		if (positions.containsKey(quote.getCode())) {
-			positionCost.put(quote.getCode(), (positionCost.get(quote.getCode()) * positions.get(quote.getCode())
-					+ trade.getAmount() + trade.getCommission()) / (positions.get(quote.getCode()) + count));
-
-			positions.put(quote.getCode(), positions.get(quote.getCode()) + count);
-		} else {
-			positions.put(quote.getCode(), count);
-			positionCost.put(quote.getCode(), (trade.getAmount() + trade.getCommission()) / count);
-		}
-
-		if (positions.get(quote.getCode()) <= 0) {
-			positions.remove(quote.getCode());
-			positionCost.remove(quote.getCode());
-		}
-
-		cash = cash - trade.getAmount() - trade.getCommission();
-
-		tradeList.add(trade);
-		return trade;
-	}
-
-	public int getPosition(String symbol) {
-		return positions.getOrDefault(symbol, 0);
-	}
-
-	public double getPositionCost(String symbol) {
-		return positionCost.getOrDefault(symbol, 0d);
-	}
-
-	public double commission(double amount) {
-		// 计算佣金，买入是万3，卖出是千分之1.3,不足5元以5元计
-		double commission = amount > 0 ? amount * buyCost : Math.abs(amount) * sellCost;
-		return (commission < minCost) ? minCost : commission;
+	public Portfolio(String name, double init, int maxPosition, double drawdownLimit, double stoplossLimit) {
+		super();
+		this.name = name;
+		this.init = init;
+		this.cash = init;
+		this.maxPosition = maxPosition;
+		this.drawdownLimit = drawdownLimit;
+		this.stoplossLimit = stoplossLimit;
 	}
 
 	public int maxBuy(double price) {
@@ -94,11 +77,122 @@ public class Portfolio {
 		return (int) ((cash - commission(cash)) / price);
 	}
 
+	public double commission(double amount) {
+		// 计算佣金，买入是万3，卖出是千分之1.3,不足5元以5元计
+		double tax = (amount > 0 ? 0 : closeTax) * Math.abs(amount);
+		double commission = (amount > 0 ? openCommission : closeCommission) * Math.abs(amount);
+		BigDecimal b = new BigDecimal(tax + (commission < minCommission ? minCommission : commission));
+		return b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+
+	/**
+	 * 是否已经满仓。
+	 * 
+	 * @return
+	 */
+	public boolean hasFullPosition() {
+		return positions.size() >= maxPosition;
+	}
+
+	/**
+	 * 下单百分比，有两种方案：
+	 * <p>
+	 * 平均持仓。每个持仓占1/N，如果很容易找到合适标的，则应该按照1/N的平均持仓。
+	 * <p>
+	 * 新建仓时先减仓。如果碰到合适标的的几率较少，仓位一直放100%，有发现合适机会后先将持有标的减仓（调仓）。
+	 * 
+	 * @return
+	 */
+	public double orderPercent() {
+		int positionSize = positions.size();
+		return positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize);
+	}
+
+	public boolean hasPosition(String code) {
+		return positions.containsKey(code);
+	}
+
+	public void updateEmptyPositionDays() {
+		for (String code : emptyPositionDays.keySet()) {
+			emptyPositionDays.put(code, emptyPositionDays.get(code) + 1);
+		}
+	}
+
+	public int getEmptyPositionDays(String code, int defaultValue) {
+		return emptyPositionDays.getOrDefault(code, defaultValue);
+	}
+
+	public Order order(Quote quote, double percent, String desc) {
+		if (percent == 0) {
+			return null;
+		}
+		if (percent > 0) {
+			percent = orderPercent() * percent;
+		}
+		String code = quote.getCode();
+
+		if (percent < 0 && !hasPosition(code)) {
+			return null;
+		}
+
+		int size = percent < 0 // 计算买入或者卖出的数量。
+				? new Double(positions.get(code).getSize() * percent).intValue()
+				: new Double(maxBuy(quote.getClose()) * percent).intValue() / 100 * 100;
+
+		if (size == 0) {
+			return null;
+		}
+
+		Order order = new Order(quote, pid, quote.getClose(), size, commission(quote.getClose() * size));
+		if (percent > 0 && cash - order.getAmount() < 0) {
+			return null;
+		}
+		if (quote.getCode().equals("sh600030") && size < 0) {
+		}
+
+		Position position = positions.getOrDefault(code, new Position(pid, code));
+		if (position.getSize() + size == 0) {
+			desc = desc + ", return: " + percentFormat.format(position.getReturnRate(quote.getClose()));
+			positions.remove(code);
+			emptyPositionDays.put(code, 0);
+		} else {
+			positions.put(code, position.add(size, order.getAmount()));
+		}
+		cash = new BigDecimal(cash).subtract(new BigDecimal(order.getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+
+		order.setBalance(cash);
+		order.setComment(desc);
+
+		orderList.add(order);// 交易记录
+		return order;
+	}
+
 	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 	// private final DecimalFormat decimal4Format = new DecimalFormat("##0.0000");
 
-	public List<Trade> getTradeLog() {
-		return tradeList;
+	public int getPid() {
+		return pid;
+	}
+
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getInit() {
+		return init;
+	}
+
+	public void setInit(double init) {
+		this.init = init;
 	}
 
 	public double getCash() {
@@ -109,44 +203,90 @@ public class Portfolio {
 		this.cash = cash;
 	}
 
-	public double getBuyCost() {
-		return buyCost;
+	public String getSamples() {
+		return samples;
 	}
 
-	public void setBuyCost(double buyCost) {
-		this.buyCost = buyCost;
+	public void setSamples(String samples) {
+		this.samples = samples;
 	}
 
-	public double getSellCost() {
-		return sellCost;
+	public int getMaxPosition() {
+		return maxPosition;
 	}
 
-	public void setSellCost(double sellCost) {
-		this.sellCost = sellCost;
+	public void setMaxPosition(int maxPosition) {
+		this.maxPosition = maxPosition;
 	}
 
-	public double getMinCost() {
-		return minCost;
+	public double getCloseTax() {
+		return closeTax;
 	}
 
-	public void setMinCost(double minCost) {
-		this.minCost = minCost;
+	public void setCloseTax(double closeTax) {
+		this.closeTax = closeTax;
 	}
 
-	public Map<String, Integer> getPositions() {
+	public double getMinCommission() {
+		return minCommission;
+	}
+
+	public void setMinCommission(double minCommission) {
+		this.minCommission = minCommission;
+	}
+
+	public double getOpenCommission() {
+		return openCommission;
+	}
+
+	public void setOpenCommission(double openCommission) {
+		this.openCommission = openCommission;
+	}
+
+	public double getCloseCommission() {
+		return closeCommission;
+	}
+
+	public void setCloseCommission(double closeCommission) {
+		this.closeCommission = closeCommission;
+	}
+
+	public Map<String, Integer> getEmptyPositionDays() {
+		return emptyPositionDays;
+	}
+
+	public void setEmptyPositionDays(Map<String, Integer> emptyPositionDays) {
+		this.emptyPositionDays = emptyPositionDays;
+	}
+
+	public List<Order> getOrderList() {
+		return orderList;
+	}
+
+	public Map<String, Position> getPositions() {
 		return positions;
 	}
 
-	public void setPositions(Map<String, Integer> positions) {
-		this.positions = positions;
+	public void putPositions(List<Position> positionList) {
+		for (Position position : positionList) {
+			positions.put(position.getCode(), position);
+		}
 	}
 
-	public List<Trade> getTradeList() {
-		return tradeList;
+	public double getDrawdownLimit() {
+		return drawdownLimit;
 	}
 
-	public void setTradeList(List<Trade> tradeList) {
-		this.tradeList = tradeList;
+	public void setDrawdownLimit(double drawdownLimit) {
+		this.drawdownLimit = drawdownLimit;
+	}
+
+	public double getStoplossLimit() {
+		return stoplossLimit;
+	}
+
+	public void setStoplossLimit(double stoplossLimit) {
+		this.stoplossLimit = stoplossLimit;
 	}
 
 	public double getMarketValue() {
@@ -157,11 +297,21 @@ public class Portfolio {
 		this.marketValue = marketValue;
 	}
 
-	public double getProfit() {
+	public double getReturn() {
 		return marketValue + cash - init;
 	}
 
-	public double getProfitRate() {
-		return getProfit() / init;
+	public String getReturnRate() {
+		return percentFormat.format(getReturn() / init);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(name);
+		builder.append(", position: ").append(positions.size());
+		builder.append(", trading today: ").append(orderList.size());
+		builder.append(", return: ").append(getReturnRate());
+		return builder.toString();
+	}
+
 }

@@ -54,8 +54,34 @@ public class MailService {
 	 * @param text
 	 * @return Whether to send successfully
 	 */
-	public boolean send(String subject, Object text) {
-		return send(defaultRecipients, subject, text);
+	public boolean send(String subject, String text) {
+		return send(defaultRecipients, subject, text, null);
+	}
+
+	/**
+	 * 
+	 * Send a email use defaultRecipients.
+	 * 
+	 * @param subject
+	 * @param content
+	 * @param type
+	 *            MIME type of this object.
+	 * @return Whether to send successfully
+	 */
+	public boolean send(String subject, String content, String type) {
+		return send(defaultRecipients, subject, content, type);
+	}
+
+	public static void main(String[] args) {
+		MailService mailService = new MailService();
+		StringBuilder html = new StringBuilder();
+		html.append("<html>");
+		html.append("<h2>").append("test html").append("</h2>");
+		html.append("<br>test");
+		html.append("<br>");
+		html.append("<h2>").append("test html").append("</h2>");
+		html.append("</html>");
+		mailService.send("html", html.toString(), "text/html;charset=utf-8");
 	}
 
 	/**
@@ -64,16 +90,20 @@ public class MailService {
 	 * @param recipients
 	 *            comma separated email address strings
 	 * @param subject
-	 * @param text
+	 * @param content
 	 * @return Whether to send successfully
 	 */
-	public boolean send(String recipients, String subject, Object text) {
+	public boolean send(String recipients, String subject, String content, String type) {
 		try {
 			Message message = new MimeMessage(getSession());
 			message.setFrom(new InternetAddress(username));
 			message.setRecipients(RecipientType.TO, InternetAddress.parse(recipients));
 			message.setSubject(subject);
-			message.setText(text.toString());
+			if (type == null) {
+				message.setText(content.toString());
+			} else {
+				message.setContent(content, type);
+			}
 			Transport.send(message);
 			return true;
 		} catch (AddressException e) {

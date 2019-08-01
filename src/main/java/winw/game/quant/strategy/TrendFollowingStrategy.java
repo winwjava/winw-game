@@ -1,12 +1,16 @@
 package winw.game.quant.strategy;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
+
 import winw.game.quant.Portfolio;
-import winw.game.quant.StockQuoteService;
-import winw.game.quant.TencentStockQuoteService;
-import winw.game.quant.Trade;
-import winw.game.quant.analysis.Indicator;
+import winw.game.quant.QuantQuote;
+import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.QuoteChart;
+import winw.game.quant.QuoteService;
 
 /**
  * 趋势跟踪策略。
@@ -14,40 +18,65 @@ import winw.game.quant.analysis.Indicator;
  * @author winw
  *
  */
-public class TrendFollowingStrategy extends AbstractStrategy {// TODO 成交量、流动性、市盈率（参考000300）
+public class TrendFollowingStrategy extends QuantTradingStrategy {
+
+	private String[] samples = CSI_300_TOP;
+
+	public TrendFollowingStrategy() {
+	}
+
+	public TrendFollowingStrategy(String... samples) {
+		this.samples = samples;
+	}
+
+	@Override
+	public String[] samples() {
+		return samples;
+	}
 
 	// TODO 收益率与国债ETF收益率比较（斜率）
 
+	private List<QuantQuote> buyOrders = new ArrayList<QuantQuote>();
+	private List<QuantQuote> sellOrders = new ArrayList<QuantQuote>();
+
 	@Override
-	public void trading(String... code) {
-		List<Indicator> indicators = getHistoryQuote(code[0]);
-		if (indicators == null || indicators.isEmpty()) {
-			return;
-		}
-		Indicator current = indicators.get(indicators.size() - 1);
+	public void trading(Portfolio portfolio) {
+		buyOrders.clear();
+		sellOrders.clear();
+		for (String code : samples()) {
+			List<QuantQuote> quantQuotes = getHistoryQuote(code);
+			if (quantQuotes == null || quantQuotes.isEmpty()) {
+				return;
+			}
+			QuantQuote current = quantQuotes.get(quantQuotes.size() - 1);
 
-		if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1
-				&& emptyPositionDays.getOrDefault(current.getCode(), 100) > 2 // 卖出后保持空仓天数
-				&& portfolio.getPosition(current.getCode()) == 0) {
-			Trade order = portfolio.order(current, 1);
-			emptyPositionDays.remove(current.getCode());
-			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "
-					+ floatFormat.format(current.getSlope5()));
+			if (current.getSlope60() > 0.04 && current.getSlope5() > 0.1
+					&& portfolio.getEmptyPositionDays(current.getCode(), 100) > 2 // 卖出后保持空仓天数
+					&& !portfolio.hasPosition(current.getCode())) {
+				buyOrders.add(current);
+			}
+
+			if (current.getSlope60() < 0.03 && portfolio.hasPosition(current.getCode())) {
+				sellOrders.add(current);
+			}
+		}
+		for (QuantQuote temp : sellOrders) {
+			portfolio.order(temp, -1, String.format("Slope60: %.2f", temp.getSlope60()));
 		}
 
-		if ((current.getSlope60() < 0.03) && portfolio.getPosition(current.getCode()) > 0) {
-			Trade order = portfolio.order(current, 0);
-			emptyPositionDays.put(current.getCode(), 0);
-			notify(order, ", Slope60: " + floatFormat.format(current.getSlope60()) + ", Slope5: "
-					+ floatFormat.format(current.getSlope5()));
+		for (QuantQuote temp : buyOrders) {
+			portfolio.order(temp, 1, String.format("Slope60: %.2f", temp.getSlope60()));
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		StockQuoteService service = new TencentStockQuoteService();
+		String today = DateFormatUtils.format(new Date(), QuoteService.DATE_PATTERN);
+		Portfolio portfolio = new Portfolio(1000000, 1, 0.1, 0.1);
+//		Portfolio portfolio = new Portfolio(1000000, 1, 0.07, 0.05);
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy();
-		strategy.setStockQuoteService(service);
-		strategy.backtesting("2015-01-01", "2019-07-05", 12640, new Portfolio(1000000), "sh600519");
+		strategy.backTesting(portfolio, "2018-01-01", today);
+
+		QuoteChart.show(portfolio, "2018-01-01", today);
 	}
 
 }

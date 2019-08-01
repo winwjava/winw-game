@@ -1,5 +1,7 @@
 package winw.game.quant;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,6 +18,9 @@ import javax.persistence.Transient;
 @Entity
 @Table(name = "QUOTE")
 public class Quote {
+
+	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期
+
 	@Id
 	@GeneratedValue
 	protected long id;
@@ -27,18 +32,35 @@ public class Quote {
 
 	protected String date;// 交易日期
 
-	protected double open; // 开盘价
-	protected double high; // 最高价
-	protected double low; // 最低价
-	protected double close; // 收盘价
+	protected Double open; // 开盘价
+	protected Double high; // 最高价
+	protected Double low; // 最低价
+	protected Double close; // 收盘价
 
-	protected int volume; // 成交量
-	protected double amount; // 成交金额
+	protected Integer volume; // 成交量
+	protected Double amount; // 成交金额
 
-	protected QuoteType quoteType;// 报价类型
+	protected QuotePeriod quotePeriod;// 报价类型
 
-	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期
-	
+	// 实时报价，买一价，卖一价
+	@Transient
+	protected Date time;// 报价时间
+	@Transient
+	protected Double price = 0.0;// 价格
+	@Transient
+	protected Double previousClose = 0.0;// 昨日收盘价
+	@Transient
+	protected Double pe = 0.0;// 市盈率
+	// private double eps = 0.0;
+	@Transient
+	protected Double marketCap = 0.0;// 总市值
+	@Transient
+	protected Double marketVal = 0.0;// 流通市值
+
+	public boolean realtime() {
+		return QuotePeriod.REALTIME.equals(quotePeriod);
+	}
+
 	public Quote() {
 		super();
 	}
@@ -87,7 +109,7 @@ public class Quote {
 	}
 
 	public double getOpen() {
-		
+
 		return open;
 	}
 
@@ -127,20 +149,68 @@ public class Quote {
 		this.volume = volume;
 	}
 
-	public double getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 
-	public QuoteType getQuoteType() {
-		return quoteType;
+	public QuotePeriod getQuotePeriod() {
+		return quotePeriod;
 	}
 
-	public void setQuoteType(QuoteType quoteType) {
-		this.quoteType = quoteType;
+	public void setQuotePeriod(QuotePeriod quotePeriod) {
+		this.quotePeriod = quotePeriod;
+	}
+
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
+	}
+
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+	public Double getPreviousClose() {
+		return previousClose;
+	}
+
+	public void setPreviousClose(Double previousClose) {
+		this.previousClose = previousClose;
+	}
+
+	public Double getPe() {
+		return pe;
+	}
+
+	public void setPe(Double pe) {
+		this.pe = pe;
+	}
+
+	public Double getMarketCap() {
+		return marketCap;
+	}
+
+	public void setMarketCap(Double marketCap) {
+		this.marketCap = marketCap;
+	}
+
+	public Double getMarketVal() {
+		return marketVal;
+	}
+
+	public void setMarketVal(Double marketVal) {
+		this.marketVal = marketVal;
 	}
 
 	@Override
