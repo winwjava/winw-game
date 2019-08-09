@@ -13,10 +13,10 @@ import winw.game.quant.OrderRepository;
 import winw.game.quant.Portfolio;
 import winw.game.quant.PortfolioRepository;
 import winw.game.quant.PositionRepository;
-import winw.game.quant.QuantTrading;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.QuoteService;
 import winw.game.quant.TencentQuoteService;
+import winw.game.quant.strategy.MeanReversionStrategy;
 import winw.game.quant.strategy.TrendFollowingStrategy;
 import winw.game.quant.util.MailService;
 
@@ -33,15 +33,19 @@ public class MockTrading {
 	@Resource
 	private PortfolioRepository portfolioRepository;
 
+	public static String MEAN_REVERSION_300TOP = "MeanReversionStrategy(300_TOP)";
 	public static String TREND_FOLLOWING_300ETF = "TrendFollowingStrategy(300_ETF)";
 	public static String TREND_FOLLOWING_300TOP = "TrendFollowingStrategy(300_TOP)";
 
 	public static QuantTradingStrategy getStrategy(String name) {
+		if (MEAN_REVERSION_300TOP.equals(name)) {
+			return new MeanReversionStrategy();
+		}
 		if (TREND_FOLLOWING_300ETF.equals(name)) {
-			return new TrendFollowingStrategy(QuantTrading.CSI_300_ETF);
+			return new TrendFollowingStrategy(QuantTradingStrategy.CSI_300_ETF);
 		}
 		if (TREND_FOLLOWING_300TOP.equals(name)) {
-			return new TrendFollowingStrategy(QuantTrading.CSI_300_TOP);
+			return new TrendFollowingStrategy(QuantTradingStrategy.CSI_300_TOP);
 		}
 		return null;
 	}
@@ -51,9 +55,9 @@ public class MockTrading {
 		if (!service.isTradingDay()) {
 			logger.info("Today is not a trading day.");
 			return;
-		} else if (!service.isTradingTime()) {
-			logger.info("It is not trading time now.");
-			return;
+//		} else if (!service.isTradingTime()) {
+//			logger.info("It is not trading time now.");
+//			return;
 		}
 
 		List<Portfolio> list = portfolioRepository.findAll();
