@@ -36,6 +36,7 @@ public class Order {
 
 	private double balance;// 结余
 
+	private String profit;
 	private String comment;
 
 	public Order() {
@@ -127,6 +128,14 @@ public class Order {
 		this.balance = balance;
 	}
 
+	public String getProfit() {
+		return profit;
+	}
+
+	public void setProfit(String profit) {
+		this.profit = profit;
+	}
+
 	public String getComment() {
 		return comment;
 	}
@@ -138,7 +147,7 @@ public class Order {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Trading [").append(code).append(size > 0 ? " +" : " -");
+		builder.append("Trading ").append(code).append(size > 0 ? " + " : " - ");
 		builder.append(Math.abs(size));
 		builder.append(", price=");
 		builder.append(price);
@@ -146,7 +155,10 @@ public class Order {
 		builder.append(Math.abs(amount));
 		builder.append(", comment=");
 		builder.append(comment);
-		builder.append("]");
+		if (profit != null) {
+			builder.append(", profit=");
+			builder.append(profit);
+		}
 		return builder.toString();
 	}
 

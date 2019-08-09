@@ -3,8 +3,8 @@ package winw.game.quant.strategy;
 import java.util.List;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.QuantQuote;
+import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.QuoteService;
 import winw.game.quant.TencentQuoteService;
 

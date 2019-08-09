@@ -15,13 +15,12 @@ public class QuantTradingStrategyTest {
 		// 先用trendFollowing回测CSI_300，根据买入时段，调换策略。
 		Portfolio portfolio = new Portfolio(init, 1, 0.05, 0.05);
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy(QuantTradingStrategy.CSI_300);
-		strategy.backTesting(portfolio, from, to);
+		strategy.backTesting(portfolio, from, to, false);
 		return portfolio.getOrderList();
 	}
-
 	public static void main(String[] args) throws Exception {
-		test("2017-01-01", "2018-01-01");
-		test("2018-01-01", "2019-01-01");
+		test("2017-01-01","2018-01-01");
+		test("2018-01-01","2019-01-01");
 		Portfolio portfolio = new Portfolio(init, 1, 0.1, 0.1);
 		TrendFollowingStrategy trendFollowing = new TrendFollowingStrategy(QuantTradingStrategy.CSI_300_TOP);
 		portfolio.setStoplossLimit(0.05);
@@ -42,11 +41,11 @@ public class QuantTradingStrategyTest {
 			if (lastSize < 0) {// 前面一段时间的趋势是向上的。
 				portfolio.setStoplossLimit(0.05);
 				portfolio.setDrawdownLimit(0.05);
-				trendFollowing.backTesting(portfolio, lastDate, order.getDate());
+				trendFollowing.backTesting(portfolio, lastDate, order.getDate(), false);
 			} else {
 				portfolio.setStoplossLimit(0.1);
 				portfolio.setDrawdownLimit(0.1);
-				meanReversion.backTesting(portfolio, lastDate, order.getDate());
+				meanReversion.backTesting(portfolio, lastDate, order.getDate(), false);
 			}
 			lastDate = order.getDate();
 		}
@@ -59,6 +58,6 @@ public class QuantTradingStrategyTest {
 			portfolio.setDrawdownLimit(0.05);
 			trendFollowing.backTesting(portfolio, lastDate, to);
 		}
-		// QuoteChart.show(portfolio, from, to);
+		//QuoteChart.show(portfolio, from, to);
 	}
 }

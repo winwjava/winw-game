@@ -60,6 +60,9 @@ public class Portfolio {
 	public Portfolio(double init, int maxPosition, double drawdownLimit, double stoplossLimit) {
 		this.init = init;
 		this.cash = init;
+		this.maxPosition = maxPosition;
+		this.drawdownLimit = drawdownLimit;
+		this.stoplossLimit = stoplossLimit;
 	}
 
 	public Portfolio(String name, double init, int maxPosition, double drawdownLimit, double stoplossLimit) {
@@ -152,7 +155,7 @@ public class Portfolio {
 
 		Position position = positions.getOrDefault(code, new Position(pid, code));
 		if (position.getSize() + size == 0) {
-			desc = desc + ", return: " + percentFormat.format(position.getReturnRate(quote.getClose()));
+			order.setProfit(percentFormat.format(position.getReturnRate(quote.getClose())));
 			positions.remove(code);
 			emptyPositionDays.put(code, 0);
 		} else {

@@ -13,38 +13,42 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class MailService {
+/**
+ * 
+ * @author winw
+ *
+ */
+public class MailService extends Authenticator {
+
+	private String smtpHost = "smtp.aliyun.com";
+	private String smtpPort = "465";
 
 	private String username = "winwjava@aliyun.com";
 	private String password = "winw.game";
 	private String defaultRecipients = "winwgame@sina.com";
 
-	private Properties properties;
-
 	private Session session;
+
+	private Properties properties;
 
 	private Session getSession() {
 		if (session != null) {
 			return session;
 		}
-		if (properties == null) {
-			properties = new Properties();
-			properties.put("mail.transport.protocol", "smtp");
-			properties.put("mail.smtp.host", "smtp.aliyun.com");
-			properties.put("mail.smtp.port", 465);
-			properties.put("mail.smtp.auth", "true");
-			properties.put("mail.smtp.ssl.enable", "true");
-			// properties.put("mail.debug", "true");
-		}
-		session = Session.getInstance(properties, new Authenticator() {
-
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
-			}
-
-		});
+		properties = new Properties();
+		properties.put("mail.transport.protocol", "smtp");
+		properties.put("mail.smtp.host", smtpHost);
+		properties.put("mail.smtp.port", smtpPort);
+		properties.put("mail.smtp.auth", "true");
+		properties.put("mail.smtp.ssl.enable", "true");
+		// properties.put("mail.debug", "true");
+		session = Session.getInstance(properties, new MailService());
 		return session;
+	}
+
+	@Override
+	protected PasswordAuthentication getPasswordAuthentication() {
+		return new PasswordAuthentication(username, password);
 	}
 
 	/**

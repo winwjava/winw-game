@@ -3,6 +3,8 @@ package winw.game.quant;
 /**
  * 报价周期。
  * 
+ * 分为实时报价和分段报价，分段报价有：每日、每周、每月。
+ * 
  * @author winw
  *
  */

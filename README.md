@@ -8,14 +8,14 @@ git init --bare winw-game.git
 ## Use git
 git clone /home/code/winw-game.git  
 git clone code@192.168.1.10:/home/code/winw-game.git  
+git config --global credential.helper store
 git pull  
 git add .  
 git commit -m "first commit"  
 git push origin master  
 
 ## Use crontab
-55 14 * * * su - winw -c 'cd winw-game && git pull >> logs/app.log && mvn -q spring-boot:run >> logs/app.log'  
-00 15 * * * shutdown -h now  
+55 14 * * * sh -c 'cd winw-game && git pull >> logs/app.log && mvn -q spring-boot:run >> logs/app.log'  
 
 ## Startup h2database web server.
 java -cp ~/.m2/repository/com/h2database/h2/1.4.199/*.jar org.h2.tools.Server -web -webPort 8082 -webAllowOthers  

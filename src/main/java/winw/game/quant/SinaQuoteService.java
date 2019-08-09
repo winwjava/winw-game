@@ -21,4 +21,16 @@ public class SinaQuoteService extends QuoteService {
 		return null;
 	}
 
+	// http://finance.sina.com.cn/realstock/company/[市场][股票代码]/[复权].js?d=[日期][复权]：qianfuquan-前复权；houfuquan-后复权。返回结果：股票日期的股价JSON数据。
+	// 例如，http://finance.sina.com.cn/realstock/company/sz002095/qianfuquan.js?d=2015-06-16，获取深圳市场002095股票的前复权2015-06-16的数据。
+
+	// 方法5：http://market.finance.sina.com.cn/downxls.php?date=[日期]&symbol=[市场][股票代码]
+	// 返回数据：XLS文件；股票历史成交明细。
+	// 例如，http://market.finance.sina.com.cn/downxls.php?date=2015-06-15&symbol=sz002095
+	// 获取2015-06-15日期的深圳市长002095数据。
+	// 方法6：http://market.finance.sina.com.cn/pricehis.php?symbol=[市场][股票代码]&startdate=[开始日期]&enddate=[结束日期]
+	// 返回数据：HTML文本；指定日期范围内的股票分价表。
+	// 例如，http://market.finance.sina.com.cn/pricehis.php?symbol=sh600900&startdate=2011-08-17&enddate=2011-08-19
+	// 获取上证600900股票2011-08-17到2011-08-19日期的分价数据。
+
 }

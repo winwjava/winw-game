@@ -12,6 +12,13 @@ import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
+/**
+ * 
+ * '000300.SS' ，'香港恒生'=>'0011.HK', '道琼指数'=>'INDU', '纳斯达克'=>'^IXIC'
+ * 
+ * @author winw
+ *
+ */
 public class YahooQuoteService extends QuoteService {
 
 	@Override

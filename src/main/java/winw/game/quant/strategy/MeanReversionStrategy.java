@@ -77,6 +77,6 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		strategy.backTesting(portfolio, "2019-04-26", today);
 
 		// TODO 幅图显示z-score和MACD
-		QuoteChart.show(portfolio, "2019-03-01", today);
+		QuoteChart.show(portfolio, "2019-01-01", today);
 	}
 }
