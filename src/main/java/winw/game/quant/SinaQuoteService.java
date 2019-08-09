@@ -1,15 +1,6 @@
 package winw.game.quant;
 
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 public class SinaQuoteService extends QuoteService {
 
