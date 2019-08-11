@@ -1,4 +1,4 @@
-# ![](https://github.com/winwjava/winw-game/docs/winwgame.png) winw-game
+# ![](./docs/winwgame.png) winw-game
 
 ## Create an empty git repository
 useradd code -g winw  
