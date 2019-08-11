@@ -1,10 +1,12 @@
-<table style="border:0">
-	<tr align="center">
-		<td><img src="./docs/winwgame.png"></img>&nbsp;&nbsp;</td>
-		<td><span style="color:red;font-size:26px">winw-game</span><br/>
-			<a style="text-decoration:none">https://github.com/winwjava/winw-game</a></td>
-	</tr>
-</table>
+<div style="overflow:hidden">
+	<div style="float:left"><img src="./docs/winwgame.png"></div>
+	<div style="float:left;margin-top:6px;margin-left:10px;text-align:center;overflow:hidden;">
+		<span style="color:red;font-size:26px">winw-game</span><br/>
+		<a style="text-decoration:none">https://github.com/winwjava/winw-game</a>
+	</div>
+</div>
+
+# 
 
 ## Create an empty git repository
 useradd code -g winw  
@@ -22,7 +24,7 @@ git commit -m "first commit"
 git push origin master  
 
 ## Use crontab
-55 14 * * * sh -c 'cd winw-game && git pull >> logs/app.log && mvn -q spring-boot:run >> logs/app.log'  
+55 14 * * 1-5 sh -c 'cd winw-game && git pull >> logs/app.log && mvn -q spring-boot:run >> logs/app.log'  
 
 ## Startup h2database web server.
 java -cp ~/.m2/repository/com/h2database/h2/1.4.199/*.jar org.h2.tools.Server -web -webPort 8082 -webAllowOthers  
