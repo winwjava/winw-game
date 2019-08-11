@@ -1,13 +1,12 @@
-<div style="overflow:hidden">
-	<div style="float:left"><img src="./docs/winwgame.png"></div>
-	<div style="float:left;margin-top:6px;margin-left:10px;text-align:center;overflow:hidden;">
-		<span style="color:red;font-size:26px">winw-game</span><br/>
-		<a style="text-decoration:none">https://github.com/winwjava/winw-game</a>
-	</div>
-</div>
+<table style="border:0">
+	<tr align="center">
+		<td><img src="./docs/winwgame.png"></img>&nbsp;&nbsp;</td>
+		<td><span style="color:red;font-size:26px">winw-game</span><br/>
+			<a style="text-decoration:none">https://github.com/winwjava/winw-game</a></td>
+	</tr>
+</table>
 
 # 
-
 ## Create an empty git repository
 useradd code -g winw  
 chmod 770 /home/code  
