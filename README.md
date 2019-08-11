@@ -1,7 +1,8 @@
-<table border="0">
+<table style="border:0!important;">
 	<tr align="center">
 		<td><img src="./docs/winwgame.png"></img>&nbsp;&nbsp;</td>
-		<td><span style="color:red;font-size:26px">winw-game</span><br/>https://github.com/winwjava/winw-game</td>
+		<td><span style="color:red;font-size:26px">winw-game</span><br/>
+			<a style="text-decoration:none">https://github.com/winwjava/winw-game</a></td>
 	</tr>
 </table>
 
