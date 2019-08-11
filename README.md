@@ -1,5 +1,5 @@
-# winw-game
-![winw-game](https://github.com/winwjava/winw-game/docs/winwgame.png)
+# ![](https://github.com/winwjava/winw-game/docs/winwgame.png) winw-game
+
 ## Create an empty git repository
 useradd code -g winw  
 chmod 770 /home/code  

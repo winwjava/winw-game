@@ -15,6 +15,8 @@ import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -160,7 +162,7 @@ public class QuoteChart extends JPanel {
 		String year = "1000-";
 		g.setColor(Color.BLUE);
 		for (int i = 10; i < viewLength; i += 10) {
-			String timestamp = quoteList.get(i).getDate();
+			String timestamp = quoteList.get(viewFrom + i).getDate();
 			if (timestamp.startsWith(year)) {
 				timestamp = timestamp.substring(5);
 			} else {
@@ -178,7 +180,7 @@ public class QuoteChart extends JPanel {
 
 	private void drawCandle(Graphics2D g) {
 		double baseY = masterY + masterH;
-		for (int i = viewFrom; i < quoteList.size(); i++) {
+		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
 			double open = quoteList.get(i).getOpen();
 			double close = quoteList.get(i).getClose();
 			// 线本身占1个像素
@@ -220,14 +222,14 @@ public class QuoteChart extends JPanel {
 	}
 
 	private void drawDeputyChart(Graphics2D g) {
-		// drawVolume(g);
-		// drawVolumeMA(g);
-		drawZscore(g);
+		drawVolume(g);
+		drawVolumeMA(g);
+		// drawZscore(g);
 	}
 
 	protected void drawVolume(Graphics2D g) {
 		double baseY = height - bottomH;
-		for (int i = viewFrom; i < quoteList.size(); i++) {
+		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
 			// 线本身占1个像素
 			double rectX = masterX + (quoteW + 1) * (i - viewFrom) + 1;
 			double lineX = masterX + (quoteW + 1) * (i - viewFrom) + quoteW / 2 - 0.5 + 1;
@@ -268,9 +270,9 @@ public class QuoteChart extends JPanel {
 		}
 	}
 
-	private void drawZscore(Graphics2D g) {
+	protected void drawZscore(Graphics2D g) {
 		double baseY = height - bottomH - deputyH / 2;
-		for (int i = viewFrom; i < quoteList.size(); i++) {
+		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
 			// 线本身占1个像素
 			double lineX = masterX + (quoteW + 1) * (i - viewFrom) + quoteW / 2 - 0.5 + 1;
 
@@ -409,6 +411,12 @@ public class QuoteChart extends JPanel {
 		}
 	}
 
+	private String orderFrom;
+
+	public String getOrderFrom() {
+		return orderFrom;
+	}
+
 	public QuoteChart(List<QuantQuote> quoteList, int viewFrom, int viewLength, String header, String footer,
 			List<Order> orderList) {
 		super();
@@ -418,6 +426,7 @@ public class QuoteChart extends JPanel {
 		this.header = header;
 		this.footer = footer;
 		if (orderList != null) {
+			orderFrom = orderList.get(0).getDate();
 			for (Order order : orderList) {
 				this.orders.put(order.getDate(), order);
 			}
@@ -431,7 +440,6 @@ public class QuoteChart extends JPanel {
 		for (int i = 0; i < quoteList.size(); i++) {
 			if (viewFrom < 0 && quoteList.get(i).getDate().compareTo(from) >= 0) {
 				viewFrom = i;
-				System.out.println("from " + viewFrom);
 			}
 			if (quoteList.get(i).getDate().compareTo(to) <= 0) {
 				viewLength = i - viewFrom + 1;
@@ -442,11 +450,10 @@ public class QuoteChart extends JPanel {
 	public static void show(List<QuoteChart> views) {
 		JFrame frame = new JFrame("winw-game");
 		frame.setVisible(true);
-		JPanel container = new JPanel();
+		JPanel container = new JPanel();// new GridLayout(2, 2)
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		for (QuoteChart quoteChart : views) {
-			quoteChart.setPreferredSize(new Dimension(1000, 320));
-			// quoteChart.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+			quoteChart.setPreferredSize(new Dimension(500, 320));
 			container.add(quoteChart);
 		}
 		frame.add(new JScrollPane(container));
@@ -482,15 +489,16 @@ public class QuoteChart extends JPanel {
 			}
 			charts.add(new QuoteChart(quotes, from, to, header.toString(), "", orders.get(code)));
 		}
+		Collections.sort(charts, Comparator.comparing(QuoteChart::getOrderFrom));
+		// Collections.reverse(portfolio.getOrderList());
 		show(charts);
 	}
 
 	private static QuoteChart newChart(String code) throws Exception {
 		QuoteService service = new TencentQuoteService();
 		String today = DateFormatUtils.format(new Date(), QuoteService.DATE_PATTERN);
-		List<Quote> dailyQuote = service.get(code, QuotePeriod.DAILY, "2018-06-01", today);
-		QuoteChart chart = new QuoteChart(QuantQuote.compute(dailyQuote), 70, dailyQuote.size() - 70, code + " Daily",
-				"", null);
+		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(code, QuotePeriod.DAILY, "2019-01-01", today));
+		QuoteChart chart = new QuoteChart(dailyQuote, dailyQuote.size() - 50, 50, code + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		return chart;
 	}
