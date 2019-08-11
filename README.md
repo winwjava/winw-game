@@ -1,4 +1,4 @@
-<table style="border:0!important;">
+<table style="border:0">
 	<tr align="center">
 		<td><img src="./docs/winwgame.png"></img>&nbsp;&nbsp;</td>
 		<td><span style="color:red;font-size:26px">winw-game</span><br/>
