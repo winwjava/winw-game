@@ -1,5 +1,6 @@
 package winw.game.quant;
 
+import java.text.ParseException;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -7,6 +8,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 /**
  * 报价。
@@ -22,6 +26,26 @@ import javax.persistence.Transient;
 public class Quote {
 
 	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期
+	public final static String TIME_PATTERN = "HH:mm:ss";// 交易日期
+
+	public static String today() {
+		return DateFormatUtils.format(new Date(), DATE_PATTERN);
+	}
+
+	public static String addDays(String date, int amount) throws ParseException {
+		return DateFormatUtils.format(DateUtils.addDays(DateUtils.parseDate(date, DATE_PATTERN), amount), DATE_PATTERN);
+	}
+
+	public static String offset(String from, int observation) throws ParseException {
+		return addDays(from, observation * 7 / 5 - 11);
+	}
+
+	public static int diff(String from, String to) throws ParseException {
+		long fromTime = DateUtils.parseDate(from, Quote.DATE_PATTERN).getTime();
+		long toTime = DateUtils.parseDate(to, Quote.DATE_PATTERN).getTime();
+		int result = (int) ((toTime - fromTime) / 1000 / 3600 / 24) + 2;
+		return result < 7 ? result : result * 7 / 5 + 1;
+	}
 
 	@Id
 	@GeneratedValue
@@ -32,8 +56,6 @@ public class Quote {
 	@Transient
 	protected String name;// 名称
 
-	protected String date;// 交易日期
-
 	protected Double open; // 开盘价
 	protected Double high; // 最高价
 	protected Double low; // 最低价
@@ -42,11 +64,9 @@ public class Quote {
 	protected Integer volume; // 成交量
 	protected Double amount; // 成交金额
 
-	protected QuotePeriod quotePeriod;// 报价类型
-
-	// 实时报价，买一价，卖一价
+	protected String date;// 交易日期
 	@Transient
-	protected Date time;// 报价时间
+	protected String time;// 报价时间
 	@Transient
 	protected Double price = 0.0;// 价格
 	@Transient
@@ -58,10 +78,6 @@ public class Quote {
 	protected Double marketCap = 0.0;// 总市值
 	@Transient
 	protected Double marketVal = 0.0;// 流通市值
-
-	public boolean realtime() {
-		return QuotePeriod.REALTIME.equals(quotePeriod);
-	}
 
 	public Quote() {
 		super();
@@ -76,6 +92,11 @@ public class Quote {
 		this.close = close;
 		this.volume = volume;
 		this.amount = amount;
+	}
+
+	public void setTime(Date time) {
+		this.date = DateFormatUtils.format(time, DATE_PATTERN);
+		this.time = DateFormatUtils.format(time, TIME_PATTERN);
 	}
 
 	public long getId() {
@@ -159,19 +180,11 @@ public class Quote {
 		this.amount = amount;
 	}
 
-	public QuotePeriod getQuotePeriod() {
-		return quotePeriod;
-	}
-
-	public void setQuotePeriod(QuotePeriod quotePeriod) {
-		this.quotePeriod = quotePeriod;
-	}
-
-	public Date getTime() {
+	public String getTime() {
 		return time;
 	}
 
-	public void setTime(Date time) {
+	public void setTime(String time) {
 		this.time = time;
 	}
 

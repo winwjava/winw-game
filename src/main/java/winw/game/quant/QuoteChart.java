@@ -161,14 +161,14 @@ public class QuoteChart extends JPanel {
 		// 中间写日期
 		String year = "1000-";
 		g.setColor(Color.BLUE);
-		for (int i = 10; i < viewLength; i += 10) {
+		for (int i = 0; i < viewLength; i += 10) {
 			String timestamp = quoteList.get(viewFrom + i).getDate();
 			if (timestamp.startsWith(year)) {
 				timestamp = timestamp.substring(5);
 			} else {
 				year = timestamp.substring(0, 5);
 			}
-			int timestampW = g.getFontMetrics().stringWidth(timestamp);
+			int timestampW = i == 0 ? -4 : g.getFontMetrics().stringWidth(timestamp);
 			g.drawString(timestamp, masterX + (quoteW + 1) * i - timestampW / 2, deputyY - middleH / 3);
 		}
 	}
@@ -222,9 +222,9 @@ public class QuoteChart extends JPanel {
 	}
 
 	private void drawDeputyChart(Graphics2D g) {
-		drawVolume(g);
-		drawVolumeMA(g);
-		// drawZscore(g);
+		// drawVolume(g);
+		// drawVolumeMA(g);
+		drawZscore(g);
 	}
 
 	protected void drawVolume(Graphics2D g) {
@@ -451,9 +451,10 @@ public class QuoteChart extends JPanel {
 		JFrame frame = new JFrame("winw-game");
 		frame.setVisible(true);
 		JPanel container = new JPanel();// new GridLayout(2, 2)
+		// new BoxLayout(container, BoxLayout.Y_AXIS)
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		for (QuoteChart quoteChart : views) {
-			quoteChart.setPreferredSize(new Dimension(500, 320));
+			quoteChart.setPreferredSize(new Dimension(1000, 320));
 			container.add(quoteChart);
 		}
 		frame.add(new JScrollPane(container));
@@ -474,10 +475,10 @@ public class QuoteChart extends JPanel {
 		}
 
 		List<QuoteChart> charts = new ArrayList<>();
-		QuoteService service = new TencentQuoteService();
+		QuoteService service = QuoteService.getDefault();
 		for (String code : orders.keySet()) {
 			Quote quote = service.get(code);
-			List<QuantQuote> quotes = QuantQuote.compute(service.get(code, QuotePeriod.DAILY, from, to));
+			List<QuantQuote> quotes = QuantQuote.compute(service.get(code, from, to));
 			StringBuilder header = new StringBuilder(quote.getName());
 			header.append("  ").append(code).append("  Daily  Backtesting ");
 			for (Order order : orders.get(code)) {
@@ -495,16 +496,16 @@ public class QuoteChart extends JPanel {
 	}
 
 	private static QuoteChart newChart(String code) throws Exception {
-		QuoteService service = new TencentQuoteService();
-		String today = DateFormatUtils.format(new Date(), QuoteService.DATE_PATTERN);
-		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(code, QuotePeriod.DAILY, "2019-01-01", today));
-		QuoteChart chart = new QuoteChart(dailyQuote, dailyQuote.size() - 50, 50, code + " Daily", "", null);
+		QuoteService service = QuoteService.getDefault();
+		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
+		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(code, "2018-10-01", today));
+		QuoteChart chart = new QuoteChart(dailyQuote, dailyQuote.size() - 120, 120, code + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		return chart;
 	}
 
 	public static void main(String[] args) throws Exception {
-		show(Arrays.asList(newChart("sh000001"), newChart("sh000300"), newChart("sz000333"), newChart("sz002352")));
+		show(Arrays.asList(newChart("sh000001"), newChart("sh000300"), newChart("sh600276"), newChart("sz002352")));
 	}
 
 }

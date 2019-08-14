@@ -9,8 +9,8 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantQuote;
 import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.Quote;
 import winw.game.quant.QuoteChart;
-import winw.game.quant.QuoteService;
 
 /**
  * 均值回归策略。
@@ -71,12 +71,11 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	// TODO 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		String today = DateFormatUtils.format(new Date(), QuoteService.DATE_PATTERN);
+		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.15, 0.15);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 		strategy.backTesting(portfolio, "2019-04-26", today);
 
-		// TODO 幅图显示z-score和MACD
 		QuoteChart.show(portfolio, "2019-01-01", today);
 	}
 }

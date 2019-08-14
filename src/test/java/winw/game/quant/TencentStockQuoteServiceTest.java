@@ -15,7 +15,7 @@ public class TencentStockQuoteServiceTest {
 		// System.out.println(quote);
 		Assert.assertNotNull(quote);
 
-		List<Quote> dailyQuote = service.get("sh000300", QuotePeriod.DAILY, null, null);
+		List<Quote> dailyQuote = service.get("sh000300", null, null);
 		Assert.assertNotNull(dailyQuote);
 		Assert.assertTrue(dailyQuote.size() > 0);
 		int i = 1 ;

@@ -2,16 +2,12 @@ package winw.game.quant;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +62,7 @@ public abstract class QuantTradingStrategy {
 	 */
 	public abstract void trading(Portfolio portfolio);
 
-	protected QuoteService quoteService = new TencentQuoteService();
+	protected QuoteService quoteService = QuoteService.getDefault();
 
 	Map<String, List<QuantQuote>> quoteCache = new HashMap<String, List<QuantQuote>>();
 
@@ -95,7 +91,7 @@ public abstract class QuantTradingStrategy {
 		if (quoteDetail == null) {
 			return null;
 		}
-		List<Quote> list = quoteService.get(code, QuotePeriod.DAILY, from, to);
+		List<Quote> list = quoteService.get(code, from, to);
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
@@ -106,9 +102,9 @@ public abstract class QuantTradingStrategy {
 
 	protected double getMarketValue(Collection<Position> positions, String to) throws Exception {
 		double marketValue = 0;
-		String from1 = addDays(to, -15);// 从to的15天前开始取数据，以获取to当天的收盘价
+		String from1 = Quote.addDays(to, -15);// 从to的15天前开始取数据，以获取to当天的收盘价
 		for (Position position : positions) {
-			List<Quote> temp = quoteService.get(position.getCode(), QuotePeriod.DAILY, from1, to);
+			List<Quote> temp = quoteService.get(position.getCode(), from1, to);
 			marketValue += position.getSize() * temp.get(temp.size() - 1).getClose();
 		}
 		return marketValue;
@@ -144,24 +140,29 @@ public abstract class QuantTradingStrategy {
 	}
 
 	public String mockTrading(Portfolio portfolio) throws Exception {
-		String today = today();
-		String from = queryFrom(observation, today);
+		String today = Quote.today();
+		String from = Quote.offset(today, observation);
 
+		StringBuilder lastday = new StringBuilder();
 		for (String temp : load()) {
 			historyQuote.put(temp, queryHistoryQuote(from, today, temp));
+			List<QuantQuote> tempQuotes = getHistoryQuote(temp);
+			lastday.append(temp).append(": ").append(tempQuotes.get(tempQuotes.size() - 1).getDate()).append(", ");
 		}
+		logger.info(lastday.toString());
 		// 量化交易
 		trading0(portfolio);
 
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), today));
 		return getTradingLog(portfolio);
 	}
+
 	public void backTesting(Portfolio portfolio, String from, String to) throws Exception {
 		backTesting(portfolio, from, to, true);
 	}
 
 	public void backTesting(Portfolio portfolio, String from, String to, boolean log) throws Exception {
-		String from0 = queryFrom(observation, from);
+		String from0 = Quote.offset(from, observation);
 		for (String temp : load()) {
 			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
 		}
@@ -178,7 +179,7 @@ public abstract class QuantTradingStrategy {
 		}
 
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), to));
-		if(log) {
+		if (log) {
 			printTradingLog(portfolio, from, to);
 		}
 	}
@@ -271,21 +272,7 @@ public abstract class QuantTradingStrategy {
 		this.quoteService = quoteService;
 	}
 
-	protected final static String datePattern = "yyyy-MM-dd";
-	protected static final NumberFormat floatFormat = new DecimalFormat("#.##");
 	protected static final NumberFormat percentFormat = new DecimalFormat("#.##%");
-
-	public static String queryFrom(int observation, String from) throws ParseException {
-		return addDays(from, observation * 7 / 5 - 11);
-	}
-
-	public static String addDays(String date, int amount) throws ParseException {
-		return DateFormatUtils.format(DateUtils.addDays(DateUtils.parseDate(date, datePattern), amount), datePattern);
-	}
-
-	public static String today() {
-		return DateFormatUtils.format(new Date(), datePattern);
-	}
 
 	public static String percentFormat(Object obj) {
 		return percentFormat.format(obj);

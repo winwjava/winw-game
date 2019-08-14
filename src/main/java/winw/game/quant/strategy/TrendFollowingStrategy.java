@@ -12,8 +12,8 @@ import winw.game.quant.Portfolio;
 import winw.game.quant.Position;
 import winw.game.quant.QuantQuote;
 import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.Quote;
 import winw.game.quant.QuoteChart;
-import winw.game.quant.QuoteService;
 
 /**
  * 趋势跟踪策略。
@@ -95,7 +95,7 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String today = DateFormatUtils.format(new Date(), QuoteService.DATE_PATTERN);
+		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy(CSI_300_TOP);
 		// strategy.setHoldBonds(true);

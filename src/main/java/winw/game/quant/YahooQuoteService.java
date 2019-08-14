@@ -13,7 +13,8 @@ import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
 /**
- * 
+ * 雅虎接口实现。
+ * <p>
  * '000300.SS' ，'香港恒生'=>'0011.HK', '道琼指数'=>'INDU', '纳斯达克'=>'^IXIC'
  * 
  * @author winw
@@ -38,11 +39,11 @@ public class YahooQuoteService extends QuoteService {
 	}
 
 	@Override
-	public List<Quote> get(String code, QuotePeriod quotePeriod, String from, String to) throws Exception {
+	public List<Quote> get(String code, String from, String to) throws Exception {
 		Calendar f = Calendar.getInstance();
 		Calendar t = Calendar.getInstance();
-		f.setTime(DateUtils.parseDate(from, DATE_PATTERN));
-		t.setTime(DateUtils.parseDate(to, DATE_PATTERN));
+		f.setTime(DateUtils.parseDate(from, Quote.DATE_PATTERN));
+		t.setTime(DateUtils.parseDate(to, Quote.DATE_PATTERN));
 
 		Stock s = YahooFinance.get(code);
 		List<HistoricalQuote> h = s.getHistory(f, t, Interval.DAILY);
@@ -52,7 +53,6 @@ public class YahooQuoteService extends QuoteService {
 			try {
 				Quote quote = new Quote();
 				quote.setCode(code);
-				quote.setQuotePeriod(quotePeriod);
 				quote.setDate(DateFormatUtils.format(q.getDate(), Quote.DATE_PATTERN));
 				quote.setClose(q.getClose().doubleValue());
 				quote.setOpen(q.getOpen().doubleValue());

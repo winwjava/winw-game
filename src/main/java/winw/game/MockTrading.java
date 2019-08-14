@@ -15,7 +15,6 @@ import winw.game.quant.PortfolioRepository;
 import winw.game.quant.PositionRepository;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.QuoteService;
-import winw.game.quant.TencentQuoteService;
 import winw.game.quant.strategy.MeanReversionStrategy;
 import winw.game.quant.strategy.TrendFollowingStrategy;
 import winw.game.quant.util.MailService;
@@ -51,13 +50,13 @@ public class MockTrading {
 	}
 
 	public void trading() throws Exception {
-		QuoteService service = new TencentQuoteService();
+		QuoteService service = QuoteService.getDefault();
 		if (!service.isTradingDay()) {
 			logger.info("Today is not a trading day.");
 			return;
-//		} else if (!service.isTradingTime()) {
-//			logger.info("It is not trading time now.");
-//			return;
+			// } else if (!service.isTradingTime()) {
+			// logger.info("It is not trading time now.");
+			// return;
 		}
 
 		List<Portfolio> list = portfolioRepository.findAll();

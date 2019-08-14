@@ -6,17 +6,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.time.DateUtils;
-
 import winw.game.quant.util.HttpExecutor;
 
 /**
+ * 腾讯接口实现。
  * @author winw
  *
  */
 public class TencentQuoteService extends QuoteService {
 
-	// http://qt.gtimg.cn/q=s_sh600233
+	// http://qt.gtimg.cn/q=sh600233
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
 
 	// 获取每日报价数据（前复权）
@@ -66,7 +65,7 @@ public class TencentQuoteService extends QuoteService {
 		// 29: 最近逐笔成交
 		// 30: 时间
 		// 20170804150557
-		quote.setTime(dateFormat.parse(split[30]));
+		quote.setTime(dateFormat.parse(split[30]));// 延迟十五分钟
 		// 31: 涨跌
 		// 32: 涨跌%
 		// 33: 最高
@@ -93,53 +92,16 @@ public class TencentQuoteService extends QuoteService {
 		return quote;
 	}
 
-	public String getURL(String code, QuotePeriod quotePeriod) throws IOException {
-		if (quotePeriod == null) {
-		} else if (quotePeriod == QuotePeriod.DAILY) {
-			return dailyQuoteUrl;
-		} else if (quotePeriod == QuotePeriod.WEEKLY) {
-			return null;
-		} else if (quotePeriod == QuotePeriod.MONTHLY) {
-			return monthlyQuoteUrl;
-		}
-		return null;
-	}
-
-	public final static String DATE_PATTERN = "yyyy-MM-dd";
-
-	public static int getDaysBetween(String from, String to) throws ParseException {
-		long fromTime = DateUtils.parseDate(from, DATE_PATTERN).getTime();
-		long toTime = DateUtils.parseDate(to, DATE_PATTERN).getTime();
-		int result = (int) ((toTime - fromTime) / 1000 / 3600 / 24) + 2;
-		return result < 7 ? result : result * 7 / 5 + 1;
-	}
-
 	@Override
-	public List<Quote> get(String code, QuotePeriod quotePeriod, String from, String to)
-			throws IOException, ParseException {
-		String url = null;
-		if (quotePeriod == null) {
-		} else if (quotePeriod == QuotePeriod.DAILY) {
-			url = dailyQuoteUrl;
-		} else if (quotePeriod == QuotePeriod.WEEKLY) {
-			url = null;
-		} else if (quotePeriod == QuotePeriod.MONTHLY) {
-			url = monthlyQuoteUrl;
-		}
+	public List<Quote> get(String code, String from, String to) throws IOException, ParseException {
 		from = from == null ? "" : from;
 		to = to == null ? "" : to;
-		String response = HttpExecutor.get(url.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code)
-				.replace("V_NUM", String.valueOf(getDaysBetween(from, to))));
-
-		try {
-			return parse(code, quotePeriod, response);
-		} catch (Exception e) {
-			System.out.println(response);
-			throw e;
-		}
+		String url = dailyQuoteUrl.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code).replace("V_NUM",
+				String.valueOf(Quote.diff(from, to)));
+		return parse(code, HttpExecutor.get(url));
 	}
 
-	private List<Quote> parse(String code, QuotePeriod quotePeriod, String response) {
+	private List<Quote> parse(String code, String response) {
 		if (response.indexOf("[[") == -1) {
 			return null;
 		}
@@ -155,7 +117,6 @@ public class TencentQuoteService extends QuoteService {
 			// date open close high low volume
 			Quote quote = new Quote();
 			quote.setCode(code);
-			quote.setQuotePeriod(quotePeriod);
 			quote.setDate(fileds[0]);
 			quote.setOpen(Double.parseDouble(fileds[1]));
 			quote.setClose(Double.parseDouble(fileds[2]));
@@ -174,9 +135,8 @@ public class TencentQuoteService extends QuoteService {
 
 		System.out.println(quoteDetail.toString());
 
-		List<Quote> list = tencentQuoteService.get("sz002714", QuotePeriod.DAILY, null, null);
+		List<Quote> list = tencentQuoteService.get("sz002714", null, null);
 		for (Quote quote : list) {
-
 			System.out.println(quote);
 		}
 	}
