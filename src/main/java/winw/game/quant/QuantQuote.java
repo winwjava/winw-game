@@ -71,7 +71,10 @@ public class QuantQuote extends Quote {
 		super();
 		this.code = o.getCode();
 		this.name = o.getName();
+
 		this.date = o.getDate();
+		this.time = o.getTime();
+
 		this.open = o.getOpen();
 		this.high = o.getHigh();
 		this.low = o.getLow();

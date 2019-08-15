@@ -19,23 +19,22 @@ public class SinaQuoteService extends QuoteService {
 	@Override
 	public Quote get(String code) throws Exception {
 		String response = HttpExecutor.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
-		String[] split = response.split("\"|,");
-		if (split == null || split.length <= 1) {
+		String[] fileds = response.split("\"|,");
+		if (fileds == null || fileds.length <= 1) {
 			return null;
 		}
 		Quote quote = new Quote();
 		quote.setCode(code);
-		quote.setName(split[1]);
-		quote.setOpen(Double.parseDouble(split[2]));
-		quote.setPreviousClose(Double.parseDouble(split[3]));
-		quote.setPrice(Double.parseDouble(split[4]));
-		quote.setHigh(Double.parseDouble(split[5]));
-		quote.setLow(Double.parseDouble(split[6]));
-		quote.setVolume(Integer.parseInt(split[9]));
-		quote.setAmount(Double.parseDouble(split[10]));
-		quote.setDate(split[split.length - 5]);
-		quote.setTime(split[split.length - 4]);
-
+		quote.setName(fileds[1]);
+		quote.setOpen(Double.parseDouble(fileds[2]));
+		quote.setPreviousClose(Double.parseDouble(fileds[3]));
+		quote.setPrice(Double.parseDouble(fileds[4]));
+		quote.setHigh(Double.parseDouble(fileds[5]));
+		quote.setLow(Double.parseDouble(fileds[6]));
+		quote.setVolume(Integer.parseInt(fileds[9]));
+		quote.setAmount(Double.parseDouble(fileds[10]));
+		quote.setDate(fileds[31]);
+		quote.setTime(fileds[32]);
 		// http://hq.sinajs.cn/list=[股票代码]
 		// 返回结果：JSON实时数据，以逗号隔开相关数据，数据依次是
 		// “股票名称、今日开盘价、昨日收盘价、当前价格、今日最高价、今日最低价、竞买价、竞卖价、成交股数、成交金额、
@@ -53,11 +52,20 @@ public class SinaQuoteService extends QuoteService {
 
 	@Override
 	public List<Quote> get(String code, String from, String to) throws Exception {
-
 		from = from == null ? "" : from;
 		to = to == null ? "" : to;
 		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(Quote.diff(from, to)));
-		return parse(code, HttpExecutor.get(url));
+		List<Quote> result = parse(code, HttpExecutor.get(url));
+		String lastday = result.get(result.size() - 1).getDate();
+		if (to.equals(lastday)) {
+			return result;
+		}
+		Quote quote = get(code);
+		quote.setClose(quote.getPrice());
+		if (to.equals(quote.getDate())) {
+			result.add(quote);
+		}
+		return result;
 	}
 
 	private List<Quote> parse(String code, String response) {
@@ -88,7 +96,10 @@ public class SinaQuoteService extends QuoteService {
 	}
 
 	public static void main(String[] args) throws Exception {
-		List<Quote> list = new SinaQuoteService().get("sh600233", "2019-08-14", "2019-08-14");
+		System.out.println(new SinaQuoteService().get("sz000651"));
+		System.out.println(new SinaQuoteService().get("sh601318"));
+
+		List<Quote> list = new SinaQuoteService().get("sz000651", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}

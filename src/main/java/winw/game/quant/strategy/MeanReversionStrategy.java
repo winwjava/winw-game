@@ -65,6 +65,8 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		for (QuantQuote temp : buyOrders) {
 			portfolio.order(temp, 1, String.format("z-score: %.2f", temp.getZscore()));
 		}
+
+		// TODO 输出所有交易机会
 	}
 
 	// 当天z-score回去了也不能买。
@@ -76,6 +78,6 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 		strategy.backTesting(portfolio, "2019-04-26", today);
 
-		QuoteChart.show(portfolio, "2019-01-01", today);
+		QuoteChart.show(portfolio, "2019-04-01", today);
 	}
 }

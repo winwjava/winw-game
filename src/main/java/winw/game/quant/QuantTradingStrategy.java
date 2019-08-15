@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author winw
  *
  */
-public abstract class QuantTradingStrategy {
+public abstract class QuantTradingStrategy extends QuantQuoteCache {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
 
 	public final static String CSI_300 = "sh000300";// 沪深三百
@@ -38,20 +38,10 @@ public abstract class QuantTradingStrategy {
 
 	protected int observation = -120;
 
-	protected String currentDate;
-
-	protected String getCurrentDate() {
-		return currentDate;
-	}
-
 	/**
 	 * @return 样本代码。
 	 */
 	public abstract String[] samples();
-
-	private String[] load() {
-		return ArrayUtils.addAll(samples(), CSI_300);
-	}
 
 	/**
 	 * 实现具体的交易。
@@ -61,44 +51,6 @@ public abstract class QuantTradingStrategy {
 	 * @param codes
 	 */
 	public abstract void trading(Portfolio portfolio);
-
-	protected QuoteService quoteService = QuoteService.getDefault();
-
-	Map<String, List<QuantQuote>> quoteCache = new HashMap<String, List<QuantQuote>>();
-
-	Map<String, List<QuantQuote>> historyQuote = new HashMap<String, List<QuantQuote>>();
-
-	protected QuantQuote getCurrentQuote(String code) {// 收盘价上记录的是当前实时价格。
-		List<QuantQuote> list = getHistoryQuote(code);
-		if (list == null || list.isEmpty()) {
-			return null;
-		}
-		return list.get(list.size() - 1);
-	}
-
-	/**
-	 * 当前历史交易数据（从缓存中取）。
-	 * 
-	 * @param code
-	 * @return
-	 */
-	protected List<QuantQuote> getHistoryQuote(String code) {
-		return historyQuote.get(code);// 如果为空，则考虑用stockQuoteService查询一次。
-	}
-
-	protected List<QuantQuote> queryHistoryQuote(String from, String to, String code) throws Exception {
-		Quote quoteDetail = quoteService.get(code);
-		if (quoteDetail == null) {
-			return null;
-		}
-		List<Quote> list = quoteService.get(code, from, to);
-		if (list == null || list.isEmpty()) {
-			return null;
-		}
-
-		// 计算技术指标
-		return QuantQuote.compute(list);
-	}
 
 	protected double getMarketValue(Collection<Position> positions, String to) throws Exception {
 		double marketValue = 0;
@@ -129,7 +81,6 @@ public abstract class QuantTradingStrategy {
 		for (Position position : portfolio.getPositions().values()) {
 			position.setSellable(position.getSize());
 		}
-
 		// FIXME 复权处理。更新持仓数量和持仓价。记录复权信息。
 
 		// 模拟交易
@@ -141,50 +92,15 @@ public abstract class QuantTradingStrategy {
 
 	public String mockTrading(Portfolio portfolio) throws Exception {
 		String today = Quote.today();
-		String from = Quote.offset(today, observation);
-
-		StringBuilder lastday = new StringBuilder();
-		for (String temp : load()) {
-			historyQuote.put(temp, queryHistoryQuote(from, today, temp));
-			List<QuantQuote> tempQuotes = getHistoryQuote(temp);
-			lastday.append(temp).append(": ").append(tempQuotes.get(tempQuotes.size() - 1).getDate()).append(", ");
+		String from0 = Quote.offset(today, observation);
+		for (String temp : ArrayUtils.addAll(samples(), CSI_300)) {
+			historyQuote.put(temp, queryHistoryQuote(from0, today, temp));
 		}
-		logger.info(lastday.toString());
-		// 量化交易
-		trading0(portfolio);
+
+		trading0(portfolio);// 量化交易
 
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), today));
-		return getTradingLog(portfolio);
-	}
 
-	public void backTesting(Portfolio portfolio, String from, String to) throws Exception {
-		backTesting(portfolio, from, to, true);
-	}
-
-	public void backTesting(Portfolio portfolio, String from, String to, boolean log) throws Exception {
-		String from0 = Quote.offset(from, observation);
-		for (String temp : load()) {
-			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
-		}
-		// 以csi300的每日交易日期为基准。
-		for (QuantQuote temp : quoteCache.get(CSI_300)) {
-			currentDate = temp.getDate();
-			if (currentDate.compareTo(from) <= 0) {
-				continue;
-			}
-			// 更新当前的历史交易数据。
-			updateHistoryQuote();
-			// 量化交易
-			trading0(portfolio);
-		}
-
-		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), to));
-		if (log) {
-			printTradingLog(portfolio, from, to);
-		}
-	}
-
-	private String getTradingLog(Portfolio portfolio) {
 		String subject = portfolio.toString();
 		StringBuilder html = new StringBuilder("<b>").append(subject).append("</b><br>");
 		logger.info(subject);
@@ -199,29 +115,39 @@ public abstract class QuantTradingStrategy {
 		return html.toString();
 	}
 
-	private void printTradingLog(Portfolio portfolio, String from, String to) throws Exception {
+	public void backTesting(Portfolio portfolio, String from, String to) throws Exception {
+		backTesting(portfolio, from, to, true);
+	}
+
+	public void backTesting(Portfolio portfolio, String from, String to, boolean log) throws Exception {
+		String from0 = Quote.offset(from, observation);
+
+		for (String temp : ArrayUtils.addAll(samples(), CSI_300)) {
+			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
+		}
+
+		// 以csi300的每日交易日期为基准。
+		for (QuantQuote temp : quoteCache.get(CSI_300)) {
+			currentDate = temp.getDate();
+			if (currentDate.compareTo(from) <= 0) {
+				continue;
+			}
+			// 更新当前的历史交易数据。
+			updateHistoryQuote();
+			// 量化交易
+			trading0(portfolio);
+		}
+
+		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), to));
+
+		if (!log) {
+			return;
+		}
 		for (Order order : portfolio.getOrderList()) {
 			logger.info("{}, {}", order.getDate(), order.toString());
 		}
 		logger.info("{}, Backtesting from {} to {}, profit: {}, samples: {}", this.getClass().getSimpleName(), from, to,
 				portfolio.getReturnRate(), samples());
-	}
-
-	private void updateHistoryQuote() {// 根据样本，及时同步。
-		for (String code : quoteCache.keySet()) {
-			List<QuantQuote> list = quoteCache.get(code);
-			if (list == null) {
-				continue;
-			}
-			for (int i = 0; i < list.size(); i++) {
-				String date = list.get(i).getDate();
-				if (date.compareTo(currentDate) <= 0) {
-					continue;
-				}
-				historyQuote.put(code, list.subList(0, i));
-				break;
-			}
-		}
 	}
 
 	/**
@@ -262,14 +188,6 @@ public abstract class QuantTradingStrategy {
 		for (QuantQuote temp : orders.keySet()) {
 			portfolio.order(temp, -1, orders.get(temp));
 		}
-	}
-
-	public QuoteService getStockQuoteService() {
-		return quoteService;
-	}
-
-	public void setStockQuoteService(QuoteService quoteService) {
-		this.quoteService = quoteService;
 	}
 
 	protected static final NumberFormat percentFormat = new DecimalFormat("#.##%");

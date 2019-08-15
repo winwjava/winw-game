@@ -5,7 +5,6 @@ import java.util.List;
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantQuote;
 import winw.game.quant.QuantTradingStrategy;
-import winw.game.quant.QuoteService;
 
 /**
  * 金叉死叉策略。
@@ -81,10 +80,7 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 	}
 
 	public static void main(String[] args) throws Exception {
-		QuoteService service = QuoteService.getDefault();
 		GoldenCrossStrategy strategy = new GoldenCrossStrategy();
-		strategy.setStockQuoteService(service);
-
 		strategy.backTesting(new Portfolio(1000000, 1, 0.07, 0.05), "2018-01-01", "2019-07-08");
 	}
 

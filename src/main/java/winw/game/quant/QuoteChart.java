@@ -333,14 +333,16 @@ public class QuoteChart extends JPanel {
 		g.setFont(new Font(null, Font.BOLD, 12));
 		g.drawString(footer, masterX + 3, height - fontH * 0.2f);
 		g.drawString(header, masterX + 3, masterY - fontH * 0.2f);
-		String date = quoteList.get(viewFrom + viewLength - 1).getDate();
-		int dateW = g.getFontMetrics().stringWidth(date);
-		g.drawString(date, masterX + masterW - dateW, masterY - fontH * 0.2f);
+		QuantQuote lastView = quoteList.get(viewFrom + viewLength - 1);
+		String datetime = lastView.getDate() + " " + lastView.getTime();
+
+		int dateW = g.getFontMetrics().stringWidth(datetime);
+		g.drawString(datetime, masterX + masterW - dateW, masterY - fontH * 0.2f);
 	}
 
 	// 买卖记录。
 	private void drawOrders(Graphics2D g) {
-		for (int i = viewFrom; i < viewLength; i++) {
+		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
 			QuantQuote quote = quoteList.get(i);
 			Order order = orders.get(quote.getDate());
 			if (order == null) {
@@ -435,13 +437,15 @@ public class QuoteChart extends JPanel {
 
 	public QuoteChart(List<QuantQuote> quoteList, String from, String to, String header, String footer,
 			List<Order> orderList) {
-		this(quoteList, 0, 0, header, footer, orderList);
+		this(quoteList, -1, 0, header, footer, orderList);
 
 		for (int i = 0; i < quoteList.size(); i++) {
-			if (viewFrom < 0 && quoteList.get(i).getDate().compareTo(from) >= 0) {
+			String temp = quoteList.get(i).getDate();
+			if (viewFrom < 0 && temp.compareTo(from) >= 0) {
 				viewFrom = i;
 			}
-			if (quoteList.get(i).getDate().compareTo(to) <= 0) {
+
+			if (viewFrom >= 0 && temp.compareTo(to) <= 0) {
 				viewLength = i - viewFrom + 1;
 			}
 		}
@@ -478,7 +482,7 @@ public class QuoteChart extends JPanel {
 		QuoteService service = QuoteService.getDefault();
 		for (String code : orders.keySet()) {
 			Quote quote = service.get(code);
-			List<QuantQuote> quotes = QuantQuote.compute(service.get(code, from, to));
+			List<QuantQuote> quotes = QuantQuote.compute(service.get(code, Quote.offset(from, -120), to));
 			StringBuilder header = new StringBuilder(quote.getName());
 			header.append("  ").append(code).append("  Daily  Backtesting ");
 			for (Order order : orders.get(code)) {

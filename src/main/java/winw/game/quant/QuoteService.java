@@ -25,6 +25,9 @@ public abstract class QuoteService {
 	/**
 	 * 返回每日历史报价，向前复权（保持现有价位不变，将以前的价格缩减）。
 	 * 
+	 * <p>
+	 * 包含当天正在交易的数据，当前价格作为收盘价。
+	 * 
 	 * @param code
 	 * @param quotePeriod
 	 * @param from

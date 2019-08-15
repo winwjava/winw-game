@@ -44,7 +44,7 @@ public class Quote {
 		long fromTime = DateUtils.parseDate(from, Quote.DATE_PATTERN).getTime();
 		long toTime = DateUtils.parseDate(to, Quote.DATE_PATTERN).getTime();
 		int result = (int) ((toTime - fromTime) / 1000 / 3600 / 24) + 2;
-		return result < 7 ? result : result * 7 / 5 + 1;
+		return result < 7 ? result : result * 5 / 7;
 	}
 
 	@Id

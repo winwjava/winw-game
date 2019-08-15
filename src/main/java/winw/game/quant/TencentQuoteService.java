@@ -10,6 +10,10 @@ import winw.game.quant.util.HttpExecutor;
 
 /**
  * 腾讯接口实现。
+ * 
+ * <p>
+ * 注意：腾讯的实时报价延迟十五分钟。
+ * 
  * @author winw
  *
  */
@@ -20,8 +24,6 @@ public class TencentQuoteService extends QuoteService {
 
 	// 获取每日报价数据（前复权）
 	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,V_FROM,V_TO,V_NUM,qfq";
-	// 获取每月报价数据（前复权）
-	protected String monthlyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_monthqfq&param=V_CODE,month,V_FROM,V_TO,V_NUM,qfq";
 
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
@@ -32,8 +34,8 @@ public class TencentQuoteService extends QuoteService {
 
 	public Quote get(String code) throws IOException, ParseException {
 		String response = HttpExecutor.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
-		String[] split = response.split("~");
-		if (split == null || split.length <= 1) {
+		String[] fileds = response.split("~");
+		if (fileds == null || fileds.length <= 1) {
 			return null;
 		}
 
@@ -43,17 +45,17 @@ public class TencentQuoteService extends QuoteService {
 		// 看返回数据是以 ~ 分割字符串中内容，下标从0开始，依次为
 		// 0: 未知
 		// 1: 股票名字
-		quote.setName(split[1]);
+		quote.setName(fileds[1]);
 		// 2: 股票代码
 		quote.setCode(code);
 		// 3: 当前价格
-		quote.setPrice(Double.parseDouble(split[3]));
+		quote.setPrice(Double.parseDouble(fileds[3]));
 		// 4: 昨收
-		quote.setPreviousClose(Double.parseDouble(split[4]));
+		quote.setPreviousClose(Double.parseDouble(fileds[4]));
 		// 5: 今开
-		quote.setOpen(Double.parseDouble(split[5]));
+		quote.setOpen(Double.parseDouble(fileds[5]));
 		// 6: 成交量（手）
-		quote.setVolume(Integer.parseInt(split[6]));
+		quote.setVolume(Integer.parseInt(fileds[6]));
 		// 7: 外盘
 		// 8: 内盘
 		// 9: 买一
@@ -65,7 +67,7 @@ public class TencentQuoteService extends QuoteService {
 		// 29: 最近逐笔成交
 		// 30: 时间
 		// 20170804150557
-		quote.setTime(dateFormat.parse(split[30]));// 延迟十五分钟
+		quote.setTime(dateFormat.parse(fileds[30]));// 延迟十五分钟
 		// 31: 涨跌
 		// 32: 涨跌%
 		// 33: 最高
@@ -78,9 +80,9 @@ public class TencentQuoteService extends QuoteService {
 		// quote.setPe(Double.parseDouble(split[39]));
 		// 40:
 		// 41: 最高
-		quote.setHigh(Double.parseDouble(split[41]));
+		quote.setHigh(Double.parseDouble(fileds[41]));
 		// 42: 最低
-		quote.setLow(Double.parseDouble(split[42]));
+		quote.setLow(Double.parseDouble(fileds[42]));
 		// 43: 振幅
 		// 44: 流通市值
 		// quote.setMarketVal(Double.parseDouble(split[44]));
@@ -98,7 +100,17 @@ public class TencentQuoteService extends QuoteService {
 		to = to == null ? "" : to;
 		String url = dailyQuoteUrl.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code).replace("V_NUM",
 				String.valueOf(Quote.diff(from, to)));
-		return parse(code, HttpExecutor.get(url));
+		List<Quote> result = parse(code, HttpExecutor.get(url));
+		String lastday = result.get(result.size() - 1).getDate();
+		if (to.equals(lastday)) {
+			return result;
+		}
+		Quote quote = get(code);
+		quote.setClose(quote.getPrice());
+		if (to.equals(quote.getDate())) {
+			result.add(quote);// 追加当天的数据（在交易时段，从历史接口中查询不出）
+		}
+		return result;
 	}
 
 	private List<Quote> parse(String code, String response) {
@@ -129,13 +141,10 @@ public class TencentQuoteService extends QuoteService {
 	}
 
 	public static void main(String[] args) throws IOException, ParseException {
-		TencentQuoteService tencentQuoteService = new TencentQuoteService();
+		System.out.println(new TencentQuoteService().get("sz000651"));
+		System.out.println(new TencentQuoteService().get("sh601318"));
 
-		Quote quoteDetail = tencentQuoteService.get("sz002714");
-
-		System.out.println(quoteDetail.toString());
-
-		List<Quote> list = tencentQuoteService.get("sz002714", null, null);
+		List<Quote> list = new TencentQuoteService().get("sz000651", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}
