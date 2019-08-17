@@ -11,7 +11,7 @@ import winw.game.quant.util.HttpExecutor;
  * @author winw
  *
  */
-public class SinaQuoteService extends QuoteService {
+public class SinaQuoteService implements QuoteService {
 
 	// http://hq.sinajs.cn/list=sh600233
 	protected String realtimeQuoteUrl = "http://hq.sinajs.cn/list=V_CODE";
@@ -31,7 +31,7 @@ public class SinaQuoteService extends QuoteService {
 		quote.setPrice(Double.parseDouble(fileds[4]));
 		quote.setHigh(Double.parseDouble(fileds[5]));
 		quote.setLow(Double.parseDouble(fileds[6]));
-		quote.setVolume(Integer.parseInt(fileds[9]));
+		quote.setVolume(Long.parseLong(fileds[9]));
 		quote.setAmount(Double.parseDouble(fileds[10]));
 		quote.setDate(fileds[31]);
 		quote.setTime(fileds[32]);
@@ -90,20 +90,22 @@ public class SinaQuoteService extends QuoteService {
 			quote.setHigh(Double.parseDouble(fileds[5]));
 			quote.setLow(Double.parseDouble(fileds[7]));
 			quote.setClose(Double.parseDouble(fileds[9]));
-			quote.setVolume((int) Double.parseDouble(fileds[11]));
+			quote.setVolume(Long.parseLong(fileds[11]));
 			quoteList.add(quote);
 		}
 		return quoteList;
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new SinaQuoteService().get(Quote.class, "sz000651"));
-		System.out.println(new SinaQuoteService().get(Quote.class, "sh601318"));
 
-		List<Quote> list = new SinaQuoteService().get(Quote.class, "sz000651", Quote.today(), Quote.today());
+		QuoteService quoteService = new SinaQuoteService();
+		System.out.println(quoteService.get(Quote.class, "sz000651"));
+		System.out.println(quoteService.get(Quote.class, "sh601318"));
+		List<Quote> list = quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}
+
 	}
 
 	// http://finance.sina.com.cn/realstock/company/[市场][股票代码]/[复权].js?d=[日期][复权]：qianfuquan-前复权；houfuquan-后复权。返回结果：股票日期的股价JSON数据。

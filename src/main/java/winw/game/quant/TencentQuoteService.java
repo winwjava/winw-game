@@ -15,7 +15,7 @@ import winw.game.quant.util.HttpExecutor;
  * @author winw
  *
  */
-public class TencentQuoteService extends QuoteService {
+public class TencentQuoteService implements QuoteService {
 
 	// http://qt.gtimg.cn/q=sh600233
 	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
@@ -53,7 +53,7 @@ public class TencentQuoteService extends QuoteService {
 		// 5: 今开
 		quote.setOpen(Double.parseDouble(fileds[5]));
 		// 6: 成交量（手）
-		quote.setVolume(Integer.parseInt(fileds[6]));
+		quote.setVolume(Long.parseLong(fileds[6]) * 100);// 返回单位是手
 		// 7: 外盘
 		// 8: 内盘
 		// 9: 买一
@@ -132,17 +132,17 @@ public class TencentQuoteService extends QuoteService {
 			quote.setClose(Double.parseDouble(fileds[2]));
 			quote.setHigh(Double.parseDouble(fileds[3]));
 			quote.setLow(Double.parseDouble(fileds[4]));
-			quote.setVolume((int) Double.parseDouble(fileds[5]));
+			quote.setVolume(Long.parseLong(fileds[5]) * 100);// 返回单位是手
 			quoteList.add(quote);
 		}
 		return quoteList;
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new TencentQuoteService().get(Quote.class, "sz000651"));
-		System.out.println(new TencentQuoteService().get(Quote.class, "sh601318"));
-
-		List<Quote> list = new TencentQuoteService().get(Quote.class, "sz000651", Quote.today(), Quote.today());
+		QuoteService quoteService = new TencentQuoteService();
+		System.out.println(quoteService.get(Quote.class, "sz000651"));
+		System.out.println(quoteService.get(Quote.class, "sh601318"));
+		List<Quote> list = quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}

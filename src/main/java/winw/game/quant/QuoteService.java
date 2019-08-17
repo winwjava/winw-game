@@ -11,7 +11,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
  * @author winw
  *
  */
-public abstract class QuoteService {
+public interface QuoteService {
 
 	/**
 	 * 返回实时报价。
@@ -20,7 +20,7 @@ public abstract class QuoteService {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract <T extends Quote> T get(Class<T> clazz, String code) throws Exception;
+	<T extends Quote> T get(Class<T> clazz, String code) throws Exception;
 
 	/**
 	 * 返回每日历史报价，向前复权（保持现有价位不变，将以前的价格缩减）。
@@ -35,13 +35,13 @@ public abstract class QuoteService {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception;
+	<T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception;
 
 	/**
 	 * 
 	 * @return 当前时间是否是交易时间。
 	 */
-	public boolean isTradingTime() {
+	default boolean isTradingTime() {
 		String hhmm = DateFormatUtils.format(new Date(), "HHmm");
 		return hhmm.compareTo("0930") >= 0 && hhmm.compareTo("1500") <= 0;
 	}
@@ -50,14 +50,14 @@ public abstract class QuoteService {
 	 * @return 当前日期是否是交易日。
 	 * @throws Exception
 	 */
-	public boolean isTradingDay() throws Exception {
+	default boolean isTradingDay() throws Exception {
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		// 先查询今天是否是交易日。
 		Quote quote = get(Quote.class, "sh000300");
 		return today.equals(quote.getDate());
 	}
 
-	public static QuoteService getDefault() {
+	static QuoteService getDefault() {
 		return new SinaQuoteService();
 	}
 

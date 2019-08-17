@@ -61,7 +61,7 @@ public class Quote {
 	protected Double low; // 最低价
 	protected Double close; // 收盘价
 
-	protected Integer volume; // 成交量
+	protected Long volume; // 成交量
 	protected Double amount; // 成交金额
 
 	protected String date;// 交易日期
@@ -83,7 +83,7 @@ public class Quote {
 		super();
 	}
 
-	public Quote(String date, double open, double high, double low, double close, int volume, double amount) {
+	public Quote(String date, double open, double high, double low, double close, long volume, double amount) {
 		super();
 		this.date = date;
 		this.open = open;
@@ -164,11 +164,11 @@ public class Quote {
 		this.close = close;
 	}
 
-	public int getVolume() {
+	public Long getVolume() {
 		return volume;
 	}
 
-	public void setVolume(int volume) {
+	public void setVolume(long volume) {
 		this.volume = volume;
 	}
 

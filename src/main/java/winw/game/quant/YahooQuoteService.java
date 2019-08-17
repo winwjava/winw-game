@@ -20,7 +20,7 @@ import yahoofinance.histquotes.Interval;
  * @author winw
  *
  */
-public class YahooQuoteService extends QuoteService {
+public class YahooQuoteService implements QuoteService {
 
 	@Override
 	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
@@ -65,6 +65,16 @@ public class YahooQuoteService extends QuoteService {
 			}
 		}
 		return quoteList;
+	}
+
+	public static void main(String[] args) throws Exception {
+		QuoteService quoteService = new YahooQuoteService();
+		System.out.println(quoteService.get(Quote.class, "0011.HK"));
+		System.out.println(quoteService.get(Quote.class, "000300.SS"));
+		List<Quote> list = quoteService.get(Quote.class, "^IXIC", Quote.today(), Quote.today());
+		for (Quote quote : list) {
+			System.out.println(quote);
+		}
 	}
 
 }
