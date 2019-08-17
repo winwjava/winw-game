@@ -1,17 +1,8 @@
 package winw.game.quant;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 /**
  * 报价的量化指标。
@@ -53,15 +44,12 @@ public class QuantQuote extends Quote {
 	private double mb; // 中轨线
 	private double dn; // 下轨线
 
-	private double ema60max;
-	private double ema60min;
-
-	// MA60的斜率
-	private double slope5;
-	private double slope60;
-
-	// standard score
 	private double zscore;
+	private double slopeS;
+	private double slopeL;
+
+	protected double ema60max;
+	protected double ema60min;
 
 	public QuantQuote() {
 		super();
@@ -84,58 +72,22 @@ public class QuantQuote extends Quote {
 	}
 
 	/**
-	 * 取不超过days时间的天
-	 * 
-	 * @param days
-	 * @param list
-	 * @return
-	 * @throws ParseException
-	 */
-	private static int formIndex(int days, List<? extends Quote> list) throws ParseException {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_YEAR, (int) (-days - (50 * 1.2)));
-		Date start = calendar.getTime();
-		DateFormat dateFormat = new SimpleDateFormat(Quote.DATE_PATTERN);
-		int from = 0;// -1
-		for (int i = 0; i < list.size(); i++) {
-			if (start.before(dateFormat.parse(list.get(i).getDate()))) {
-				from = i;
-				break;
-			}
-		}
-		return from;
-	}
-
-	public static List<QuantQuote> compute(List<? extends Quote> quoteList, int days) throws ParseException {
-		return compute(quoteList.subList(formIndex(days, quoteList), quoteList.size()));
-	}
-
-	/**
 	 * 计算 MA MACD BOLL RSI KDJ 指标
 	 * 
 	 * @param quoteList
 	 * @return
 	 */
-	public static List<QuantQuote> compute(List<? extends Quote> quoteList) {
-		List<QuantQuote> list = new ArrayList<QuantQuote>();
-		for (Quote quote : quoteList) {
-			list.add(new QuantQuote(quote));
-		}
+	public static <T extends QuantQuote> List<T> compute(List<T> list) {
 		computeMA(list);
 		computeEMA(list);
 		computeMACD(list);
-		// computeBOLL(list);
-		// computeRSI(list);
-		// computeKDJ(list);
-		computeSlope(list);
-		computeZscore(list);
 		return list;
 	}
 
 	/**
 	 * 计算 MA
 	 */
-	protected static void computeMA(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeMA(List<T> list) {
 		double ma5 = 0;
 		double ma10 = 0;
 		double ma20 = 0;
@@ -197,7 +149,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 EMA
 	 */
-	protected static void computeEMA(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeEMA(List<T> list) {
 		Double k5 = 2.0 / (5 + 1.0);
 		Double k60 = 2.0 / (60 + 1.0);
 		Double ema5 = list.get(0).getClose();
@@ -208,7 +160,6 @@ public class QuantQuote extends Quote {
 			ema60 = quote.getClose() * k60 + ema60 * (1 - k60);
 			quote.setEma5(ema5);
 			quote.setEma60(ema60);
-
 		}
 
 		for (int i = 1; i < list.size(); i++) {
@@ -249,7 +200,7 @@ public class QuantQuote extends Quote {
 	 * which are used by the majority of traders as the buying and selling decisions
 	 * based on the standard settings further push the prices in that direction.
 	 */
-	protected static void computeMACD(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeMACD(List<T> list) {
 		double ema12 = 0;
 		double ema26 = 0;
 		double diff = 0;
@@ -285,7 +236,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 BOLL 需要在计算 MA 之后进行
 	 */
-	protected static void computeBOLL(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeBOLL(List<T> list) {
 		for (int i = 0; i < list.size(); i++) {
 			QuantQuote quantQuote = list.get(i);
 
@@ -320,7 +271,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 RSI
 	 */
-	protected static void computeRSI(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeRSI(List<T> list) {
 		double rsi1 = 0;
 		double rsi2 = 0;
 		double rsi3 = 0;
@@ -371,7 +322,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 KDJ
 	 */
-	protected static void computeKDJ(List<QuantQuote> list) {
+	protected static <T extends QuantQuote> void computeKDJ(List<T> list) {
 		double k = 0;
 		double d = 0;
 
@@ -408,90 +359,6 @@ public class QuantQuote extends Quote {
 			quantQuote.setK(k);
 			quantQuote.setD(d);
 			quantQuote.setJ(3f * k - 2 * d);
-		}
-	}
-
-	/**
-	 * 计算 slope
-	 */
-	protected static void computeSlope(List<QuantQuote> list) {
-		// 线性回归，计算斜率
-		SimpleRegression regression = new SimpleRegression();
-		for (int i = 1; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
-			if (i < 5) {
-				continue;
-			}
-
-			regression.clear();
-
-			// 算法一：用最近60天的最高价和最低价作为高，60天标准高宽比例是300：1500
-			// Y = 300 * (EMA60 - MIN(CLOSE, 60) ) * (MAX(CLOSE, 60) - MIN(CLOSE, 60) )
-			// X = (1500 / 60) * N
-			double hight = list.get(i).ema60max - list.get(i).ema60min;
-			double bottom = list.get(i).ema60min;
-
-			for (int j = 1; j <= 3; j++) {
-				QuantQuote temp = list.get(i - 3 + j);
-				regression.addData((1500 / 60) * j, 300d * (temp.ema5 - bottom) / hight);
-			}
-			quantQuote.setSlope5(regression.getSlope());
-			regression.clear();
-			for (int j = 1; j <= 5; j++) {
-				QuantQuote temp = list.get(i - 5 + j);
-				regression.addData((1500d / 60) * j, 300d * (temp.ema60 - bottom) / hight);
-			}
-			quantQuote.setSlope60(regression.getSlope());
-			// 算法二：模拟X轴，X点的间隔用Y点的0.005倍（y * 30% / 60）
-			// 算法三：每年250个交易日年化4%收益，斜率应该是0.04，则Y的间隔应该是X的0.104倍（y(1 + 0.04) / (250x) = 0.04）
-			// double xInterval5 = indicator.getEma5() * 0.005;
-			// for (int j = 0; j < 3; j++) {
-			// regression.addData(j * xInterval5, list.get(i - 3 + j).getEma5());
-			// }
-			// indicator.setSlope5(regression.getSlope());
-			//
-			// regression.clear();
-			// double xInterval60 = indicator.getEma60() * 0.005;
-			// for (int j = 0; j < 6; j++) {
-			// if (indicator.getDate().equals("2018-01-15")) {
-			// System.out.println("====" + list.get(i - 5 + j).getEma60());
-			// }
-			// regression.addData(j * xInterval60, list.get(i - 5 + j).getEma60());
-			// }
-			// indicator.setSlope60(regression.getSlope());
-			// if (indicator.getDate().equals("2018-01-15")) {
-			// NumberFormat percentFormat = new DecimalFormat("##.00%");
-			// System.out.println("====" + percentFormat.format(regression.getSlope()));
-			// }
-		}
-	}
-
-	/**
-	 * 计算 Z-Score（此处计算的是收盘价与20天移动平均线的差值的Z-Score）
-	 * <p>
-	 * 公式：z-score = (value - mean) / standard deviation;
-	 */
-	protected static void computeZscore(List<QuantQuote> list) {
-		double[] subArray = new double[list.size()];
-		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
-			subArray[i] = quantQuote.close - quantQuote.ma20;
-			if (i < 62) {
-				continue;
-			}
-			// 取59天的数据。
-			double std = Math.sqrt(StatUtils.populationVariance(subArray, i - 59, 59));
-			quantQuote.zscore = (subArray[i - 1] - StatUtils.mean(subArray, i - 59, 59)) / std;
-		}
-	}
-
-	public static void main(String[] args) {
-		double[] points60 = new double[] { 16.2441, 16.2296, 16.2048, 16.2129, 16.2746, 16.3092 };
-
-		SimpleRegression regression = new SimpleRegression();
-		double xInterval5 = points60[5] * 0.15;
-		for (int j = 0; j <= 5; j++) {
-			regression.addData(j * xInterval5, points60[j]);
 		}
 	}
 
@@ -671,28 +538,28 @@ public class QuantQuote extends Quote {
 		this.ema60min = ema60min;
 	}
 
-	public double getSlope60() {
-		return slope60;
-	}
-
-	public void setSlope60(double slope60) {
-		this.slope60 = slope60;
-	}
-
-	public double getSlope5() {
-		return slope5;
-	}
-
-	public void setSlope5(double slope5) {
-		this.slope5 = slope5;
-	}
-
 	public double getZscore() {
 		return zscore;
 	}
 
 	public void setZscore(double zscore) {
 		this.zscore = zscore;
+	}
+
+	public double getSlopeL() {
+		return slopeL;
+	}
+
+	public void setSlopeL(double slopeL) {
+		this.slopeL = slopeL;
+	}
+
+	public double getSlopeS() {
+		return slopeS;
+	}
+
+	public void setSlopeS(double slopeS) {
+		this.slopeS = slopeS;
 	}
 
 }

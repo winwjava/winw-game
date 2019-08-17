@@ -11,11 +11,11 @@ public class TencentStockQuoteServiceTest {
 
 	@Test
 	public void test() throws Exception {
-		Quote quote = service.get("sh000300");
+		Quote quote = service.get(Quote.class, "sh000300");
 		// System.out.println(quote);
 		Assert.assertNotNull(quote);
 
-		List<Quote> dailyQuote = service.get("sh000300", null, null);
+		List<Quote> dailyQuote = service.get(Quote.class, "sh000300", null, null);
 		Assert.assertNotNull(dailyQuote);
 		Assert.assertTrue(dailyQuote.size() > 0);
 		int i = 1 ;

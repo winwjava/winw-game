@@ -17,13 +17,13 @@ public class SinaQuoteService extends QuoteService {
 	protected String realtimeQuoteUrl = "http://hq.sinajs.cn/list=V_CODE";
 
 	@Override
-	public Quote get(String code) throws Exception {
+	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
 		String response = HttpExecutor.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] fileds = response.split("\"|,");
 		if (fileds == null || fileds.length <= 1) {
 			return null;
 		}
-		Quote quote = new Quote();
+		T quote = clazz.newInstance();
 		quote.setCode(code);
 		quote.setName(fileds[1]);
 		quote.setOpen(Double.parseDouble(fileds[2]));
@@ -51,16 +51,16 @@ public class SinaQuoteService extends QuoteService {
 	// 例如，http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600233&scale=60&ma=no&datalen=1023
 
 	@Override
-	public List<Quote> get(String code, String from, String to) throws Exception {
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
 		from = from == null ? "" : from;
 		to = to == null ? "" : to;
 		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(Quote.diff(from, to)));
-		List<Quote> result = parse(code, HttpExecutor.get(url));
+		List<T> result = parse(clazz, code, HttpExecutor.get(url));
 		String lastday = result.get(result.size() - 1).getDate();
 		if (to.equals(lastday)) {
 			return result;
 		}
-		Quote quote = get(code);
+		T quote = get(clazz, code);
 		quote.setClose(quote.getPrice());
 		if (to.equals(quote.getDate())) {
 			result.add(quote);
@@ -68,21 +68,22 @@ public class SinaQuoteService extends QuoteService {
 		return result;
 	}
 
-	private List<Quote> parse(String code, String response) {
+	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response) throws Exception {
 		if (response.indexOf("[") == -1) {
 			return null;
 		}
 		String data = response.substring(2, response.length() - 3);
 		String[] lines = data.split("\\}\\,\\{");
 
-		List<Quote> quoteList = new ArrayList<Quote>();
+		List<T> quoteList = new ArrayList<T>();
 		for (int i = 0; i < lines.length; i++) {
 			String[] fileds = lines[i].replaceAll("\"", "").split("\\,|:");
 			if (fileds == null || fileds.length < 6) {
 				continue;
 			}
 			// day:"2019-08-01",open:"13.170",high:"13.200",low:"12.650",close:"12.750",volume:"12621062"
-			Quote quote = new Quote();
+
+			T quote = clazz.newInstance();
 			quote.setCode(code);
 			quote.setDate(fileds[1]);
 			quote.setOpen(Double.parseDouble(fileds[3]));
@@ -96,10 +97,10 @@ public class SinaQuoteService extends QuoteService {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new SinaQuoteService().get("sz000651"));
-		System.out.println(new SinaQuoteService().get("sh601318"));
+		System.out.println(new SinaQuoteService().get(Quote.class, "sz000651"));
+		System.out.println(new SinaQuoteService().get(Quote.class, "sh601318"));
 
-		List<Quote> list = new SinaQuoteService().get("sz000651", Quote.today(), Quote.today());
+		List<Quote> list = new SinaQuoteService().get(Quote.class, "sz000651", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}

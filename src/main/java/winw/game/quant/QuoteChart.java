@@ -60,9 +60,9 @@ public class QuoteChart extends JPanel {
 	private List<Point2D> v5Points = new ArrayList<Point2D>();
 	private List<Point2D> v10Points = new ArrayList<Point2D>();
 
-	private double maxPrice, minPrice, maxVolume, maxZscore, priceRatio, volumeRatio, zscoreRatio;
-
 	private float masterX, masterY, bottomH, masterW, deputyH, middleH, masterH, deputyY, quoteW;
+
+	private double maxPrice, minPrice, maxVolume, maxZscore, priceRatio, volumeRatio, zscoreRatio;
 
 	@Override
 	public void paint(Graphics g) {
@@ -222,9 +222,12 @@ public class QuoteChart extends JPanel {
 	}
 
 	private void drawDeputyChart(Graphics2D g) {
-		// drawVolume(g);
-		// drawVolumeMA(g);
-		drawZscore(g);
+		if (maxZscore == 0) {
+			drawVolume(g);
+			drawVolumeMA(g);
+		} else {
+			drawZscore(g);
+		}
 	}
 
 	protected void drawVolume(Graphics2D g) {
@@ -334,7 +337,7 @@ public class QuoteChart extends JPanel {
 		g.drawString(footer, masterX + 3, height - fontH * 0.2f);
 		g.drawString(header, masterX + 3, masterY - fontH * 0.2f);
 		QuantQuote lastView = quoteList.get(viewFrom + viewLength - 1);
-		String datetime = lastView.getDate() + " " + lastView.getTime();
+		String datetime = lastView.getDate() + " " + lastView.getTimeOrDefault();
 
 		int dateW = g.getFontMetrics().stringWidth(datetime);
 		g.drawString(datetime, masterX + masterW - dateW, masterY - fontH * 0.2f);
@@ -466,7 +469,7 @@ public class QuoteChart extends JPanel {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public static void show(Portfolio portfolio, String from, String to) throws Exception {
+	public static void show(Portfolio portfolio, QuantQuoteCache cache, String from, String to) throws Exception {
 		Map<String, List<Order>> orders = new HashMap<String, List<Order>>();
 		// Collections.sort(portfolio.getOrderList(),
 		// Comparator.comparing(Order::getProfit));
@@ -481,8 +484,10 @@ public class QuoteChart extends JPanel {
 		List<QuoteChart> charts = new ArrayList<>();
 		QuoteService service = QuoteService.getDefault();
 		for (String code : orders.keySet()) {
-			Quote quote = service.get(code);
-			List<QuantQuote> quotes = QuantQuote.compute(service.get(code, Quote.offset(from, -120), to));
+			Quote quote = service.get(Quote.class, code);
+			List<QuantQuote> quotes = cache.getQuoteCache().get(code);
+			// QuantQuote.compute(service.get(QuantQuote.class, code, Quote.offset(from,
+			// -120), to));
 			StringBuilder header = new StringBuilder(quote.getName());
 			header.append("  ").append(code).append("  Daily  Backtesting ");
 			for (Order order : orders.get(code)) {
@@ -502,7 +507,7 @@ public class QuoteChart extends JPanel {
 	private static QuoteChart newChart(String code) throws Exception {
 		QuoteService service = QuoteService.getDefault();
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
-		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(code, "2018-10-01", today));
+		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(QuantQuote.class, code, "2018-10-01", today));
 		QuoteChart chart = new QuoteChart(dailyQuote, dailyQuote.size() - 120, 120, code + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		return chart;

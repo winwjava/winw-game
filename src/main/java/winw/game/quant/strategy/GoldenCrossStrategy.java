@@ -61,7 +61,7 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 		QuantQuote today = quantQuotes.get(quantQuotes.size() - 1);
 		QuantQuote yesterday = quantQuotes.get(quantQuotes.size() - 2);
 
-		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0 && today.getSlope60() > 0.02
+		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0
 				&& !portfolio.hasPosition(today.getCode())) {
 			portfolio.order(today, 1, "GOLDEN_CROSSOVER");
 		}

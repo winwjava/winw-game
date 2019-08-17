@@ -1,7 +1,5 @@
 package winw.game.quant;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +30,14 @@ public class TencentQuoteService extends QuoteService {
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
-	public Quote get(String code) throws IOException, ParseException {
+	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
 		String response = HttpExecutor.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] fileds = response.split("~");
 		if (fileds == null || fileds.length <= 1) {
 			return null;
 		}
 
-		Quote quote = new Quote();
+		T quote = clazz.newInstance();
 
 		// v_sh600233="1~圆通速递~600233~18.07~18.11~18.10~17984~7724~10260~18.07~158~18.06~703~18.05~453~18.04~552~18.03~426~18.08~210~18.09~61~18.10~414~18.11~15~18.12~111~15:00:02/18.07/5/S/9035/23371|15:00:00/18.07/1/S/1807/23368|14:59:57/18.07/1/S/1807/23364|14:59:50/18.07/17/S/30724/23355|14:59:44/18.07/7/S/12655/23349|14:59:44/18.07/1/S/1807/23346~20170804150557~-0.04~-0.22~18.14~18.03~18.07/17978/32487500~17984~3250~0.54~31.11~~18.14~18.03~0.61~59.63~509.80~6.01~19.92~16.30~0.83";
 		// 看返回数据是以 ~ 分割字符串中内容，下标从0开始，依次为
@@ -95,17 +93,17 @@ public class TencentQuoteService extends QuoteService {
 	}
 
 	@Override
-	public List<Quote> get(String code, String from, String to) throws IOException, ParseException {
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
 		from = from == null ? "" : from;
 		to = to == null ? "" : to;
 		String url = dailyQuoteUrl.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code).replace("V_NUM",
 				String.valueOf(Quote.diff(from, to)));
-		List<Quote> result = parse(code, HttpExecutor.get(url));
+		List<T> result = parse(clazz, code, HttpExecutor.get(url));
 		String lastday = result.get(result.size() - 1).getDate();
 		if (to.equals(lastday)) {
 			return result;
 		}
-		Quote quote = get(code);
+		T quote = get(clazz, code);
 		quote.setClose(quote.getPrice());
 		if (to.equals(quote.getDate())) {
 			result.add(quote);// 追加当天的数据（在交易时段，从历史接口中查询不出）
@@ -113,21 +111,21 @@ public class TencentQuoteService extends QuoteService {
 		return result;
 	}
 
-	private List<Quote> parse(String code, String response) {
+	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response) throws Exception {
 		if (response.indexOf("[[") == -1) {
 			return null;
 		}
 		String data = response.substring(response.indexOf("[[") + 2, response.indexOf("]],"));
 		String[] lines = data.split("\\]\\,\\[");// "],["
 
-		List<Quote> quoteList = new ArrayList<Quote>();
+		List<T> quoteList = new ArrayList<T>();
 		for (int i = 0; i < lines.length; i++) {
 			String[] fileds = lines[i].replaceAll("\"", "").split("\\,");
 			if (fileds == null || fileds.length < 6) {
 				continue;
 			}
 			// date open close high low volume
-			Quote quote = new Quote();
+			T quote = clazz.newInstance();
 			quote.setCode(code);
 			quote.setDate(fileds[0]);
 			quote.setOpen(Double.parseDouble(fileds[1]));
@@ -140,11 +138,11 @@ public class TencentQuoteService extends QuoteService {
 		return quoteList;
 	}
 
-	public static void main(String[] args) throws IOException, ParseException {
-		System.out.println(new TencentQuoteService().get("sz000651"));
-		System.out.println(new TencentQuoteService().get("sh601318"));
+	public static void main(String[] args) throws Exception {
+		System.out.println(new TencentQuoteService().get(Quote.class, "sz000651"));
+		System.out.println(new TencentQuoteService().get(Quote.class, "sh601318"));
 
-		List<Quote> list = new TencentQuoteService().get("sz000651", Quote.today(), Quote.today());
+		List<Quote> list = new TencentQuoteService().get(Quote.class, "sz000651", Quote.today(), Quote.today());
 		for (Quote quote : list) {
 			System.out.println(quote);
 		}

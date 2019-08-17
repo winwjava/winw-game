@@ -20,7 +20,7 @@ public abstract class QuoteService {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract Quote get(String code) throws Exception;
+	public abstract <T extends Quote> T get(Class<T> clazz, String code) throws Exception;
 
 	/**
 	 * 返回每日历史报价，向前复权（保持现有价位不变，将以前的价格缩减）。
@@ -35,7 +35,7 @@ public abstract class QuoteService {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract List<Quote> get(String code, String from, String to) throws Exception;
+	public abstract <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception;
 
 	/**
 	 * 
@@ -53,7 +53,7 @@ public abstract class QuoteService {
 	public boolean isTradingDay() throws Exception {
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		// 先查询今天是否是交易日。
-		Quote quote = get("sh000300");
+		Quote quote = get(Quote.class, "sh000300");
 		return today.equals(quote.getDate());
 	}
 

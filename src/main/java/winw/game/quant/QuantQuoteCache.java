@@ -18,6 +18,13 @@ public class QuantQuoteCache {
 
 	protected Map<String, List<QuantQuote>> historyQuote = new HashMap<String, List<QuantQuote>>();
 
+	public List<QuantQuote> compute(List<QuantQuote> list) {
+		QuantQuote.computeMA(list);
+		QuantQuote.computeEMA(list);
+		QuantQuote.computeMACD(list);
+		return list;
+	}
+
 	public void cache(String[] codes, String from, String to) throws Exception {
 		String today = Quote.today();
 		for (String temp : codes) {
@@ -25,7 +32,7 @@ public class QuantQuoteCache {
 			List<QuantQuote> tempQuotes = getHistoryQuote(temp);
 			String lastday = tempQuotes.get(tempQuotes.size() - 1).getDate();
 			if (!today.equals(lastday)) {
-				System.err.println("last quote("+lastday + ") is not today!!!");
+				System.err.println("last quote(" + lastday + ") is not today!!!");
 			}
 		}
 	}
@@ -49,17 +56,17 @@ public class QuantQuoteCache {
 	}
 
 	public List<QuantQuote> queryHistoryQuote(String from, String to, String code) throws Exception {
-		Quote quoteDetail = quoteService.get(code);
+		Quote quoteDetail = quoteService.get(QuantQuote.class, code);
 		if (quoteDetail == null) {
 			return null;
 		}
-		List<Quote> list = quoteService.get(code, from, to);
+		List<QuantQuote> list = quoteService.get(QuantQuote.class, code, from, to);
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
 
 		// 计算技术指标
-		return QuantQuote.compute(list);
+		return compute(list);
 	}
 
 	public void updateHistoryQuote() {// 根据样本，及时同步。
@@ -77,6 +84,10 @@ public class QuantQuoteCache {
 				break;
 			}
 		}
+	}
+
+	public Map<String, List<QuantQuote>> getQuoteCache() {
+		return quoteCache;
 	}
 
 }

@@ -21,7 +21,7 @@ public class QuoteRepositoryTest {
 
 	@Test
 	public void test() throws Exception {
-		List<Quote> dailyQuote = service.get("sh600233", null, null);
+		List<Quote> dailyQuote = service.get(Quote.class, "sh600233", null, null);
 		Assert.assertNotNull(dailyQuote);
 		Assert.assertTrue(dailyQuote.size() > 0);
 

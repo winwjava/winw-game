@@ -23,9 +23,9 @@ import yahoofinance.histquotes.Interval;
 public class YahooQuoteService extends QuoteService {
 
 	@Override
-	public Quote get(String code) throws Exception {
+	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
 		yahoofinance.quotes.stock.StockQuote temp = YahooFinance.get(code).getQuote();
-		Quote quote = new Quote();
+		T quote = clazz.newInstance();
 		quote.setName(temp.getSymbol());
 		quote.setCode(code);
 		quote.setPrice(temp.getPrice().doubleValue());
@@ -39,7 +39,7 @@ public class YahooQuoteService extends QuoteService {
 	}
 
 	@Override
-	public List<Quote> get(String code, String from, String to) throws Exception {
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
 		Calendar f = Calendar.getInstance();
 		Calendar t = Calendar.getInstance();
 		f.setTime(DateUtils.parseDate(from, Quote.DATE_PATTERN));
@@ -48,10 +48,10 @@ public class YahooQuoteService extends QuoteService {
 		Stock s = YahooFinance.get(code);
 		List<HistoricalQuote> h = s.getHistory(f, t, Interval.DAILY);
 
-		List<Quote> quoteList = new ArrayList<Quote>();
+		List<T> quoteList = new ArrayList<T>();
 		for (HistoricalQuote q : h) {
 			try {
-				Quote quote = new Quote();
+				T quote = clazz.newInstance();
 				quote.setCode(code);
 				quote.setDate(DateFormatUtils.format(q.getDate(), Quote.DATE_PATTERN));
 				quote.setClose(q.getClose().doubleValue());

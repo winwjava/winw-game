@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.math3.stat.StatUtils;
 
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantQuote;
@@ -26,6 +27,30 @@ import winw.game.quant.QuoteChart;
  *
  */
 public class MeanReversionStrategy extends QuantTradingStrategy {
+
+	/**
+	 * 计算 Z-Score（此处计算的是收盘价与20天移动平均线的差值的Z-Score）
+	 * <p>
+	 * 公式：z-score = (value - mean) / standard deviation;
+	 */
+	public static List<QuantQuote> computeZscore(List<QuantQuote> list) {
+		double[] subArray = new double[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			QuantQuote quantQuote = list.get(i);
+			subArray[i] = quantQuote.getClose() - quantQuote.getMa20();
+			if (i < 62) {
+				continue;
+			}
+			// 取59天的数据。
+			double std = Math.sqrt(StatUtils.populationVariance(subArray, i - 59, 59));
+			quantQuote.setZscore((subArray[i - 1] - StatUtils.mean(subArray, i - 59, 59)) / std);
+		}
+		return list;
+	}
+
+	public List<QuantQuote> compute(List<QuantQuote> list) {
+		return computeZscore(super.compute(list));
+	}
 
 	@Override
 	public String[] samples() {
@@ -78,6 +103,6 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 		strategy.backTesting(portfolio, "2019-04-26", today);
 
-		QuoteChart.show(portfolio, "2019-04-01", today);
+		QuoteChart.show(portfolio, strategy, "2019-04-01", today);
 	}
 }

@@ -25,8 +25,8 @@ import org.apache.commons.lang3.time.DateUtils;
 @Table(name = "QUOTE")
 public class Quote {
 
-	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期
-	public final static String TIME_PATTERN = "HH:mm:ss";// 交易日期
+	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期格式
+	public final static String TIME_PATTERN = "HH:mm:ss";// 交易时间格式
 
 	public static String today() {
 		return DateFormatUtils.format(new Date(), DATE_PATTERN);
@@ -182,6 +182,10 @@ public class Quote {
 
 	public String getTime() {
 		return time;
+	}
+
+	public String getTimeOrDefault() {
+		return time != null ? time : "15:00:00";
 	}
 
 	public void setTime(String time) {

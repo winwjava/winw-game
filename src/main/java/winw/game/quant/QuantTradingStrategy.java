@@ -56,7 +56,7 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 		double marketValue = 0;
 		String from1 = Quote.addDays(to, -15);// 从to的15天前开始取数据，以获取to当天的收盘价
 		for (Position position : positions) {
-			List<Quote> temp = quoteService.get(position.getCode(), from1, to);
+			List<Quote> temp = quoteService.get(Quote.class, position.getCode(), from1, to);
 			marketValue += position.getSize() * temp.get(temp.size() - 1).getClose();
 		}
 		return marketValue;
@@ -72,8 +72,9 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 
 		// 市场处于向上趋势，调整为趋势跟踪策略
 		// 市场处于向下或震荡趋势，调整为均值回归策略
-		QuantQuote current = getCurrentQuote(CSI_300);
-		return current.getSlope60() > 0.04 && current.getSlope5() > 0.04;
+		// QuantQuote current = getCurrentQuote(CSI_300);
+		// return current.getSlope60() > 0.04 && current.getSlope5() > 0.04;
+		return false;
 	}
 
 	private void trading0(Portfolio portfolio) {
@@ -137,7 +138,6 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 			// 量化交易
 			trading0(portfolio);
 		}
-
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), to));
 
 		if (!log) {
