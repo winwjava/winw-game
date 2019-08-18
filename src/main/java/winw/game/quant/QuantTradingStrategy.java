@@ -122,11 +122,9 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 
 	public void backTesting(Portfolio portfolio, String from, String to, boolean log) throws Exception {
 		String from0 = Quote.offset(from, observation);
-
 		for (String temp : ArrayUtils.addAll(samples(), CSI_300)) {
 			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
 		}
-
 		// 以csi300的每日交易日期为基准。
 		for (QuantQuote temp : quoteCache.get(CSI_300)) {
 			currentDate = temp.getDate();

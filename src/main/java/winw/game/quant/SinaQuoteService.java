@@ -54,8 +54,8 @@ public class SinaQuoteService implements QuoteService {
 	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
 		from = from == null ? "" : from;
 		to = to == null ? "" : to;
-		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(Quote.diff(from, to)));
-		List<T> result = parse(clazz, code, HttpExecutor.get(url));
+		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(Quote.diff(from, Quote.today())));
+		List<T> result = parse(clazz, code, HttpExecutor.get(url), from, to);
 		String lastday = result.get(result.size() - 1).getDate();
 		if (to.equals(lastday)) {
 			return result;
@@ -68,13 +68,12 @@ public class SinaQuoteService implements QuoteService {
 		return result;
 	}
 
-	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response) throws Exception {
+	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response, String from, String to) throws Exception {
 		if (response.indexOf("[") == -1) {
 			return null;
 		}
 		String data = response.substring(2, response.length() - 3);
 		String[] lines = data.split("\\}\\,\\{");
-
 		List<T> quoteList = new ArrayList<T>();
 		for (int i = 0; i < lines.length; i++) {
 			String[] fileds = lines[i].replaceAll("\"", "").split("\\,|:");
@@ -82,7 +81,6 @@ public class SinaQuoteService implements QuoteService {
 				continue;
 			}
 			// day:"2019-08-01",open:"13.170",high:"13.200",low:"12.650",close:"12.750",volume:"12621062"
-
 			T quote = clazz.newInstance();
 			quote.setCode(code);
 			quote.setDate(fileds[1]);
@@ -91,21 +89,22 @@ public class SinaQuoteService implements QuoteService {
 			quote.setLow(Double.parseDouble(fileds[7]));
 			quote.setClose(Double.parseDouble(fileds[9]));
 			quote.setVolume(Long.parseLong(fileds[11]));
+
+			if (quote.getDate().compareTo(to) > 0) {
+				break;
+			}
 			quoteList.add(quote);
 		}
 		return quoteList;
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		QuoteService quoteService = new SinaQuoteService();
 		System.out.println(quoteService.get(Quote.class, "sz000651"));
 		System.out.println(quoteService.get(Quote.class, "sh601318"));
-		List<Quote> list = quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today());
-		for (Quote quote : list) {
+		for (Quote quote : quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today())) {
 			System.out.println(quote);
 		}
-
 	}
 
 	// http://finance.sina.com.cn/realstock/company/[市场][股票代码]/[复权].js?d=[日期][复权]：qianfuquan-前复权；houfuquan-后复权。返回结果：股票日期的股价JSON数据。

@@ -58,7 +58,7 @@ public interface QuoteService {
 	}
 
 	static QuoteService getDefault() {
-		return new SinaQuoteService();
+		return new TencentQuoteService();
 	}
 
 }

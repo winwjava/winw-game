@@ -11,16 +11,14 @@ import java.net.URL;
 public class HttpExecutor {
 
 	public static final String CHARSET = "GBK";
-	public static final int connectTimeout = 10000;
 	public static final int readTimeout = 10000;
+	public static final int connectTimeout = 10000;
 
 	public static String get(String url) throws IOException {
 		URL request = new URL(url);
-
-		HttpURLConnection connection = null;
-		connection = (HttpURLConnection) request.openConnection();
-		connection.setConnectTimeout(connectTimeout);
+		HttpURLConnection connection = (HttpURLConnection) request.openConnection();
 		connection.setReadTimeout(readTimeout);
+		connection.setConnectTimeout(connectTimeout);
 
 		InputStreamReader is = new InputStreamReader(connection.getInputStream(), CHARSET);
 		BufferedReader br = new BufferedReader(is);
@@ -40,10 +38,9 @@ public class HttpExecutor {
 
 	public static byte[] getBytes(String url) throws IOException {
 		URL request = new URL(url);
-		HttpURLConnection connection = null;
-		connection = (HttpURLConnection) request.openConnection();
-		connection.setConnectTimeout(connectTimeout);
+		HttpURLConnection connection = (HttpURLConnection) request.openConnection();
 		connection.setReadTimeout(readTimeout);
+		connection.setConnectTimeout(connectTimeout);
 
 		InputStream in = connection.getInputStream();
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

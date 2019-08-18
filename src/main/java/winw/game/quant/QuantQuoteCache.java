@@ -15,7 +15,7 @@ public class QuantQuoteCache {
 	protected QuoteService quoteService = QuoteService.getDefault();
 
 	protected Map<String, List<QuantQuote>> quoteCache = new HashMap<String, List<QuantQuote>>();
-
+	// 当前时间的历史数据。
 	protected Map<String, List<QuantQuote>> historyQuote = new HashMap<String, List<QuantQuote>>();
 
 	public List<QuantQuote> compute(List<QuantQuote> list) {

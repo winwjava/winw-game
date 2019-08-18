@@ -125,6 +125,9 @@ public class TencentQuoteService implements QuoteService {
 				continue;
 			}
 			// date open close high low volume
+			// 除权除息数据
+			// , {nd:2018, fh_sh:3.5, djr:2019-08-01, cqr:2019-08-02,
+			// FHcontent:10\u6d3e3.5\u5143}
 			T quote = clazz.newInstance();
 			quote.setCode(code);
 			quote.setDate(fileds[0]);
@@ -132,7 +135,7 @@ public class TencentQuoteService implements QuoteService {
 			quote.setClose(Double.parseDouble(fileds[2]));
 			quote.setHigh(Double.parseDouble(fileds[3]));
 			quote.setLow(Double.parseDouble(fileds[4]));
-			quote.setVolume(Long.parseLong(fileds[5]) * 100);// 返回单位是手
+			quote.setVolume((long) Double.parseDouble(fileds[5]) * 100);// 返回单位是手
 			quoteList.add(quote);
 		}
 		return quoteList;
@@ -142,8 +145,7 @@ public class TencentQuoteService implements QuoteService {
 		QuoteService quoteService = new TencentQuoteService();
 		System.out.println(quoteService.get(Quote.class, "sz000651"));
 		System.out.println(quoteService.get(Quote.class, "sh601318"));
-		List<Quote> list = quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today());
-		for (Quote quote : list) {
+		for (Quote quote : quoteService.get(Quote.class, "sh000300", Quote.today(), Quote.today())) {
 			System.out.println(quote);
 		}
 	}
