@@ -39,7 +39,7 @@ public class YahooQuoteService implements QuoteService {
 	}
 
 	@Override
-	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num) throws Exception {
 		Calendar f = Calendar.getInstance();
 		Calendar t = Calendar.getInstance();
 		f.setTime(DateUtils.parseDate(from, Quote.DATE_PATTERN));

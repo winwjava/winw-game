@@ -51,24 +51,14 @@ public class SinaQuoteService implements QuoteService {
 	// 例如，http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600233&scale=60&ma=no&datalen=1023
 
 	@Override
-	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
-		from = from == null ? "" : from;
-		to = to == null ? "" : to;
-		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(Quote.diff(from, Quote.today())));
-		List<T> result = parse(clazz, code, HttpExecutor.get(url), from, to);
-		String lastday = result.get(result.size() - 1).getDate();
-		if (to.equals(lastday)) {
-			return result;
-		}
-		T quote = get(clazz, code);
-		quote.setClose(quote.getPrice());
-		if (to.equals(quote.getDate())) {
-			result.add(quote);
-		}
-		return result;
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num)
+			throws Exception {
+		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(num));
+		return parse(clazz, code, HttpExecutor.get(url), from, to);
 	}
 
-	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response, String from, String to) throws Exception {
+	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response, String from, String to)
+			throws Exception {
 		if (response.indexOf("[") == -1) {
 			return null;
 		}

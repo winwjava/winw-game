@@ -93,22 +93,10 @@ public class TencentQuoteService implements QuoteService {
 	}
 
 	@Override
-	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
-		from = from == null ? "" : from;
-		to = to == null ? "" : to;
-		String url = dailyQuoteUrl.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code).replace("V_NUM",
-				String.valueOf(Quote.diff(from, to)));
-		List<T> result = parse(clazz, code, HttpExecutor.get(url));
-		String lastday = result.get(result.size() - 1).getDate();
-		if (to.equals(lastday)) {
-			return result;
-		}
-		T quote = get(clazz, code);
-		quote.setClose(quote.getPrice());
-		if (to.equals(quote.getDate())) {
-			result.add(quote);// 追加当天的数据（在交易时段，从历史接口中查询不出）
-		}
-		return result;
+	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num)
+			throws Exception {
+		String url = dailyQuoteUrl.replace("V_FROM", from).replace("V_TO", to).replace("V_CODE", code);
+		return parse(clazz, code, HttpExecutor.get(url.replace("V_NUM", String.valueOf(num))));
 	}
 
 	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response) throws Exception {
