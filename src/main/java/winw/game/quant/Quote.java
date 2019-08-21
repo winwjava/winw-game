@@ -14,7 +14,6 @@ import org.apache.commons.lang3.time.DateUtils;
  * @author winw
  *
  */
-
 public class Quote {
 
 	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期格式
@@ -24,12 +23,12 @@ public class Quote {
 		return DateFormatUtils.format(new Date(), DATE_PATTERN);
 	}
 
-	public static String addDays(String date, int amount) throws ParseException {
-		return DateFormatUtils.format(DateUtils.addDays(DateUtils.parseDate(date, DATE_PATTERN), amount), DATE_PATTERN);
-	}
-
 	public static String offset(String from, int observation) throws ParseException {
 		return addDays(from, observation * 7 / 5 - 11);
+	}
+
+	public static String addDays(String date, int amount) throws ParseException {
+		return DateFormatUtils.format(DateUtils.addDays(DateUtils.parseDate(date, DATE_PATTERN), amount), DATE_PATTERN);
 	}
 
 	public static int diff(String from, String to) throws ParseException {

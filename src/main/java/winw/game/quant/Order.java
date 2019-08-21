@@ -37,11 +37,12 @@ public class Order {
 
 	private double balance;// 结余
 
-	private String profit;
-	private String comment;
+	private String profit;// 收益
+	
+	private String comment;// 备注
 
 	@Transient
-	private double percent;
+	private double percent;// 下单比例
 
 	public Order() {
 		super();

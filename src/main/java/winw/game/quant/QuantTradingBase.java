@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QuantQuoteCache {
+public abstract class QuantTradingBase {
 
 	public final static String CSI_300 = "sh000300";// 沪深三百
 	public final static String SH_BOND = "sh000012";// 上证国债
@@ -26,14 +26,14 @@ public class QuantQuoteCache {
 
 	protected QuoteService quoteService = QuoteService.getDefault();
 
-	protected Map<String, List<QuantQuote>> quoteCache = new HashMap<String, List<QuantQuote>>();
+	protected Map<String, List<QuoteIndex>> quoteCache = new HashMap<String, List<QuoteIndex>>();
 	// 当前时间的历史数据。
-	protected Map<String, List<QuantQuote>> historyQuote = new HashMap<String, List<QuantQuote>>();
+	protected Map<String, List<QuoteIndex>> historyQuote = new HashMap<String, List<QuoteIndex>>();
 
-	public List<QuantQuote> compute(List<QuantQuote> list) {
-		QuantQuote.computeMA(list);
-		QuantQuote.computeEMA(list);
-		QuantQuote.computeMACD(list);
+	public List<QuoteIndex> compute(List<QuoteIndex> list) {
+		QuoteIndex.computeMA(list);
+		QuoteIndex.computeEMA(list);
+		QuoteIndex.computeMACD(list);
 		return list;
 	}
 
@@ -41,7 +41,7 @@ public class QuantQuoteCache {
 		String today = Quote.today();
 		for (String temp : codes) {
 			historyQuote.put(temp, queryHistoryQuote(from, to, temp));
-			List<QuantQuote> tempQuotes = getHistoryQuote(temp);
+			List<QuoteIndex> tempQuotes = getHistoryQuote(temp);
 			String lastday = tempQuotes.get(tempQuotes.size() - 1).getDate();
 			if (!today.equals(lastday)) {
 				System.err.println("last quote(" + lastday + ") is not today!!!");
@@ -49,8 +49,8 @@ public class QuantQuoteCache {
 		}
 	}
 
-	public QuantQuote getCurrentQuote(String code) {// 收盘价上记录的是当前实时价格。
-		List<QuantQuote> list = getHistoryQuote(code);
+	public QuoteIndex getCurrentQuote(String code) {// 收盘价上记录的是当前实时价格。
+		List<QuoteIndex> list = getHistoryQuote(code);
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
@@ -63,16 +63,16 @@ public class QuantQuoteCache {
 	 * @param code
 	 * @return
 	 */
-	public List<QuantQuote> getHistoryQuote(String code) {
+	public List<QuoteIndex> getHistoryQuote(String code) {
 		return historyQuote.get(code);// 如果为空，则考虑用stockQuoteService查询一次。
 	}
 
-	public List<QuantQuote> queryHistoryQuote(String from, String to, String code) throws Exception {
-		Quote quoteDetail = quoteService.get(QuantQuote.class, code);
+	public List<QuoteIndex> queryHistoryQuote(String from, String to, String code) throws Exception {
+		Quote quoteDetail = quoteService.get(QuoteIndex.class, code);
 		if (quoteDetail == null) {
 			return null;
 		}
-		List<QuantQuote> list = quoteService.get(QuantQuote.class, code, from, to);
+		List<QuoteIndex> list = quoteService.get(QuoteIndex.class, code, from, to);
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
@@ -83,7 +83,7 @@ public class QuantQuoteCache {
 
 	public void updateHistoryQuote() {// 根据样本，及时同步。
 		for (String code : quoteCache.keySet()) {
-			List<QuantQuote> list = quoteCache.get(code);
+			List<QuoteIndex> list = quoteCache.get(code);
 			if (list == null) {
 				continue;
 			}
@@ -98,7 +98,7 @@ public class QuantQuoteCache {
 		}
 	}
 
-	public Map<String, List<QuantQuote>> getQuoteCache() {
+	public Map<String, List<QuoteIndex>> getQuoteCache() {
 		return quoteCache;
 	}
 

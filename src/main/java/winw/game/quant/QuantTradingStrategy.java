@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author winw
  *
  */
-public abstract class QuantTradingStrategy extends QuantQuoteCache {
+public abstract class QuantTradingStrategy extends QuantTradingBase {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
 
 	protected int observation = -120;
@@ -112,7 +112,7 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
 		}
 		// 以csi300的每日交易日期为基准。
-		for (QuantQuote temp : quoteCache.get(CSI_300)) {
+		for (QuoteIndex temp : quoteCache.get(CSI_300)) {
 			currentDate = temp.getDate();
 			if (currentDate.compareTo(from) <= 0) {
 				continue;
@@ -152,7 +152,7 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 		for (Position position : portfolio.getPositions().values()) {
 			position.addHoldingDays(1);
 			String code = position.getCode();
-			QuantQuote current = getCurrentQuote(code);
+			QuoteIndex current = getCurrentQuote(code);
 			double profit = position.getReturnRate(current.getClose());
 			// n天内涨幅小于m%离场。
 			// if(positionDays.get(code) >= 5 && increase <= 0.01)

@@ -131,7 +131,7 @@ public class Portfolio {
 	}
 
 	@Transient
-	private LinkedList<Order> preparedOrders = new LinkedList<Order>();
+	private LinkedList<Order> batchOrders = new LinkedList<Order>();
 
 	/**
 	 * 预添加订单。如果当天没有提交，则次日自动失效。
@@ -145,9 +145,9 @@ public class Portfolio {
 			return;
 		}
 		if (percent < 0) {
-			preparedOrders.addFirst(new Order(quote, pid, quote.getClose(), percent, desc));
+			batchOrders.addFirst(new Order(quote, pid, quote.getClose(), percent, desc));
 		} else {
-			preparedOrders.addLast(new Order(quote, pid, quote.getClose(), percent, desc));
+			batchOrders.addLast(new Order(quote, pid, quote.getClose(), percent, desc));
 		}
 	}
 
@@ -155,7 +155,7 @@ public class Portfolio {
 	 * 取消全部预添加订单。
 	 */
 	public void cancelBatch() {
-		preparedOrders.clear();
+		batchOrders.clear();
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class Portfolio {
 	 */
 	public List<Order> commitBatch() {
 		ArrayList<Order> resultList = new ArrayList<Order>();
-		for (Order order : preparedOrders) {
+		for (Order order : batchOrders) {
 			String code = order.getCode();
 			double percent = order.getPercent();
 			if (percent < 0 && !hasPosition(code)) {
@@ -186,7 +186,7 @@ public class Portfolio {
 					.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 			resultList.add(order(order));
 		}
-		preparedOrders.clear();
+		batchOrders.clear();
 		return resultList;
 	}
 
@@ -214,9 +214,6 @@ public class Portfolio {
 		orderList.add(order);// 交易记录
 		return order;
 	}
-
-	// private final DecimalFormat decimalFormat = new DecimalFormat("##0.00");
-	// private final DecimalFormat decimal4Format = new DecimalFormat("##0.0000");
 
 	public int getPid() {
 		return pid;

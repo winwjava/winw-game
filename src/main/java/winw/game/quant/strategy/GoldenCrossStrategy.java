@@ -3,10 +3,10 @@ package winw.game.quant.strategy;
 import java.util.List;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuantQuote;
+import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
-import winw.game.quant.QuoteChart;
+import winw.game.quant.QuotePanel;
 
 /**
  * 金叉死叉策略。
@@ -57,12 +57,12 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 	@Override
 	public void trading(Portfolio portfolio) {
 		for (String code : samples()) {
-			List<QuantQuote> quantQuotes = getHistoryQuote(code);
-			if (quantQuotes == null || quantQuotes.isEmpty()) {
+			List<QuoteIndex> quoteIndexs = getHistoryQuote(code);
+			if (quoteIndexs == null || quoteIndexs.isEmpty()) {
 				continue;
 			}
-			QuantQuote today = quantQuotes.get(quantQuotes.size() - 1);
-			QuantQuote yesterday = quantQuotes.get(quantQuotes.size() - 2);
+			QuoteIndex today = quoteIndexs.get(quoteIndexs.size() - 1);
+			QuoteIndex yesterday = quoteIndexs.get(quoteIndexs.size() - 2);
 
 			if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0) {
 				portfolio.addBatch(today, 1, "GoldenCrossover");
@@ -79,7 +79,7 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		GoldenCrossStrategy strategy = new GoldenCrossStrategy();
 		strategy.backTesting(portfolio, "2019-01-01", Quote.today());
-		QuoteChart.show(portfolio, strategy, "2019-01-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2019-01-01", Quote.today());
 	}
 
 }

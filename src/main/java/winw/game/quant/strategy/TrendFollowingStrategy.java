@@ -6,10 +6,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuantQuote;
+import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
-import winw.game.quant.QuoteChart;
+import winw.game.quant.QuotePanel;
 
 /**
  * 趋势跟踪策略。
@@ -55,11 +55,11 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 	 * @return
 	 */
 	@Override
-	public List<QuantQuote> compute(List<QuantQuote> list) {
+	public List<QuoteIndex> compute(List<QuoteIndex> list) {
 		super.compute(list);
 		// 线性回归，计算斜率
 		for (int i = 1; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 			if (i < 5) {
 				continue;
 			}
@@ -70,16 +70,16 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 			double bottom = list.get(i).getEma60min();
 
 			for (int j = 1; j <= 3; j++) {
-				QuantQuote temp = list.get(i - 3 + j);
+				QuoteIndex temp = list.get(i - 3 + j);
 				regression.addData((1500 / 60) * j, 300d * (temp.getEma5() - bottom) / hight);
 			}
-			quantQuote.setSlopeS(regression.getSlope());
+			quoteIndex.setSlopeS(regression.getSlope());
 			regression.clear();
 			for (int j = 1; j <= 5; j++) {
-				QuantQuote temp = list.get(i - 5 + j);
+				QuoteIndex temp = list.get(i - 5 + j);
 				regression.addData((1500d / 60) * j, 300d * (temp.getEma60() - bottom) / hight);
 			}
-			quantQuote.setSlopeL(regression.getSlope());
+			quoteIndex.setSlopeL(regression.getSlope());
 			// double xInterval5 = indicator.getEma5() * 0.005;
 			// for (int j = 0; j < 3; j++) {
 			// regression.addData(j * xInterval5, list.get(i - 3 + j).getEma5());
@@ -106,15 +106,15 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 
 	@Override
 	public void trading(Portfolio portfolio) {
-		QuantQuote shbond = getCurrentQuote(SH_BOND);
+		QuoteIndex shbond = getCurrentQuote(SH_BOND);
 		double bondYield = shbond.getSlopeL();// 国债收益率
 		for (String code : samples()) {
 			if (SH_BOND.equals(code)) {
 				continue;
 			}
-			List<QuantQuote> quantQuotes = getHistoryQuote(code);
-			QuantQuote current = quantQuotes.get(quantQuotes.size() - 1);
-			QuantQuote yestday = quantQuotes.get(quantQuotes.size() - 2);
+			List<QuoteIndex> quoteIndexs = getHistoryQuote(code);
+			QuoteIndex current = quoteIndexs.get(quoteIndexs.size() - 1);
+			QuoteIndex yestday = quoteIndexs.get(quoteIndexs.size() - 2);
 			// 5/10/20均线是否全部需要向上？
 			// 从转折点买入，避免从顶部买入。
 			if (yestday.getSlopeL() < bondYield && current.getSlopeL() > bondYield && current.getSlopeS() > bondYield
@@ -136,7 +136,7 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy(CSI_300_TOP);
 		strategy.backTesting(portfolio, "2019-01-01", Quote.today());
-		QuoteChart.show(portfolio, strategy, "2019-01-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2019-01-01", Quote.today());
 	}
 
 	public static void main0(String[] args) {

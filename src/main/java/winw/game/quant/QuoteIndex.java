@@ -10,7 +10,7 @@ import java.util.List;
  * @author winw
  *
  */
-public class QuantQuote extends Quote {
+public class QuoteIndex extends Quote {
 
 	protected double ma5;// 5日均价
 	protected double ma10;// 10日均价
@@ -51,11 +51,11 @@ public class QuantQuote extends Quote {
 	protected double ema60max;
 	protected double ema60min;
 
-	public QuantQuote() {
+	public QuoteIndex() {
 		super();
 	}
 
-	public QuantQuote(Quote o) {
+	public QuoteIndex(Quote o) {
 		super();
 		this.code = o.getCode();
 		this.name = o.getName();
@@ -77,7 +77,7 @@ public class QuantQuote extends Quote {
 	 * @param quoteList
 	 * @return
 	 */
-	public static <T extends QuantQuote> List<T> compute(List<T> list) {
+	public static <T extends QuoteIndex> List<T> compute(List<T> list) {
 		computeMA(list);
 		computeEMA(list);
 		computeMACD(list);
@@ -87,7 +87,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 MA
 	 */
-	protected static <T extends QuantQuote> void computeMA(List<T> list) {
+	protected static <T extends QuoteIndex> void computeMA(List<T> list) {
 		double ma5 = 0;
 		double ma10 = 0;
 		double ma20 = 0;
@@ -96,52 +96,52 @@ public class QuantQuote extends Quote {
 		double volumeMa10 = 0;
 
 		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 
-			ma5 += quantQuote.getClose();
-			ma10 += quantQuote.getClose();
-			ma20 += quantQuote.getClose();
-			ma60 += quantQuote.getClose();
+			ma5 += quoteIndex.getClose();
+			ma10 += quoteIndex.getClose();
+			ma20 += quoteIndex.getClose();
+			ma60 += quoteIndex.getClose();
 
-			volumeMa5 += quantQuote.getVolume();
-			volumeMa10 += quantQuote.getVolume();
+			volumeMa5 += quoteIndex.getVolume();
+			volumeMa10 += quoteIndex.getVolume();
 
 			if (i >= 5) {
 				ma5 -= list.get(i - 5).getClose();
-				quantQuote.setMa5(ma5 / 5f);
+				quoteIndex.setMa5(ma5 / 5f);
 
 				volumeMa5 -= list.get(i - 5).getVolume();
-				quantQuote.setVolumeMa5(volumeMa5 / 5f);
+				quoteIndex.setVolumeMa5(volumeMa5 / 5f);
 			} else {
-				quantQuote.setMa5(ma5 / (i + 1f));
+				quoteIndex.setMa5(ma5 / (i + 1f));
 
-				quantQuote.setVolumeMa5(volumeMa5 / (i + 1f));
+				quoteIndex.setVolumeMa5(volumeMa5 / (i + 1f));
 			}
 
 			if (i >= 10) {
 				ma10 -= list.get(i - 10).getClose();
-				quantQuote.setMa10(ma10 / 10f);
+				quoteIndex.setMa10(ma10 / 10f);
 
 				volumeMa10 -= list.get(i - 10).getVolume();
-				quantQuote.setVolumeMa10(volumeMa10 / 10f);
+				quoteIndex.setVolumeMa10(volumeMa10 / 10f);
 			} else {
-				quantQuote.setMa10(ma10 / (i + 1f));
+				quoteIndex.setMa10(ma10 / (i + 1f));
 
-				quantQuote.setVolumeMa10(volumeMa10 / (i + 1f));
+				quoteIndex.setVolumeMa10(volumeMa10 / (i + 1f));
 			}
 
 			if (i >= 20) {
 				ma20 -= list.get(i - 20).getClose();
-				quantQuote.setMa20(ma20 / 20f);
+				quoteIndex.setMa20(ma20 / 20f);
 			} else {
-				quantQuote.setMa20(ma20 / (i + 1f));
+				quoteIndex.setMa20(ma20 / (i + 1f));
 			}
 
 			if (i >= 60) {
 				ma60 -= list.get(i - 60).getClose();
-				quantQuote.setMa60(ma60 / 60f);
+				quoteIndex.setMa60(ma60 / 60f);
 			} else {
-				quantQuote.setMa60(ma60 / (i + 1f));
+				quoteIndex.setMa60(ma60 / (i + 1f));
 			}
 		}
 	}
@@ -149,13 +149,13 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 EMA
 	 */
-	protected static <T extends QuantQuote> void computeEMA(List<T> list) {
+	protected static <T extends QuoteIndex> void computeEMA(List<T> list) {
 		Double k5 = 2.0 / (5 + 1.0);
 		Double k60 = 2.0 / (60 + 1.0);
 		Double ema5 = list.get(0).getClose();
 		Double ema60 = list.get(0).getClose();
 
-		for (QuantQuote quote : list) {
+		for (QuoteIndex quote : list) {
 			ema5 = quote.getClose() * k5 + ema5 * (1 - k5);
 			ema60 = quote.getClose() * k60 + ema60 * (1 - k60);
 			quote.setEma5(ema5);
@@ -163,18 +163,18 @@ public class QuantQuote extends Quote {
 		}
 
 		for (int i = 1; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
-			quantQuote.ema60max = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<QuantQuote>() {
+			QuoteIndex quoteIndex = list.get(i);
+			quoteIndex.ema60max = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<QuoteIndex>() {
 
 				@Override
-				public int compare(QuantQuote o1, QuantQuote o2) {
+				public int compare(QuoteIndex o1, QuoteIndex o2) {
 					return new Double(o1.getEma60()).compareTo(o2.getEma60());
 				}
 			}).getEma60();
-			quantQuote.ema60min = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<QuantQuote>() {
+			quoteIndex.ema60min = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<QuoteIndex>() {
 
 				@Override
-				public int compare(QuantQuote o1, QuantQuote o2) {
+				public int compare(QuoteIndex o1, QuoteIndex o2) {
 					return new Double(o2.getEma60()).compareTo(o1.getEma60());
 				}
 			}).getEma60();
@@ -200,7 +200,7 @@ public class QuantQuote extends Quote {
 	 * which are used by the majority of traders as the buying and selling decisions
 	 * based on the standard settings further push the prices in that direction.
 	 */
-	protected static <T extends QuantQuote> void computeMACD(List<T> list) {
+	protected static <T extends QuoteIndex> void computeMACD(List<T> list) {
 		double ema12 = 0;
 		double ema26 = 0;
 		double diff = 0;
@@ -208,16 +208,16 @@ public class QuantQuote extends Quote {
 		double macd = 0;
 
 		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 
 			if (i == 0) {
-				ema12 = quantQuote.getClose();
-				ema26 = quantQuote.getClose();
+				ema12 = quoteIndex.getClose();
+				ema26 = quoteIndex.getClose();
 			} else {
 				// EMA（12） = 前一日EMA（12） X 11/13 + 今日收盘价 X 2/13
-				ema12 = ema12 * 11f / 13f + quantQuote.getClose() * 2f / 13f;// 快速移动平均线
+				ema12 = ema12 * 11f / 13f + quoteIndex.getClose() * 2f / 13f;// 快速移动平均线
 				// EMA（26） = 前一日EMA（26） X 25/27 + 今日收盘价 X 2/27
-				ema26 = ema26 * 25f / 27f + quantQuote.getClose() * 2f / 27f;// 慢速移动平均线
+				ema26 = ema26 * 25f / 27f + quoteIndex.getClose() * 2f / 27f;// 慢速移动平均线
 			}
 
 			// DIF = EMA（12） - EMA（26） 。
@@ -227,23 +227,23 @@ public class QuantQuote extends Quote {
 			// 用（DIF-DEA）*2 即为 MACD 柱状图。
 			macd = (diff - dea) * 2f;
 
-			quantQuote.setDiff(diff);
-			quantQuote.setDea(dea);
-			quantQuote.setMacd(macd);
+			quoteIndex.setDiff(diff);
+			quoteIndex.setDea(dea);
+			quoteIndex.setMacd(macd);
 		}
 	}
 
 	/**
 	 * 计算 BOLL 需要在计算 MA 之后进行
 	 */
-	protected static <T extends QuantQuote> void computeBOLL(List<T> list) {
+	protected static <T extends QuoteIndex> void computeBOLL(List<T> list) {
 		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 
 			if (i == 0) {
-				quantQuote.setMb(quantQuote.getClose());
-				quantQuote.setUp(Double.NaN);
-				quantQuote.setDn(Double.NaN);
+				quoteIndex.setMb(quoteIndex.getClose());
+				quoteIndex.setUp(Double.NaN);
+				quoteIndex.setDn(Double.NaN);
 			} else {
 				int n = 20;
 				if (i < 20) {
@@ -253,7 +253,7 @@ public class QuantQuote extends Quote {
 				double md = 0;
 				for (int j = i - n + 1; j <= i; j++) {
 					double c = list.get(j).getClose();
-					double m = quantQuote.getMa20();
+					double m = quoteIndex.getMa20();
 					double value = c - m;
 					md += value * value;
 				}
@@ -261,9 +261,9 @@ public class QuantQuote extends Quote {
 				md = md / (n - 1);
 				md = (double) Math.sqrt(md);
 
-				quantQuote.setMb(quantQuote.getMa20());
-				quantQuote.setUp(quantQuote.getMb() + 2f * md);
-				quantQuote.setDn(quantQuote.getMb() - 2f * md);
+				quoteIndex.setMb(quoteIndex.getMa20());
+				quoteIndex.setUp(quoteIndex.getMb() + 2f * md);
+				quoteIndex.setDn(quoteIndex.getMb() - 2f * md);
 			}
 		}
 	}
@@ -271,7 +271,7 @@ public class QuantQuote extends Quote {
 	/**
 	 * 计算 RSI
 	 */
-	protected static <T extends QuantQuote> void computeRSI(List<T> list) {
+	protected static <T extends QuoteIndex> void computeRSI(List<T> list) {
 		double rsi1 = 0;
 		double rsi2 = 0;
 		double rsi3 = 0;
@@ -283,7 +283,7 @@ public class QuantQuote extends Quote {
 		double rsi3MaxEma = 0;
 
 		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 
 			if (i == 0) {
 				rsi1 = 0;
@@ -296,8 +296,8 @@ public class QuantQuote extends Quote {
 				rsi2MaxEma = 0;
 				rsi3MaxEma = 0;
 			} else {
-				double Rmax = Math.max(0, quantQuote.getClose() - list.get(i - 1).getClose());
-				double RAbs = Math.abs(quantQuote.getClose() - list.get(i - 1).getClose());
+				double Rmax = Math.max(0, quoteIndex.getClose() - list.get(i - 1).getClose());
+				double RAbs = Math.abs(quoteIndex.getClose() - list.get(i - 1).getClose());
 
 				rsi1MaxEma = (Rmax + (6f - 1) * rsi1MaxEma) / 6f;
 				rsi1ABSEma = (RAbs + (6f - 1) * rsi1ABSEma) / 6f;
@@ -313,21 +313,21 @@ public class QuantQuote extends Quote {
 				rsi3 = (rsi3MaxEma / rsi3ABSEma) * 100;
 			}
 
-			quantQuote.setRsi1(rsi1);
-			quantQuote.setRsi2(rsi2);
-			quantQuote.setRsi3(rsi3);
+			quoteIndex.setRsi1(rsi1);
+			quoteIndex.setRsi2(rsi2);
+			quoteIndex.setRsi3(rsi3);
 		}
 	}
 
 	/**
 	 * 计算 KDJ
 	 */
-	protected static <T extends QuantQuote> void computeKDJ(List<T> list) {
+	protected static <T extends QuoteIndex> void computeKDJ(List<T> list) {
 		double k = 0;
 		double d = 0;
 
 		for (int i = 0; i < list.size(); i++) {
-			QuantQuote quantQuote = list.get(i);
+			QuoteIndex quoteIndex = list.get(i);
 
 			int startIndex = i - 8;
 			if (startIndex < 0) {
@@ -342,7 +342,7 @@ public class QuantQuote extends Quote {
 			}
 
 			// Raw Stochastic Value
-			double rsv = 100f * (quantQuote.getClose() - min9) / (max9 - min9);
+			double rsv = 100f * (quoteIndex.getClose() - min9) / (max9 - min9);
 
 			if (max9 == min9) {
 				rsv = 0;
@@ -356,9 +356,9 @@ public class QuantQuote extends Quote {
 				d = (k + 2f * d) / 3f;
 			}
 
-			quantQuote.setK(k);
-			quantQuote.setD(d);
-			quantQuote.setJ(3f * k - 2 * d);
+			quoteIndex.setK(k);
+			quoteIndex.setD(d);
+			quoteIndex.setJ(3f * k - 2 * d);
 		}
 	}
 

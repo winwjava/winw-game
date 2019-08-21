@@ -35,7 +35,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
  * @author winw
  *
  */
-public class QuoteChart extends JPanel {
+public class QuotePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private int width = 480;
@@ -45,7 +45,7 @@ public class QuoteChart extends JPanel {
 
 	private int viewFrom = 0;
 	private int viewLength = 75;
-	private List<QuantQuote> quoteList;
+	private List<QuoteIndex> quoteList;
 
 	private Color ma5Color = Color.BLACK;
 	private Color ma10Color = Color.BLUE;
@@ -204,7 +204,7 @@ public class QuoteChart extends JPanel {
 		drawBezierCurve(g, ma10Points, ma10Color);
 		drawBezierCurve(g, ma60Points, ma60Color);
 
-		QuantQuote lastView = quoteList.get(viewFrom + viewLength - 1);
+		QuoteIndex lastView = quoteList.get(viewFrom + viewLength - 1);
 		String ma5 = "MA5:" + format(lastView.getMa5());
 		String ma10 = "MA10:" + format(lastView.getMa10());
 		String ma60 = "MA60:" + format(lastView.getMa60());
@@ -250,7 +250,7 @@ public class QuoteChart extends JPanel {
 		drawBezierCurve(g, v5Points, ma5Color);
 		drawBezierCurve(g, v10Points, ma10Color);
 
-		QuantQuote lastView = quoteList.get(viewFrom + viewLength - 1);
+		QuoteIndex lastView = quoteList.get(viewFrom + viewLength - 1);
 		String v5 = "MA5:" + format(lastView.getVolumeMa5());
 		String v10 = "MA10:" + format(lastView.getVolumeMa10());
 		int ma5Width = g.getFontMetrics().stringWidth(v5);
@@ -334,7 +334,7 @@ public class QuoteChart extends JPanel {
 		g.setFont(new Font(null, Font.BOLD, 12));
 		g.drawString(footer, masterX + 3, height - fontH * 0.2f);
 		g.drawString(header, masterX + 3, masterY - fontH * 0.2f);
-		QuantQuote lastView = quoteList.get(viewFrom + viewLength - 1);
+		QuoteIndex lastView = quoteList.get(viewFrom + viewLength - 1);
 		String datetime = lastView.getDate() + " " + lastView.getTimeOrDefault();
 
 		int dateW = g.getFontMetrics().stringWidth(datetime);
@@ -344,7 +344,7 @@ public class QuoteChart extends JPanel {
 	// 买卖记录。
 	private void drawOrders(Graphics2D g) {
 		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
-			QuantQuote quote = quoteList.get(i);
+			QuoteIndex quote = quoteList.get(i);
 			Order order = orders.get(quote.getDate());
 			if (order == null) {
 				continue;
@@ -420,7 +420,7 @@ public class QuoteChart extends JPanel {
 		return orderFrom;
 	}
 
-	public QuoteChart(List<QuantQuote> quoteList, int viewFrom, int viewLength, String header, String footer,
+	public QuotePanel(List<QuoteIndex> quoteList, int viewFrom, int viewLength, String header, String footer,
 			List<Order> orderList) {
 		super();
 		this.viewFrom = viewFrom;
@@ -436,7 +436,7 @@ public class QuoteChart extends JPanel {
 		}
 	}
 
-	public QuoteChart(List<QuantQuote> quoteList, String from, String to, String header, String footer,
+	public QuotePanel(List<QuoteIndex> quoteList, String from, String to, String header, String footer,
 			List<Order> orderList) {
 		this(quoteList, -1, 0, header, footer, orderList);
 
@@ -452,22 +452,22 @@ public class QuoteChart extends JPanel {
 		}
 	}
 
-	public static void show(List<QuoteChart> views) {
+	public static void show(List<QuotePanel> views) {
 		JFrame frame = new JFrame("winw-game");
 		frame.setVisible(true);
 		JPanel container = new JPanel();// new GridLayout(2, 2)
 		// new BoxLayout(container, BoxLayout.Y_AXIS)
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-		for (QuoteChart quoteChart : views) {
-			quoteChart.setPreferredSize(new Dimension(1000, 320));
-			container.add(quoteChart);
+		for (QuotePanel quotePanel : views) {
+			quotePanel.setPreferredSize(new Dimension(1000, 320));
+			container.add(quotePanel);
 		}
 		frame.add(new JScrollPane(container));
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public static void show(Portfolio portfolio, QuantQuoteCache cache, String from, String to) throws Exception {
+	public static void show(Portfolio portfolio, QuantTradingBase cache, String from, String to) throws Exception {
 		Map<String, List<Order>> orders = new HashMap<String, List<Order>>();
 		// Collections.sort(portfolio.getOrderList(),
 		// Comparator.comparing(Order::getProfit));
@@ -479,11 +479,11 @@ public class QuoteChart extends JPanel {
 			orders.get(order.getCode()).add(order);
 		}
 
-		List<QuoteChart> charts = new ArrayList<>();
+		List<QuotePanel> charts = new ArrayList<>();
 		QuoteService service = QuoteService.getDefault();
 		for (String code : orders.keySet()) {
 			Quote quote = service.get(Quote.class, code);
-			List<QuantQuote> quotes = cache.getQuoteCache().get(code);
+			List<QuoteIndex> quotes = cache.getQuoteCache().get(code);
 			StringBuilder header = new StringBuilder(quote.getName());
 			header.append("  ").append(code).append("  Daily  Backtesting ");
 			for (Order order : orders.get(code)) {
@@ -493,17 +493,17 @@ public class QuoteChart extends JPanel {
 					header.append(" ~ ").append(order.getDate()).append(" ").append(order.getProfit()).append("] ");
 				}
 			}
-			charts.add(new QuoteChart(quotes, from, to, header.toString(), "", orders.get(code)));
+			charts.add(new QuotePanel(quotes, from, to, header.toString(), "", orders.get(code)));
 		}
-		Collections.sort(charts, Comparator.comparing(QuoteChart::getOrderFrom));
+		Collections.sort(charts, Comparator.comparing(QuotePanel::getOrderFrom));
 		show(charts);
 	}
 
-	private static QuoteChart newChart(String code) throws Exception {
+	private static QuotePanel newChart(String code) throws Exception {
 		QuoteService service = QuoteService.getDefault();
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
-		List<QuantQuote> dailyQuote = QuantQuote.compute(service.get(QuantQuote.class, code, "2018-10-01", today));
-		QuoteChart chart = new QuoteChart(dailyQuote, dailyQuote.size() - 120, 120, code + " Daily", "", null);
+		List<QuoteIndex> dailyQuote = QuoteIndex.compute(service.get(QuoteIndex.class, code, "2018-10-01", today));
+		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 120, 120, code + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		return chart;
 	}
