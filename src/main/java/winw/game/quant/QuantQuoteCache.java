@@ -6,6 +6,18 @@ import java.util.Map;
 
 public class QuantQuoteCache {
 
+	public final static String CSI_300 = "sh000300";// 沪深三百
+	public final static String SH_BOND = "sh000012";// 上证国债
+	public final static String CSI_300_ETF = "sh510300";// 沪深三百ETF
+	public final static String SH_BOND_ETF = "sh511010";// 上证国债ETF
+	public final static String SH_GOLD_ETF = "sh518880";// 上证黄金ETF
+
+	public final static String[] CSI_300_TOP = { // 沪深300十大权重股。市值大、流动性好。
+			// 中国平安// 贵州茅台// 招商银行// 格力电器// 美的集团
+			"sh601318", "sh600519", "sh600036", "sh601166", "sz000651",
+			// 兴业银行// 五 粮 液// 伊利股份// 恒瑞医药// 中信证券
+			"sz000333", "sz000858", "sh600276", "sh600887", "sh600030" };
+
 	protected String currentDate;
 
 	protected String getCurrentDate() {

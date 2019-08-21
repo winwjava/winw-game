@@ -27,7 +27,7 @@ git push origin master
 
 ## Use crontab
 50 14 * * 1-5 cd winw-game && git pull | awk '{print strftime("\%F \%T git pull -"),$0}' >> logs/app.log
-55 14 * * 1-5 cd winw-game && . ~/.bash_profile && mvn -q spring-boot:run >> logs/app.log
+54 14 * * 1-5 cd winw-game && . ~/.profile && mvn -q spring-boot:run >> logs/app.log
 ## Startup h2database web server.
 java -cp ~/.m2/repository/com/h2database/h2/1.4.199/*.jar org.h2.tools.Server -web -webPort 8082 -webAllowOthers  
 

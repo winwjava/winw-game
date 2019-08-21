@@ -3,12 +3,6 @@ package winw.game.quant;
 import java.text.ParseException;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -21,8 +15,6 @@ import org.apache.commons.lang3.time.DateUtils;
  *
  */
 
-@Entity
-@Table(name = "QUOTE")
 public class Quote {
 
 	public final static String DATE_PATTERN = "yyyy-MM-dd";// 交易日期格式
@@ -47,13 +39,8 @@ public class Quote {
 		return result < 7 ? result : result * 5 / 7;
 	}
 
-	@Id
-	@GeneratedValue
-	protected long id;
-
 	protected String code;// 代码
 
-	@Transient
 	protected String name;// 名称
 
 	protected Double open; // 开盘价
@@ -65,18 +52,17 @@ public class Quote {
 	protected Double amount; // 成交金额
 
 	protected String date;// 交易日期
-	@Transient
+
 	protected String time;// 报价时间
-	@Transient
+
 	protected Double price = 0.0;// 价格
-	@Transient
+
 	protected Double previousClose = 0.0;// 昨日收盘价
-	@Transient
+
 	protected Double pe = 0.0;// 市盈率
 	// private double eps = 0.0;
-	@Transient
 	protected Double marketCap = 0.0;// 总市值
-	@Transient
+
 	protected Double marketVal = 0.0;// 流通市值
 
 	public Quote() {
@@ -97,14 +83,6 @@ public class Quote {
 	public void setTime(Date time) {
 		this.date = DateFormatUtils.format(time, DATE_PATTERN);
 		this.time = DateFormatUtils.format(time, TIME_PATTERN);
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getCode() {

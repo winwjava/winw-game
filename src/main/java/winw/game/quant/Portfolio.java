@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 投资组合。
@@ -42,15 +44,18 @@ public class Portfolio {
 	private double drawdownLimit = 1;// 回撤限制。
 	private double stoplossLimit = 1;// 亏损限制。
 
-	private transient double marketValue = 0;// 持仓市值。
-
+	// 持仓市值。
+	@Transient
+	private double marketValue = 0;
 	// 交易记录。
-	private transient final List<Order> orderList = new ArrayList<Order>();
+	@Transient
+	private final List<Order> orderList = new ArrayList<Order>();
 	// 持仓记录。
-	private transient final Map<String, Position> positions = new HashMap<String, Position>();
-
+	@Transient
+	private final Map<String, Position> positions = new HashMap<String, Position>();
 	// 卖出后保持空仓天数
-	private transient Map<String, Integer> emptyPositionDays = new HashMap<String, Integer>();
+	@Transient
+	private Map<String, Integer> emptyPositionDays = new HashMap<String, Integer>();
 
 	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
 
@@ -106,9 +111,9 @@ public class Portfolio {
 	 * 
 	 * @return
 	 */
-	public double orderPercent() {
+	public double orderPercent(double percent) {
 		int positionSize = positions.size();
-		return positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize);
+		return (positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize)) * percent;
 	}
 
 	public boolean hasPosition(String code) {
@@ -125,37 +130,77 @@ public class Portfolio {
 		return emptyPositionDays.getOrDefault(code, defaultValue);
 	}
 
-	public Order order(Quote quote, double percent, String desc) {
-		if (percent == 0) {
-			return null;
-		}
-		if (percent > 0) {
-			percent = orderPercent() * percent;
-		}
-		String code = quote.getCode();
+	@Transient
+	private LinkedList<Order> preparedOrders = new LinkedList<Order>();
 
-		if (percent < 0 && !hasPosition(code)) {
-			return null;
+	/**
+	 * 预添加订单。如果当天没有提交，则次日自动失效。
+	 * 
+	 * @param quote
+	 * @param percent
+	 * @param desc
+	 */
+	public void addBatch(Quote quote, double percent, String desc) {
+		if (percent < 0 && !hasPosition(quote.getCode())) {
+			return;
 		}
-
-		int size = percent < 0 // 计算买入或者卖出的数量。
-				? new Double(positions.get(code).getSize() * percent).intValue()
-				: new Double(maxBuy(quote.getClose()) * percent).intValue() / 100 * 100;
-
-		if (size == 0) {
-			return null;
+		if (percent < 0) {
+			preparedOrders.addFirst(new Order(quote, pid, quote.getClose(), percent, desc));
+		} else {
+			preparedOrders.addLast(new Order(quote, pid, quote.getClose(), percent, desc));
 		}
+	}
 
-		Order order = new Order(quote, pid, quote.getClose(), size, commission(quote.getClose() * size));
-		if (percent > 0 && cash - order.getAmount() < 0) {
-			return null;
+	/**
+	 * 取消全部预添加订单。
+	 */
+	public void cancelBatch() {
+		preparedOrders.clear();
+	}
+
+	/**
+	 * 提交预添加的订单。返回执行成功的订单。
+	 * 
+	 * @return
+	 */
+	public List<Order> commitBatch() {
+		ArrayList<Order> resultList = new ArrayList<Order>();
+		for (Order order : preparedOrders) {
+			String code = order.getCode();
+			double percent = order.getPercent();
+			if (percent < 0 && !hasPosition(code)) {
+				continue;
+			}
+
+			int size = percent < 0 // 计算买入或者卖出的数量。
+					? new Double(positions.get(code).getSize() * percent).intValue()
+					: new Double(maxBuy(order.getPrice()) * orderPercent(percent)).intValue() / 100 * 100;
+
+			if (size == 0) {
+				continue;
+			}
+
+			order.setSize(size);
+			order.setCommission(commission(order.getPrice() * size));
+			order.setAmount(new BigDecimal(order.getPrice() * size).add(new BigDecimal(order.getCommission()))
+					.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+			resultList.add(order(order));
 		}
-		if (quote.getCode().equals("sh600030") && size < 0) {
+		preparedOrders.clear();
+		return resultList;
+	}
+
+	public Order order(Order order) {
+		int size = order.getSize();
+		String code = order.getCode();
+
+		if (size > 0 && cash - order.getAmount() < 0) {
+			return null;
 		}
 
 		Position position = positions.getOrDefault(code, new Position(pid, code));
 		if (position.getSize() + size == 0) {
-			order.setProfit(percentFormat.format(position.getReturnRate(quote.getClose())));
+			order.setProfit(percentFormat.format(position.getReturnRate(order.getPrice())));
 			positions.remove(code);
 			emptyPositionDays.put(code, 0);
 		} else {
@@ -165,7 +210,6 @@ public class Portfolio {
 				.doubleValue();
 
 		order.setBalance(cash);
-		order.setComment(desc);
 
 		orderList.add(order);// 交易记录
 		return order;

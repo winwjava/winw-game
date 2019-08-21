@@ -200,7 +200,6 @@ public class QuoteChart extends JPanel {
 	}
 
 	private void drawMasterMA(Graphics2D g) {
-		// 均线，贝塞尔曲线
 		drawBezierCurve(g, ma5Points, ma5Color);
 		drawBezierCurve(g, ma10Points, ma10Color);
 		drawBezierCurve(g, ma60Points, ma60Color);
@@ -248,7 +247,6 @@ public class QuoteChart extends JPanel {
 	}
 
 	protected void drawVolumeMA(Graphics2D g) {
-		// 均线，贝塞尔曲线
 		drawBezierCurve(g, v5Points, ma5Color);
 		drawBezierCurve(g, v10Points, ma10Color);
 
@@ -486,8 +484,6 @@ public class QuoteChart extends JPanel {
 		for (String code : orders.keySet()) {
 			Quote quote = service.get(Quote.class, code);
 			List<QuantQuote> quotes = cache.getQuoteCache().get(code);
-			// QuantQuote.compute(service.get(QuantQuote.class, code, Quote.offset(from,
-			// -120), to));
 			StringBuilder header = new StringBuilder(quote.getName());
 			header.append("  ").append(code).append("  Daily  Backtesting ");
 			for (Order order : orders.get(code)) {
@@ -500,7 +496,6 @@ public class QuoteChart extends JPanel {
 			charts.add(new QuoteChart(quotes, from, to, header.toString(), "", orders.get(code)));
 		}
 		Collections.sort(charts, Comparator.comparing(QuoteChart::getOrderFrom));
-		// Collections.reverse(portfolio.getOrderList());
 		show(charts);
 	}
 
@@ -517,4 +512,6 @@ public class QuoteChart extends JPanel {
 		show(Arrays.asList(newChart("sh000001"), newChart("sh000300"), newChart("sh600276"), newChart("sz002352")));
 	}
 
+	// TODO 显示收益曲线，和交易明细。
+	
 }

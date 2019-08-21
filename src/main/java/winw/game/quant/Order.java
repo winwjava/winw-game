@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 交易订单。
@@ -39,8 +40,21 @@ public class Order {
 	private String profit;
 	private String comment;
 
+	@Transient
+	private double percent;
+
 	public Order() {
 		super();
+	}
+
+	public Order(Quote quote, int pid, double price, double percent, String comment) {
+		super();
+		this.pid = pid;
+		this.date = quote.getDate();
+		this.code = quote.getCode();
+		this.price = price;
+		this.percent = percent;
+		this.comment = comment;
 	}
 
 	public Order(Quote quote, int pid, double price, int size, double commission) {
@@ -142,6 +156,14 @@ public class Order {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public double getPercent() {
+		return percent;
+	}
+
+	public void setPercent(double percent) {
+		this.percent = percent;
 	}
 
 	@Override

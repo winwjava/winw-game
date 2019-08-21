@@ -3,9 +3,7 @@ package winw.game.quant;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -23,18 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class QuantTradingStrategy extends QuantQuoteCache {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
-
-	public final static String CSI_300 = "sh000300";// 沪深三百
-	public final static String SH_BOND = "sh000012";// 上证国债
-	public final static String CSI_300_ETF = "sh510300";// 沪深三百ETF
-	public final static String SH_BOND_ETF = "sh511010";// 上证国债ETF
-	public final static String SH_GOLD_ETF = "sh518880";// 上证黄金ETF
-
-	public final static String[] CSI_300_TOP = { // 沪深300十大权重股。市值大、流动性好。
-			// 中国平安// 贵州茅台// 招商银行// 格力电器// 美的集团
-			"sh601318", "sh600519", "sh600036", "sh601166", "sz000651",
-			// 兴业银行// 五 粮 液// 伊利股份// 恒瑞医药// 中信证券
-			"sz000333", "sz000858", "sh600276", "sh600887", "sh600030" };
 
 	protected int observation = -120;
 
@@ -83,11 +69,11 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 			position.setSellable(position.getSize());
 		}
 		// FIXME 复权处理。更新持仓数量和持仓价。记录复权信息。
-
+		
+		// 撤销前一日的订单。
+		portfolio.cancelBatch();
 		// 模拟交易
 		trading(portfolio);
-		// 交易后止损。
-		stoploss(portfolio);
 		// 其他资产买入时，国债可以随时卖出。
 	}
 
@@ -163,7 +149,6 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 	 * 
 	 */
 	protected void stoploss(Portfolio portfolio) {
-		Map<QuantQuote, String> orders = new HashMap<QuantQuote, String>();
 		for (Position position : portfolio.getPositions().values()) {
 			position.addHoldingDays(1);
 			String code = position.getCode();
@@ -174,17 +159,14 @@ public abstract class QuantTradingStrategy extends QuantQuoteCache {
 			// slowness
 			// 控制亏损，亏损2%离场。
 			if (profit < -portfolio.getStoplossLimit()) {
-				orders.put(current, "stoploss: " + percentFormat(profit));
+				portfolio.addBatch(current, -1, "stoploss: " + percentFormat(profit));
 				continue;
 			}
 			// 控制回撤，回撤5%离场。
 			double drawdown = position.getDrawdown(current.getClose());
 			if (drawdown > portfolio.getDrawdownLimit()) {
-				orders.put(current, "drawdown: " + percentFormat(drawdown));
+				portfolio.addBatch(current, -1, "drawdown: " + percentFormat(drawdown));
 			}
-		}
-		for (QuantQuote temp : orders.keySet()) {
-			portfolio.order(temp, -1, orders.get(temp));
 		}
 	}
 

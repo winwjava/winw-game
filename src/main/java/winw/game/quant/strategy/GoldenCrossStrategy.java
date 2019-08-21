@@ -5,6 +5,8 @@ import java.util.List;
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantQuote;
 import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.Quote;
+import winw.game.quant.QuoteChart;
 
 /**
  * 金叉死叉策略。
@@ -54,34 +56,30 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 
 	@Override
 	public void trading(Portfolio portfolio) {
-		List<QuantQuote> quantQuotes = getHistoryQuote(samples()[0]);
-		if (quantQuotes == null || quantQuotes.isEmpty()) {
-			return;
-		}
-		QuantQuote today = quantQuotes.get(quantQuotes.size() - 1);
-		QuantQuote yesterday = quantQuotes.get(quantQuotes.size() - 2);
+		for (String code : samples()) {
+			List<QuantQuote> quantQuotes = getHistoryQuote(code);
+			if (quantQuotes == null || quantQuotes.isEmpty()) {
+				continue;
+			}
+			QuantQuote today = quantQuotes.get(quantQuotes.size() - 1);
+			QuantQuote yesterday = quantQuotes.get(quantQuotes.size() - 2);
 
-		if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0
-				&& !portfolio.hasPosition(today.getCode())) {
-			portfolio.order(today, 1, "GOLDEN_CROSSOVER");
+			if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0) {
+				portfolio.addBatch(today, 1, "GoldenCrossover");
+			}
+			if (today.getMacd() < 0 && yesterday.getMacd() > 0) {
+				portfolio.addBatch(today, -1, "DeathCrossover");
+			}
 		}
-
-		// if (today.getMacd() > 0 && yesterday.getMacd() < 0 &&
-		// portfolio.getPosition(today.getCode()) == 0) {
-		// Trade order = portfolio.order(today, 1);
-		// String subject = today.getDate() + "[B]" + order.getCode() + "
-		// ZERO_CROSSOVER";
-		// System.out.println(subject + ", " + order);
-		// mailService.send(subject, order);
-		// }
-		if (today.getMacd() < 0 && yesterday.getMacd() > 0 && portfolio.hasPosition(today.getCode())) {
-			portfolio.order(today, -1, "DEATH_CROSSOVER");
-		}
+		stoploss(portfolio);
+		portfolio.commitBatch();
 	}
 
 	public static void main(String[] args) throws Exception {
+		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		GoldenCrossStrategy strategy = new GoldenCrossStrategy();
-		strategy.backTesting(new Portfolio(1000000, 1, 0.07, 0.05), "2018-01-01", "2019-07-08");
+		strategy.backTesting(portfolio, "2019-01-01", Quote.today());
+		QuoteChart.show(portfolio, strategy, "2019-01-01", Quote.today());
 	}
 
 }

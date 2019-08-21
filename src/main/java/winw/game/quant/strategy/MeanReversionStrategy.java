@@ -1,10 +1,7 @@
 package winw.game.quant.strategy;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.math3.stat.StatUtils;
 
 import winw.game.quant.Portfolio;
@@ -28,12 +25,19 @@ import winw.game.quant.QuoteChart;
  */
 public class MeanReversionStrategy extends QuantTradingStrategy {
 
+	@Override
+	public String[] samples() {
+		return CSI_300_TOP;
+	}
+
 	/**
 	 * 计算 Z-Score（此处计算的是收盘价与20天移动平均线的差值的Z-Score）
 	 * <p>
 	 * 公式：z-score = (value - mean) / standard deviation;
 	 */
-	public static List<QuantQuote> computeZscore(List<QuantQuote> list) {
+	@Override
+	public List<QuantQuote> compute(List<QuantQuote> list) {
+		super.compute(list);
 		double[] subArray = new double[list.size()];
 		for (int i = 0; i < list.size(); i++) {
 			QuantQuote quantQuote = list.get(i);
@@ -48,25 +52,11 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		return list;
 	}
 
-	public List<QuantQuote> compute(List<QuantQuote> list) {
-		return computeZscore(super.compute(list));
-	}
-
-	@Override
-	public String[] samples() {
-		return CSI_300_TOP;
-	}
-
-	private List<QuantQuote> buyOrders = new ArrayList<QuantQuote>();
-	private List<QuantQuote> sellOrders = new ArrayList<QuantQuote>();
-
 	/**
 	 * 用 Z-Score 实现
 	 */
 	@Override
 	public void trading(Portfolio portfolio) {
-		buyOrders.clear();
-		sellOrders.clear();
 		for (String code : samples()) {
 			List<QuantQuote> quantQuotes = getHistoryQuote(code);
 			if (quantQuotes == null || quantQuotes.isEmpty()) {
@@ -76,33 +66,24 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			QuantQuote yestday = quantQuotes.get(quantQuotes.size() - 2);
 
 			if (yestday.getZscore() <= -2 && !portfolio.hasPosition(code)) {
-				buyOrders.add(current);
+				portfolio.addBatch(current, 1, String.format("z-score: %.2f", current.getZscore()));
 			}
-
 			if (yestday.getZscore() >= 1 && portfolio.hasPosition(code)) {
-				sellOrders.add(current);
+				portfolio.addBatch(current, -1, String.format("z-score: %.2f", current.getZscore()));
 			}
 		}
-		for (QuantQuote temp : sellOrders) {
-			portfolio.order(temp, -1, String.format("z-score: %.2f", temp.getZscore()));
-		}
 
-		for (QuantQuote temp : buyOrders) {
-			portfolio.order(temp, 1, String.format("z-score: %.2f", temp.getZscore()));
-		}
-
-		// TODO 输出所有交易机会
+		stoploss(portfolio);
+		portfolio.commitBatch();
 	}
 
 	// 当天z-score回去了也不能买。
 	// TODO 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.15, 0.15);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
-		strategy.backTesting(portfolio, "2019-04-26", today);
-
-		QuoteChart.show(portfolio, strategy, "2019-04-01", today);
+		strategy.backTesting(portfolio, "2019-04-26", Quote.today());
+		QuoteChart.show(portfolio, strategy, "2019-04-01", Quote.today());
 	}
 }
