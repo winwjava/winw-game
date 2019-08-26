@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 /**
  * 投资组合。
@@ -22,7 +23,7 @@ import javax.persistence.Transient;
  *
  */
 @Entity
-@Table(name = "PORTFOLIO")
+@Table(name = "PORTFOLIO", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
 public class Portfolio {
 	@Id
 	@GeneratedValue
@@ -47,7 +48,7 @@ public class Portfolio {
 	// 持仓市值。
 	@Transient
 	private double marketValue = 0;
-	// 交易记录。
+	// 委托记录（委托指令）。
 	@Transient
 	private final List<Order> orderList = new ArrayList<Order>();
 	// 持仓记录。
@@ -190,6 +191,12 @@ public class Portfolio {
 		return resultList;
 	}
 
+	/**
+	 * 委托交易指令。
+	 * 
+	 * @param order
+	 * @return
+	 */
 	public Order order(Order order) {
 		int size = order.getSize();
 		String code = order.getCode();

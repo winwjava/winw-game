@@ -56,6 +56,9 @@ public class Quote {
 
 	protected Double price = 0.0;// 价格
 
+	// protected Double ask = 0.0;
+	// protected Double bid = 0.0;
+
 	protected Double previousClose = 0.0;// 昨日收盘价
 
 	protected Double pe = 0.0;// 市盈率

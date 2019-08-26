@@ -1,7 +1,5 @@
 package winw.game.quant;
 
-import java.math.BigDecimal;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -9,7 +7,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
- * 交易订单。
+ * 交易指令。
  * 
  * @author winw
  *
@@ -58,18 +56,19 @@ public class Order {
 		this.comment = comment;
 	}
 
-	public Order(Quote quote, int pid, double price, int size, double commission) {
-		super();
-		this.pid = pid;
-		this.date = quote.getDate();
-		this.code = quote.getCode();
-		this.price = price;
-		this.size = size;
-		this.commission = commission;
-
-		this.amount = new BigDecimal(price * size).add(new BigDecimal(commission)).setScale(2, BigDecimal.ROUND_HALF_UP)
-				.doubleValue();
-	}
+//	public Order(Quote quote, int pid, double price, int size, double commission) {
+//		super();
+//		this.pid = pid;
+//		this.date = quote.getDate();
+//		this.code = quote.getCode();
+//		this.price = price;
+//		this.size = size;
+//		this.commission = commission;
+//
+//		// amount，应该怎么算
+//		this.amount = new BigDecimal(price * size).add(new BigDecimal(commission)).setScale(2, BigDecimal.ROUND_HALF_UP)
+//				.doubleValue();
+//	}
 
 	public int getId() {
 		return id;

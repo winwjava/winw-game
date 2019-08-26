@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public abstract class QuantTradingStrategy extends QuantTradingBase {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
 
+//	private String name;
+	
 	protected int observation = -120;
 
 	/**
@@ -48,28 +50,13 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 		return marketValue;
 	}
 
-	/**
-	 * 是否趋势向上。
-	 * 
-	 * @return
-	 */
-	public boolean marketTrend() {
-		// 根据CSI_300的60天均线。分析市场趋势
-
-		// 市场处于向上趋势，调整为趋势跟踪策略
-		// 市场处于向下或震荡趋势，调整为均值回归策略
-		// QuantQuote current = getCurrentQuote(CSI_300);
-		// return current.getSlope60() > 0.04 && current.getSlope5() > 0.04;
-		return false;
-	}
-
 	private void trading0(Portfolio portfolio) {
 		// 调整持仓可卖。
 		for (Position position : portfolio.getPositions().values()) {
 			position.setSellable(position.getSize());
 		}
-		// FIXME 复权处理。更新持仓数量和持仓价。记录复权信息。
-		
+		// TODO 复权处理。更新持仓数量和持仓价。记录复权信息。
+
 		// 撤销前一日的订单。
 		portfolio.cancelBatch();
 		// 模拟交易

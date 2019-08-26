@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * 持仓。
@@ -15,7 +16,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "POSITIONS")
+@Table(name = "POSITIONS", uniqueConstraints = { @UniqueConstraint(columnNames = { "pid", "code" }) })
 public class Position {
 
 	@Id

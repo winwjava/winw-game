@@ -2,6 +2,9 @@ package winw.game.quant.util;
 
 import java.util.Properties;
 
+import javax.annotation.ManagedBean;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
@@ -13,23 +16,51 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import winw.game.TradingConfig;
+
 /**
  * 
  * @author winw
  *
  */
+@ManagedBean
 public class MailService extends Authenticator {
 
-	private String smtpHost = "smtp.aliyun.com";
-	private String smtpPort = "465";
+	@Resource
+	private TradingConfig config;
 
-	private String username = "winwjava@aliyun.com";
-	private String password = "winw.game";
-	private String defaultRecipients = "winwgame@sina.com";
+	private String smtpHost;
+	private String smtpPort;
+
+	private String username;
+	private String password;
+	private String defaultRecipients;
 
 	private Session session;
 
 	private Properties properties;
+
+	public MailService() {
+	}
+
+	public MailService(String smtpHost, String smtpPort, String username, String password, String defaultRecipients) {
+		this.smtpHost = smtpHost;
+		this.smtpPort = smtpPort;
+		this.username = username;
+		this.password = password;
+		this.defaultRecipients = defaultRecipients;
+	}
+
+	@PostConstruct
+	public void init() {
+		if (config != null) {
+			smtpHost = config.getMailHost();
+			smtpPort = config.getMailPort();
+			username = config.getMailUser();
+			password = config.getMailAuth();
+			defaultRecipients = config.getMailRecipients();
+		}
+	}
 
 	private Session getSession() {
 		if (session != null) {
@@ -42,7 +73,7 @@ public class MailService extends Authenticator {
 		properties.put("mail.smtp.auth", "true");
 		properties.put("mail.smtp.ssl.enable", "true");
 		// properties.put("mail.debug", "true");
-		session = Session.getInstance(properties, new MailService());
+		session = Session.getInstance(properties, this);
 		return session;
 	}
 
@@ -78,6 +109,13 @@ public class MailService extends Authenticator {
 
 	public static void main(String[] args) {
 		MailService mailService = new MailService();
+
+		mailService.smtpHost = "smtp.aliyun.com";
+		mailService.smtpPort = "465";
+		mailService.username = "winwjava@aliyun.com";
+		mailService.password = "winw.game";
+		mailService.defaultRecipients = "inwgame@sina.com";
+
 		StringBuilder html = new StringBuilder();
 		html.append("<html>");
 		html.append("<h2>").append("test html").append("</h2>");
@@ -116,6 +154,54 @@ public class MailService extends Authenticator {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public String getSmtpHost() {
+		return smtpHost;
+	}
+
+	public void setSmtpHost(String smtpHost) {
+		this.smtpHost = smtpHost;
+	}
+
+	public String getSmtpPort() {
+		return smtpPort;
+	}
+
+	public void setSmtpPort(String smtpPort) {
+		this.smtpPort = smtpPort;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getDefaultRecipients() {
+		return defaultRecipients;
+	}
+
+	public void setDefaultRecipients(String defaultRecipients) {
+		this.defaultRecipients = defaultRecipients;
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
 	}
 
 }

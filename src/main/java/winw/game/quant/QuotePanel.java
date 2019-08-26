@@ -512,6 +512,6 @@ public class QuotePanel extends JPanel {
 		show(Arrays.asList(newChart("sh000001"), newChart("sh000300"), newChart("sh600276"), newChart("sz002352")));
 	}
 
-	// TODO 显示收益曲线，和交易明细。
-	
+	// TODO 2、显示收益曲线，和交易明细。邮件里可以带上图表，方便查看分析。
+
 }
