@@ -1,14 +1,14 @@
 package winw.game.quant.strategy;
 
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
+import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
 
 /**
@@ -19,21 +19,17 @@ import winw.game.quant.QuotePanel;
  */
 public class TrendFollowingStrategy extends QuantTradingStrategy {
 
-	// 默认用国债和300二八轮换
-	private String[] samples = { CSI_300, SH_BOND };
-
 	// private boolean holdBonds = false;// 空仓时持有国债。
 
+	// 默认用国债和300二八轮换
 	public TrendFollowingStrategy() {
+		this.samples.add(CSI_300);
+		this.samples.add(SH_BOND);
 	}
 
 	public TrendFollowingStrategy(String... samples) {
-		this.samples = ArrayUtils.addAll(samples, SH_BOND);
-	}
-
-	@Override
-	public String[] samples() {
-		return samples;
+		this.samples.add(SH_BOND);
+		this.samples.addAll(Arrays.asList(samples));
 	}
 
 	private SimpleRegression regression = new SimpleRegression();

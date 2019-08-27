@@ -1,13 +1,14 @@
 package winw.game.quant.strategy;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.stat.StatUtils;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
+import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
 
 /**
@@ -25,9 +26,9 @@ import winw.game.quant.QuotePanel;
  */
 public class MeanReversionStrategy extends QuantTradingStrategy {
 
-	@Override
-	public String[] samples() {
-		return CSI_300_TOP;
+	public MeanReversionStrategy() {
+		super();
+		this.samples.addAll(Arrays.asList(CSI_300_TOP));
 	}
 
 	/**

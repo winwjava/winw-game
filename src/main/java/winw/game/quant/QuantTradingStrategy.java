@@ -2,10 +2,11 @@ package winw.game.quant;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +23,46 @@ import org.slf4j.LoggerFactory;
 public abstract class QuantTradingStrategy extends QuantTradingBase {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
 
-//	private String name;
-	
+	// private String name;
+	protected List<String> samples = new ArrayList<String>(Arrays.asList("CSI_300"));
+
 	protected int observation = -120;
 
+	public QuantTradingStrategy() {
+		super();
+	}
+
+	public QuantTradingStrategy(String[] samples) {
+		super();
+		this.samples.addAll(Arrays.asList(samples));
+	}
+
 	/**
+	 * 子类实现该方法用于选样。
+	 * 
 	 * @return 样本代码。
 	 */
-	public abstract String[] samples();
+	public List<String> samples() {
+		return samples;
+	}
+
+	/**
+	 * 添加样本代码。
+	 * 
+	 * @param samples
+	 */
+	public void addSamples(String... samples) {
+		this.samples.addAll(Arrays.asList(samples));
+	}
+
+	/**
+	 * 添加样本代码。
+	 * 
+	 * @param samples
+	 */
+	public void addSamples(Collection<String> samples) {
+		this.samples.addAll(samples);
+	}
 
 	/**
 	 * 实现具体的交易。
@@ -67,7 +100,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 	public String mockTrading(Portfolio portfolio) throws Exception {
 		String today = Quote.today();
 		String from0 = Quote.offset(today, observation);
-		for (String temp : ArrayUtils.addAll(samples(), CSI_300)) {
+		for (String temp : samples()) {
 			historyQuote.put(temp, queryHistoryQuote(from0, today, temp));
 		}
 
@@ -95,7 +128,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 
 	public void backTesting(Portfolio portfolio, String from, String to, boolean log) throws Exception {
 		String from0 = Quote.offset(from, observation);
-		for (String temp : ArrayUtils.addAll(samples(), CSI_300)) {
+		for (String temp : samples()) {
 			quoteCache.put(temp, queryHistoryQuote(from0, to, temp));
 		}
 		// 以csi300的每日交易日期为基准。

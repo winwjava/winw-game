@@ -25,6 +25,8 @@ public class Order {
 
 	private String date;// 日期
 
+	private String time;// 时间
+
 	private int size;// 数量
 
 	private double price;// 价格
@@ -36,7 +38,7 @@ public class Order {
 	private double balance;// 结余
 
 	private String profit;// 收益
-	
+
 	private String comment;// 备注
 
 	@Transient
@@ -56,19 +58,21 @@ public class Order {
 		this.comment = comment;
 	}
 
-//	public Order(Quote quote, int pid, double price, int size, double commission) {
-//		super();
-//		this.pid = pid;
-//		this.date = quote.getDate();
-//		this.code = quote.getCode();
-//		this.price = price;
-//		this.size = size;
-//		this.commission = commission;
-//
-//		// amount，应该怎么算
-//		this.amount = new BigDecimal(price * size).add(new BigDecimal(commission)).setScale(2, BigDecimal.ROUND_HALF_UP)
-//				.doubleValue();
-//	}
+	// public Order(Quote quote, int pid, double price, int size, double commission)
+	// {
+	// super();
+	// this.pid = pid;
+	// this.date = quote.getDate();
+	// this.code = quote.getCode();
+	// this.price = price;
+	// this.size = size;
+	// this.commission = commission;
+	//
+	// // amount，应该怎么算
+	// this.amount = new BigDecimal(price * size).add(new
+	// BigDecimal(commission)).setScale(2, BigDecimal.ROUND_HALF_UP)
+	// .doubleValue();
+	// }
 
 	public int getId() {
 		return id;
@@ -100,6 +104,14 @@ public class Order {
 
 	public void setDate(String date) {
 		this.date = date;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
 	}
 
 	public double getPrice() {

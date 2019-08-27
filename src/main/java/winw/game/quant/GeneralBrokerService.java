@@ -1,6 +1,7 @@
 package winw.game.quant;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -8,22 +9,29 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.ManagedBean;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 
 import winw.game.TradingConfig;
 
 /**
  * 通用券商接口。用 <tt>Robot</tt> 模拟操作同花顺实现。
  * <p>
+ * 只支持一个交易账户。
+ * <p>
  * 参考https://github.com/nladuo/THSTrader实现（Python控制能力更强）。
+ * 
+ * <p>
+ * 另外有代理服务器实现：https://github.com/928675268/alphaquant.git和开源实现：https://github.com/waditu/tushare.git，
+ * 但可靠性很低，且难以维护更新。
  * 
  * @author winw
  *
@@ -34,31 +42,24 @@ public class GeneralBrokerService extends BrokerService {
 	private Robot robot;
 	protected Process client;
 
-	@Resource
-	protected TradingConfig config;
+	private static Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 
 	public GeneralBrokerService() {
 		super();
 	}
 
-	public GeneralBrokerService(String brokerExe) throws AWTException, IOException {
-		super();
-		config = new TradingConfig();
-		config.setBrokerExe(brokerExe);
-		init();
-	}
-
-	@PostConstruct
-	public void init() throws AWTException, IOException {
+	private void startBrokerClient(TradingConfig config) throws AWTException, IOException, UnsupportedFlavorException {
 		if (config.getBroker() == null || config.getBroker().isEmpty()) {
 			return;
 		}
 		client = Runtime.getRuntime().exec(config.getBrokerExe());
 		robot = new Robot();
 		robot.delay(15000);
+		fullScreen();
+		robot.delay(100);
 		robot.setAutoDelay(20);
 
-		// TODO login
+		// Login
 	}
 
 	@PreDestroy
@@ -68,51 +69,24 @@ public class GeneralBrokerService extends BrokerService {
 		}
 	}
 
-	public Portfolio find(String name) throws Exception {
-		Map<String, Position> positions = getPositions();
-		// 资金余额，设置初始值，然后根据持仓计算即可。
-		// 当前持仓
-		// TODO 当日成交 = 当天第一次order时先更新持仓。然后与当前持仓做对比即可。
-		double cash = config.getInitAssets();
-		for (Position position : positions.values()) {
-			cash -= position.getHoldingPrice() * position.getSize();
-		}
-		return new Portfolio(name, cash, config.getMaxPosition(), config.getDrawdownLimit(), config.getStoplossLimit());
+	/**
+	 * 资金余额为前一交易日结算后的余额。
+	 */
+	public Portfolio getPortfolio(TradingConfig config) throws Exception {// TODO getBalance是昨天的，应该和今天的成交和委托一并计算。
+		startBrokerClient(config);
+		// 根据初始资金和持仓计算资金余额。
+		Portfolio portfolio = new Portfolio(config.getPortfolio(), getBalance(), config.getMaxPosition(),
+				config.getDrawdownLimit(), config.getStoplossLimit());
+		portfolio.getPositions().putAll(getPositions());
+		return portfolio;
 	}
 
-	public Map<String, Position> getPositions() throws UnsupportedFlavorException, IOException {
-		key(KeyEvent.VK_F4);
-		key(KeyEvent.VK_DOWN);
-		keyWithCtrl(KeyEvent.VK_C);
-		String positions = getClipboardString();
-		if (!positions.startsWith("明细")) {
-			return null;
-		}
-		HashMap<String, Position> results = new HashMap<String, Position>();
-		for (String line : positions.split("\n")) {
-			if (line.startsWith("明细")) {
-				continue;
-			}
-			String[] fileds = line.split("\t");
-			Position position = new Position();
-			position.setCode(fileds[1]);
-			position.setName(fileds[2]);
-			position.setSize(Integer.valueOf(fileds[3]));
-			position.setSellable(Integer.valueOf(fileds[4]));
-			position.setHoldingPrice(Double.valueOf(fileds[5]));
-			position.setCurrentPrice(Double.valueOf(fileds[6]));
-			System.out.println(position);
-			results.put(position.getCode(), position);
-		}
-		return results;
-	}
-
-	public void order(Order order) {
+	public void delegate(Portfolio portfolio, Order order) {
 		long t0 = System.currentTimeMillis();
 		key(KeyEvent.VK_F4);// 还原F1和F2的光标位置
 		key(order.getSize() > 0 ? KeyEvent.VK_F1 : KeyEvent.VK_F2);
 
-		keyboardString(order.getCode().substring(2));
+		keyboardString(delPrefix(order.getCode()));
 		key(KeyEvent.VK_TAB);
 
 		robot.delay(100);
@@ -128,7 +102,106 @@ public class GeneralBrokerService extends BrokerService {
 			robot.delay(100);
 		}
 		long t1 = System.currentTimeMillis();
-		System.out.println("order cost: " + (t1 - t0));
+		System.out.println("Delegate " + order + " cost: " + (t1 - t0));
+	}
+
+	/**
+	 * 当日交易记录。
+	 * 
+	 * @throws IOException
+	 * @throws UnsupportedFlavorException
+	 */
+	public List<Order> getTradings(Portfolio portfolio) throws Exception {
+		key(KeyEvent.VK_F4);
+		click(100, dimension.height - 100);
+		key(KeyEvent.VK_DOWN);
+		robot.delay(300);
+		key(KeyEvent.VK_DOWN);
+		keyWithCtrl(KeyEvent.VK_C);
+		String tradings = getClipboardString();
+		if (!tradings.startsWith("成交时间")) {
+			return null;
+		}
+		List<Order> result = new ArrayList<Order>();
+		for (String line : tradings.split("\n")) {
+			if (line.startsWith("成交时间")) {
+				continue;
+			}
+			String[] fileds = line.split("\t");
+			Order order = new Order();
+			order.setTime(fileds[0]);
+			order.setCode(addPrefix(fileds[1]));
+			order.setSize(("证券卖出".equals(fileds[3]) ? -1 : 1) * Integer.valueOf(fileds[4]));
+			order.setPrice(Double.valueOf(fileds[5]));
+			order.setAmount(Double.valueOf(fileds[6]));
+			result.add(order);
+		}
+		return result;
+	}
+
+	/**
+	 * 前一交易日结算后的余额。
+	 * 
+	 * @return
+	 * @throws UnsupportedFlavorException
+	 * @throws IOException
+	 */
+	private Double getBalance() throws UnsupportedFlavorException, IOException {
+		key(KeyEvent.VK_F4);
+		for (int i = 0; i <= 5; i++) {
+			click(100, dimension.height - 100);
+			key(KeyEvent.VK_DOWN);
+		}
+		robot.delay(300);
+		key(KeyEvent.VK_DOWN);
+		keyWithCtrl(KeyEvent.VK_C);
+		String balance = getClipboardString();
+
+		if (!balance.startsWith("成交日期")) {
+			return null;
+		}
+		String[] lines = balance.split("\n");
+		String[] fileds = lines[lines.length - 1].split("\t");
+		return Double.valueOf(fileds[11]);
+	}
+
+	/**
+	 * 当前持仓。
+	 * 
+	 * @return
+	 * @throws UnsupportedFlavorException
+	 * @throws IOException
+	 */
+	private Map<String, Position> getPositions() throws UnsupportedFlavorException, IOException {
+		key(KeyEvent.VK_F4);
+		key(KeyEvent.VK_DOWN);
+		keyWithCtrl(KeyEvent.VK_C);
+		String positions = getClipboardString();
+		if (!positions.startsWith("明细")) {
+			return null;
+		}
+		HashMap<String, Position> results = new HashMap<String, Position>();
+		for (String line : positions.split("\n")) {
+			if (line.startsWith("明细")) {
+				continue;
+			}
+			String[] fileds = line.split("\t");
+			Position position = new Position();
+			position.setCode(addPrefix(fileds[1]));
+			position.setName(fileds[2]);
+			position.setSize(Integer.valueOf(fileds[3]));
+			position.setSellable(Integer.valueOf(fileds[4]));
+			position.setHoldingPrice(Double.valueOf(fileds[5]));
+			position.setCurrentPrice(Double.valueOf(fileds[6]));
+			results.put(position.getCode(), position);
+		}
+		return results;
+	}
+
+	protected void click(int x, int y) {
+		robot.mouseMove(x, y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 
 	protected void key(int key) {
@@ -170,6 +243,15 @@ public class GeneralBrokerService extends BrokerService {
 		robot.setAutoDelay(20);
 	}
 
+	public void fullScreen() {
+		robot.keyPress(KeyEvent.VK_ALT);
+		robot.keyPress(KeyEvent.VK_SPACE);
+		robot.keyPress(KeyEvent.VK_X);
+		robot.keyRelease(KeyEvent.VK_ALT);
+		robot.keyRelease(KeyEvent.VK_SPACE);
+		robot.keyRelease(KeyEvent.VK_X);
+	}
+
 	/**
 	 * 把文本设置到剪贴板（复制）
 	 */
@@ -192,26 +274,63 @@ public class GeneralBrokerService extends BrokerService {
 		return null;
 	}
 
-	public static void main(String[] args)
-			throws IOException, AWTException, UnsupportedFlavorException, InterruptedException {
+	public static void main1(String[] args) throws Exception {
+		TradingConfig config = new TradingConfig();
+		config.setBrokerExe("C:\\同花顺软件\\同花顺\\xiadan.exe");
+		config.setBroker("test");
+		config.setInitAssets(1000000d);
+		config.setPortfolio("test");
+		config.setMaxPosition(1);
+		config.setDrawdownLimit(0.1);
+		config.setStoplossLimit(0.1);
+
 		Order order = new Order();
 		order.setCode("sh600519");
 		order.setSize(1000);
 		order.setPrice(1000);
 
-		GeneralBrokerService service = new GeneralBrokerService("C:\\同花顺软件\\同花顺\\xiadan.exe");
-		service.getPositions();
-		service.order(order);
-		service.order(order);
-		service.order(order);
-
+		GeneralBrokerService service = new GeneralBrokerService();
+		Portfolio portfolio = service.getPortfolio(config);
+		System.out.println("Balance: " + portfolio.getCash());
+		for (Position position : portfolio.getPositions().values()) {
+			System.out.println(position);
+		}
+		for (Order temp : service.getTradings(portfolio)) {
+			System.out.println(temp);
+		}
+		service.delegate(portfolio, order);
+		service.delegate(portfolio, order);
+		service.delegate(portfolio, order);
 		order.setSize(-1000);
-		service.order(order);
-		service.order(order);
-		service.order(order);
-		service.getPositions();
-		Thread.sleep(5000);
+		service.delegate(portfolio, order);
+		service.delegate(portfolio, order);
+		service.delegate(portfolio, order);
 		service.destroy();
+	}
+
+	public static String addPrefix(String code) {
+		if (code.startsWith("0") || code.startsWith("1")) {
+			return "sz" + code;
+		}
+		if (code.startsWith("6") || code.startsWith("5")) {
+			return "sh" + code;
+		}
+		return code;
+	}
+
+	public static String delPrefix(String code) {
+		String prefix = code.substring(0, 2);
+		if (prefix.equalsIgnoreCase("sh") || prefix.equalsIgnoreCase("sz")) {
+			return code.substring(2);
+		}
+		return code;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(addPrefix("600333"));
+		System.out.println(addPrefix("000333"));
+		System.out.println(delPrefix("sz000333"));
+		System.out.println(delPrefix("sh600333"));
 	}
 
 }

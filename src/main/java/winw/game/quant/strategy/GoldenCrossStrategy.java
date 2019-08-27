@@ -1,11 +1,12 @@
 package winw.game.quant.strategy;
 
+import java.util.Arrays;
 import java.util.List;
 
 import winw.game.quant.Portfolio;
-import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
+import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
 
 /**
@@ -49,9 +50,9 @@ import winw.game.quant.QuotePanel;
  */
 public class GoldenCrossStrategy extends QuantTradingStrategy {
 
-	@Override
-	public String[] samples() {
-		return CSI_300_TOP;
+	public GoldenCrossStrategy() {
+		super();
+		this.samples.addAll(Arrays.asList(CSI_300_TOP));
 	}
 
 	@Override

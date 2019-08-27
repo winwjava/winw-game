@@ -22,6 +22,9 @@ public class Quote {
 	public static String today() {
 		return DateFormatUtils.format(new Date(), DATE_PATTERN);
 	}
+	public static String times() {
+		return DateFormatUtils.format(new Date(), TIME_PATTERN);
+	}
 
 	public static String offset(String from, int observation) throws ParseException {
 		return addDays(from, observation * 7 / 5 - 11);

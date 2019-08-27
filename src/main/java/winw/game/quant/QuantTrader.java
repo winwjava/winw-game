@@ -69,11 +69,17 @@ public class QuantTrader {
 	 * @throws Exception
 	 */
 	public void beforeClose() throws Exception {
-		Portfolio portfolio = getBrokerService().find(config.getPortfolio());
-		String result = config.getStrategy().mockTrading(portfolio);
-		getBrokerService().save(portfolio);
+		Portfolio portfolio = getBrokerService().getPortfolio(config);
+		System.out.println("Balance: " + portfolio.getCash());
+
+		for (Position position : portfolio.getPositions().values()) {
+			System.out.println(position);
+		}
+		QuantTradingStrategy strategy = config.getStrategy().newInstance();
+		strategy.addSamples(portfolio.getPositions().keySet());
+		String result = strategy.mockTrading(portfolio);
 		for (Order order : portfolio.getOrderList()) {
-			getBrokerService().delegate(order);
+			getBrokerService().delegate(portfolio, order);
 		}
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");

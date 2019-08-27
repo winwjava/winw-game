@@ -83,15 +83,15 @@ public class TradingConfig {
 		this.portfolio = portfolio;
 	}
 
-	public QuantTradingStrategy getStrategy() {
+	public Class<? extends QuantTradingStrategy> getStrategy() {
 		if ("MeanReversionStrategy(300_TOP)".equals(portfolio)) {
-			return new MeanReversionStrategy();
+			return MeanReversionStrategy.class;
 		}
 		if ("TrendFollowingStrategy(300_ETF)".equals(portfolio)) {
-			return new TrendFollowingStrategy(QuantTradingStrategy.CSI_300_ETF);
+			return TrendFollowingStrategy.class;
 		}
 		if ("TrendFollowingStrategy(300_TOP)".equals(portfolio)) {
-			return new TrendFollowingStrategy(QuantTradingStrategy.CSI_300_TOP);
+			return TrendFollowingStrategy.class;
 		}
 		return null;
 	}
