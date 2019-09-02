@@ -1,4 +1,4 @@
-package winw.game.quant.util;
+package winw.game.quant;
 
 import java.util.Properties;
 

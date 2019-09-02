@@ -25,7 +25,7 @@ public class YahooQuoteService implements QuoteService {
 	@Override
 	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
 		yahoofinance.quotes.stock.StockQuote temp = YahooFinance.get(code).getQuote();
-		T quote = clazz.newInstance();
+		T quote = clazz.getDeclaredConstructor().newInstance();
 		quote.setName(temp.getSymbol());
 		quote.setCode(code);
 		quote.setPrice(temp.getPrice().doubleValue());
@@ -51,7 +51,7 @@ public class YahooQuoteService implements QuoteService {
 		List<T> quoteList = new ArrayList<T>();
 		for (HistoricalQuote q : h) {
 			try {
-				T quote = clazz.newInstance();
+				T quote = clazz.getDeclaredConstructor().newInstance();
 				quote.setCode(code);
 				quote.setDate(DateFormatUtils.format(q.getDate(), Quote.DATE_PATTERN));
 				quote.setClose(q.getClose().doubleValue());

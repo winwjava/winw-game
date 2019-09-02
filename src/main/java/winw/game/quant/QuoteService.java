@@ -1,5 +1,10 @@
 package winw.game.quant;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Date;
 import java.util.List;
 
@@ -71,6 +76,13 @@ public interface QuoteService {
 		return result;
 	}
 
+	HttpClient client = HttpClient.newHttpClient();
+	
+	default String get(String url) throws IOException, InterruptedException {
+		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+		return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+	}
+
 	/**
 	 * 返回每日历史报价，向前复权（保持现有价位不变，将以前的价格缩减），不包含今天正在交易的数据。
 	 * 
@@ -84,7 +96,7 @@ public interface QuoteService {
 	<T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num) throws Exception;
 
 	static QuoteService getDefault() {
-		return new TencentQuoteService();
+		return new TencentQuoteService();// TODO 改用新浪实时数据。
 	}
 
 }

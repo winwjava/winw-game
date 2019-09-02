@@ -3,8 +3,6 @@ package winw.game.quant;
 import java.util.ArrayList;
 import java.util.List;
 
-import winw.game.quant.util.HttpExecutor;
-
 /**
  * 新浪接口实现。
  * 
@@ -18,12 +16,12 @@ public class SinaQuoteService implements QuoteService {
 
 	@Override
 	public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
-		String response = HttpExecutor.get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
+		String response = get(realtimeQuoteUrl.replaceFirst("V_CODE", code));
 		String[] fileds = response.split("\"|,");
 		if (fileds == null || fileds.length <= 1) {
 			return null;
 		}
-		T quote = clazz.newInstance();
+		T quote = clazz.getDeclaredConstructor().newInstance();
 		quote.setCode(code);
 		quote.setName(fileds[1]);
 		quote.setOpen(Double.parseDouble(fileds[2]));
@@ -54,7 +52,7 @@ public class SinaQuoteService implements QuoteService {
 	public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num)
 			throws Exception {
 		String url = dailyQuoteUrl.replace("V_CODE", code).replace("V_NUM", String.valueOf(num));
-		return parse(clazz, code, HttpExecutor.get(url), from, to);
+		return parse(clazz, code, get(url), from, to);
 	}
 
 	private <T extends Quote> List<T> parse(Class<T> clazz, String code, String response, String from, String to)
@@ -71,7 +69,7 @@ public class SinaQuoteService implements QuoteService {
 				continue;
 			}
 			// day:"2019-08-01",open:"13.170",high:"13.200",low:"12.650",close:"12.750",volume:"12621062"
-			T quote = clazz.newInstance();
+			T quote = clazz.getDeclaredConstructor().newInstance();
 			quote.setCode(code);
 			quote.setDate(fileds[1]);
 			quote.setOpen(Double.parseDouble(fileds[3]));

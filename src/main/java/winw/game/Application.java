@@ -1,6 +1,5 @@
 package winw.game;
 
-import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -21,13 +20,13 @@ public class Application {
 	public static SpringApplicationBuilder springBuilder = new SpringApplicationBuilder(Application.class);
 
 	public static void main(String[] args) throws Exception {
-		applicationContext = springBuilder.headless(false).bannerMode(Banner.Mode.OFF).run(args);
+		applicationContext = springBuilder.headless(false).run(args);
 
 		QuantTrader quantTrader = applicationContext.getBean(QuantTrader.class);
 
-		//if (quantTrader.isTradable()) {
-			quantTrader.beforeClose();
-		//}
+		// if (quantTrader.isTradable()) {
+		quantTrader.beforeClose();
+		// }
 
 		applicationContext.close();
 	}

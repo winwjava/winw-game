@@ -7,7 +7,7 @@
     </encoder>
   </appender>
   <appender name="File" class="ch.qos.logback.core.FileAppender">
-    <file>logs/app.log</file>
+    <file>logs/game.log</file>
     <append>true</append>
     <immediateFlush>true</immediateFlush>
     <encoder>

@@ -1,6 +1,7 @@
 package winw.game.quant;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class Portfolio {
 		double tax = (amount > 0 ? 0 : closeTax) * Math.abs(amount);
 		double commission = (amount > 0 ? openCommission : closeCommission) * Math.abs(amount);
 		BigDecimal b = new BigDecimal(tax + (commission < minCommission ? minCommission : commission));
-		return b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		return b.setScale(2, RoundingMode.DOWN).doubleValue();
 	}
 
 	/**
@@ -174,8 +175,8 @@ public class Portfolio {
 			}
 
 			int size = percent < 0 // 计算买入或者卖出的数量。
-					? new Double(positions.get(code).getSize() * percent).intValue()
-					: new Double(maxBuy(order.getPrice()) * orderPercent(percent)).intValue() / 100 * 100;
+					? Double.valueOf(positions.get(code).getSize() * percent).intValue()
+					: Double.valueOf(maxBuy(order.getPrice()) * orderPercent(percent)).intValue() / 100 * 100;
 
 			if (size == 0) {
 				continue;
@@ -184,7 +185,7 @@ public class Portfolio {
 			order.setSize(size);
 			order.setCommission(commission(order.getPrice() * size));
 			order.setAmount(new BigDecimal(order.getPrice() * size).add(new BigDecimal(order.getCommission()))
-					.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+					.setScale(2, RoundingMode.DOWN).doubleValue());
 			resultList.add(order(order));
 		}
 		batchOrders.clear();
@@ -213,7 +214,7 @@ public class Portfolio {
 		} else {
 			positions.put(code, position.add(size, order.getAmount()));
 		}
-		cash = new BigDecimal(cash).subtract(new BigDecimal(order.getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP)
+		cash = new BigDecimal(cash).subtract(new BigDecimal(order.getAmount())).setScale(2, RoundingMode.DOWN)
 				.doubleValue();
 
 		order.setBalance(cash);

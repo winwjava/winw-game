@@ -48,7 +48,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			}
 			// 取59天的数据。
 			double std = Math.sqrt(StatUtils.populationVariance(subArray, i - 59, 59));
-			quoteIndex.setZscore((subArray[i - 1] - StatUtils.mean(subArray, i - 59, 59)) / std);
+			quoteIndex.setZ((subArray[i - 1] - StatUtils.mean(subArray, i - 59, 59)) / std);
 		}
 		return list;
 	}
@@ -66,11 +66,11 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			QuoteIndex current = quoteIndexs.get(quoteIndexs.size() - 1);
 			QuoteIndex yestday = quoteIndexs.get(quoteIndexs.size() - 2);
 
-			if (yestday.getZscore() <= -2 && !portfolio.hasPosition(code)) {
-				portfolio.addBatch(current, 1, String.format("z-score: %.2f", current.getZscore()));
+			if (yestday.getZ() <= -2 && !portfolio.hasPosition(code)) {
+				portfolio.addBatch(current, 1, String.format("z-score: %.2f", current.getZ()));
 			}
-			if (yestday.getZscore() >= 1 && portfolio.hasPosition(code)) {
-				portfolio.addBatch(current, -1, String.format("z-score: %.2f", current.getZscore()));
+			if (yestday.getZ() >= 1 && portfolio.hasPosition(code)) {
+				portfolio.addBatch(current, -1, String.format("z-score: %.2f", current.getZ()));
 			}
 		}
 
@@ -80,6 +80,10 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 
 	// 当天z-score回去了也不能买。
 	// TODO 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
+
+	// TODO 清仓后用全部余额买国债或其他固定收益，与现有手动操作无法衔接。
+
+	// TODO 自动买入国债，自动申购新股。
 
 	public static void main(String[] args) throws Exception {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.15, 0.15);

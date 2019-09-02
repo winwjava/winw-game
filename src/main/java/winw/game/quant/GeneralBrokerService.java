@@ -54,9 +54,14 @@ public class GeneralBrokerService extends BrokerService {
 		}
 		client = Runtime.getRuntime().exec(config.getBrokerExe());
 		robot = new Robot();
-		robot.delay(15000);
+		for (long cpuDuration = 0, lastDuration = -100; cpuDuration - lastDuration >= 100;) {
+			robot.delay(1000);
+			lastDuration = cpuDuration;
+			cpuDuration = ProcessHandle.of(client.pid()).get().info().totalCpuDuration().get().toMillis();
+		}
+
 		fullScreen();
-		robot.delay(100);
+		robot.delay(300);
 		robot.setAutoDelay(20);
 
 		// Login
@@ -115,7 +120,7 @@ public class GeneralBrokerService extends BrokerService {
 		key(KeyEvent.VK_F4);
 		click(100, dimension.height - 100);
 		key(KeyEvent.VK_DOWN);
-		robot.delay(300);
+		robot.delay(500);
 		key(KeyEvent.VK_DOWN);
 		keyWithCtrl(KeyEvent.VK_C);
 		String tradings = getClipboardString();
@@ -140,7 +145,7 @@ public class GeneralBrokerService extends BrokerService {
 	}
 
 	/**
-	 * 前一交易日结算后的余额。
+	 * 前一交易日结算后的余额。TODO 根据交易记录计算当前余额。
 	 * 
 	 * @return
 	 * @throws UnsupportedFlavorException
@@ -152,7 +157,7 @@ public class GeneralBrokerService extends BrokerService {
 			click(100, dimension.height - 100);
 			key(KeyEvent.VK_DOWN);
 		}
-		robot.delay(300);
+		robot.delay(500);
 		key(KeyEvent.VK_DOWN);
 		keyWithCtrl(KeyEvent.VK_C);
 		String balance = getClipboardString();

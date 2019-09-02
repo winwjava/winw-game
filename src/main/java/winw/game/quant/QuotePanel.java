@@ -13,6 +13,7 @@ import java.awt.geom.Path2D.Double;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -118,7 +119,7 @@ public class QuotePanel extends JPanel {
 			minPrice = Math.min(minPrice, quoteList.get(i).getMa60());
 			maxVolume = Math.max(maxVolume, quoteList.get(i).getVolume());
 			maxVolume = Math.max(maxVolume, quoteList.get(i).getVolumeMa10());
-			maxZscore = Math.max(maxZscore, Math.abs(quoteList.get(i).getZscore()));
+			maxZscore = Math.max(maxZscore, Math.abs(quoteList.get(i).getZ()));
 		}
 		double diffPrice = maxPrice - minPrice;
 		maxPrice = maxPrice + diffPrice * 0.07;
@@ -277,9 +278,9 @@ public class QuotePanel extends JPanel {
 			// 线本身占1个像素
 			double lineX = masterX + (quoteW + 1) * (i - viewFrom) + quoteW / 2 - 0.5 + 1;
 
-			double zscore = quoteList.get(i).getZscore();
+			double zscore = quoteList.get(i).getZ();
 			g.setColor(zscore > 0 ? riseColor : fallColor);
-			drawLine(g, lineX, baseY, lineX, baseY - quoteList.get(i).getZscore() * zscoreRatio);
+			drawLine(g, lineX, baseY, lineX, baseY - quoteList.get(i).getZ() * zscoreRatio);
 		}
 
 		g.setColor(Color.GRAY);// 右边写刻度
@@ -392,7 +393,7 @@ public class QuotePanel extends JPanel {
 
 	private String format(double num, int scale) {
 		BigDecimal bigDecimal = new BigDecimal(num);
-		return bigDecimal.setScale(scale, BigDecimal.ROUND_DOWN).toPlainString();
+		return bigDecimal.setScale(scale, RoundingMode.DOWN).toPlainString();
 	}
 
 	/**
@@ -512,6 +513,6 @@ public class QuotePanel extends JPanel {
 		show(Arrays.asList(newChart("sh000001"), newChart("sh000300"), newChart("sh600276"), newChart("sz002352")));
 	}
 
-	// TODO 2、显示收益曲线，和交易明细。邮件里可以带上图表，方便查看分析。
+	// 显示收益曲线和交易明细。
 
 }

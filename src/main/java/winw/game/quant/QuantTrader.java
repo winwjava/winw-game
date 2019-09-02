@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import winw.game.Application;
 import winw.game.TradingConfig;
-import winw.game.quant.util.MailService;
 
 /**
  * 根据策略名称、券商接口做量化交易。
@@ -70,17 +69,15 @@ public class QuantTrader {
 	 */
 	public void beforeClose() throws Exception {
 		Portfolio portfolio = getBrokerService().getPortfolio(config);
-		System.out.println("Balance: " + portfolio.getCash());
-
-		for (Position position : portfolio.getPositions().values()) {
-			System.out.println(position);
-		}
-		QuantTradingStrategy strategy = config.getStrategy().newInstance();
+		logger.info("{} [{}], balance: {}", portfolio.getName(), config.getBroker(), portfolio.getCash());
+		QuantTradingStrategy strategy = config.getStrategy().getDeclaredConstructor().newInstance();
 		strategy.addSamples(portfolio.getPositions().keySet());
 		String result = strategy.mockTrading(portfolio);
 		for (Order order : portfolio.getOrderList()) {
-			getBrokerService().delegate(portfolio, order);
+			logger.info("Delegate: {}", order);
+			// getBrokerService().delegate(portfolio, order);
 		}
+		// TODO 邮件里可以带上图表，方便查看分析。
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");
 	}

@@ -44,12 +44,12 @@ public class QuoteIndex extends Quote {
 	private double mb; // 中轨线
 	private double dn; // 下轨线
 
-	private double zscore;
-	private double slopeS;
-	private double slopeL;
-
 	protected double ema60max;
 	protected double ema60min;
+
+	private double z;
+	private double s;
+	private double l;
 
 	public QuoteIndex() {
 		super();
@@ -168,14 +168,14 @@ public class QuoteIndex extends Quote {
 
 				@Override
 				public int compare(QuoteIndex o1, QuoteIndex o2) {
-					return new Double(o1.getEma60()).compareTo(o2.getEma60());
+					return Double.valueOf(o1.getEma60()).compareTo(o2.getEma60());
 				}
 			}).getEma60();
 			quoteIndex.ema60min = Collections.max(list.subList(i < 100 ? 0 : i - 100, i), new Comparator<QuoteIndex>() {
 
 				@Override
 				public int compare(QuoteIndex o1, QuoteIndex o2) {
-					return new Double(o2.getEma60()).compareTo(o1.getEma60());
+					return Double.valueOf(o2.getEma60()).compareTo(o1.getEma60());
 				}
 			}).getEma60();
 		}
@@ -538,28 +538,28 @@ public class QuoteIndex extends Quote {
 		this.ema60min = ema60min;
 	}
 
-	public double getZscore() {
-		return zscore;
+	public double getZ() {
+		return z;
 	}
 
-	public void setZscore(double zscore) {
-		this.zscore = zscore;
+	public void setZ(double z) {
+		this.z = z;
 	}
 
-	public double getSlopeL() {
-		return slopeL;
+	public double getL() {
+		return l;
 	}
 
-	public void setSlopeL(double slopeL) {
-		this.slopeL = slopeL;
+	public void setL(double l) {
+		this.l = l;
 	}
 
-	public double getSlopeS() {
-		return slopeS;
+	public double getS() {
+		return s;
 	}
 
-	public void setSlopeS(double slopeS) {
-		this.slopeS = slopeS;
+	public void setS(double s) {
+		this.s = s;
 	}
 
 }
