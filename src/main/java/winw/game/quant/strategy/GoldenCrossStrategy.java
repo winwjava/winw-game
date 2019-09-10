@@ -62,8 +62,8 @@ public class GoldenCrossStrategy extends QuantTradingStrategy {
 			if (quoteIndexs == null || quoteIndexs.isEmpty()) {
 				continue;
 			}
-			QuoteIndex today = quoteIndexs.get(quoteIndexs.size() - 1);
-			QuoteIndex yesterday = quoteIndexs.get(quoteIndexs.size() - 2);
+			QuoteIndex today = getQuoteIndex(code, 0);
+			QuoteIndex yesterday = getQuoteIndex(code, -1);
 
 			if (today.getDiff() > 0 && yesterday.getDiff() < 0 && today.getMacd() > 0) {
 				portfolio.addBatch(today, 1, "GoldenCrossover");

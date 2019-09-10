@@ -77,7 +77,7 @@ public interface QuoteService {
 	}
 
 	HttpClient client = HttpClient.newHttpClient();
-	
+
 	default String get(String url) throws IOException, InterruptedException {
 		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
 		return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
@@ -96,7 +96,22 @@ public interface QuoteService {
 	<T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num) throws Exception;
 
 	static QuoteService getDefault() {
-		return new TencentQuoteService();// TODO 改用新浪实时数据。
+		return new QuoteService() {
+
+			private SinaQuoteService sinaQuoteService = new SinaQuoteService();
+			private TencentQuoteService tencentQuoteService = new TencentQuoteService();
+
+			@Override
+			public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
+				return sinaQuoteService.get(clazz, code);
+			}
+
+			@Override
+			public <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to, int num)
+					throws Exception {
+				return tencentQuoteService.get(clazz, code, from, to, num);
+			}
+		};
 	}
 
 }

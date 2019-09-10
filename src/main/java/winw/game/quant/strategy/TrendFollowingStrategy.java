@@ -102,26 +102,26 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 
 	@Override
 	public void trading(Portfolio portfolio) {
-		QuoteIndex shbond = getCurrentQuote(SH_BOND);
+		QuoteIndex shbond = getQuoteIndex(SH_BOND);
 		double bondYield = shbond.getL();// 国债收益率
 		for (String code : samples()) {
 			if (SH_BOND.equals(code)) {
 				continue;
 			}
-			List<QuoteIndex> quoteIndexs = getHistoryQuote(code);
-			QuoteIndex current = quoteIndexs.get(quoteIndexs.size() - 1);
-			QuoteIndex yestday = quoteIndexs.get(quoteIndexs.size() - 2);
+			QuoteIndex today = getQuoteIndex(code, 0);
+			QuoteIndex yesterday = getQuoteIndex(code, -1);
+
 			// 5/10/20均线是否全部需要向上？
 			// 从转折点买入，避免从顶部买入。
-			if (yestday.getL() < bondYield && current.getL() > bondYield && current.getS() > bondYield
-					&& portfolio.getEmptyPositionDays(current.getCode(), 100) > 2 // 卖出后保持空仓天数
-					&& !portfolio.hasPosition(current.getCode())) {
-				portfolio.addBatch(current, 1, String.format("SlopeL: %.2f", current.getL()));
+			if (yesterday.getL() < bondYield && today.getL() > bondYield && today.getS() > bondYield
+					&& portfolio.getEmptyPositionDays(today.getCode(), 100) > 2 // 卖出后保持空仓天数
+					&& !portfolio.hasPosition(today.getCode())) {
+				portfolio.addBatch(today, 1, String.format("SlopeL: %.2f", today.getL()));
 			}
 
 			// 考虑用20日线。卖出更可靠。
-			if (current.getL() < bondYield) {
-				portfolio.addBatch(current, -1, String.format("SlopeL: %.2f", current.getL()));
+			if (today.getL() < bondYield) {
+				portfolio.addBatch(today, -1, String.format("SlopeL: %.2f", today.getL()));
 			}
 		}
 		stoploss(portfolio);
@@ -144,7 +144,7 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 		}
 	}
 
-	// TODO 用国债Slope并不准确，国债在短期内会下跌。
+	// TODO 3、用国债Slope并不准确，国债在短期内会下跌。
 	// TODO 如果当前持仓收益较低，则应及时调仓，应当持有相比更靠近底部的标的，可以用斜率做比较。
 
 }

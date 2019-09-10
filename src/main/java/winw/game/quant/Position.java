@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 /**
@@ -35,6 +36,9 @@ public class Position {
 
 	private double marketValue;// 市值。
 	// private double boughtValue;
+
+	@Transient
+	private double weight;// 仓位占比。
 
 	private int holdingDays = -1;// 持仓天数。
 
@@ -187,6 +191,14 @@ public class Position {
 
 	public void setHighestMarketValue(double highestMarketValue) {
 		this.highestMarketValue = highestMarketValue;
+	}
+
+	public double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 
 	private static final NumberFormat floatFormat = new DecimalFormat("#.##");

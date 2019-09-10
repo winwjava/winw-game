@@ -15,20 +15,19 @@ import winw.game.quant.QuantTrader;
 @SpringBootApplication
 public class Application {
 
-	// @Scheduled(cron = "55 14 * * 1-5")
-	public static ConfigurableApplicationContext applicationContext;
-	public static SpringApplicationBuilder springBuilder = new SpringApplicationBuilder(Application.class);
+	private static ConfigurableApplicationContext applicationContext;
+	private static SpringApplicationBuilder springBuilder = new SpringApplicationBuilder(Application.class);
 
 	public static void main(String[] args) throws Exception {
 		applicationContext = springBuilder.headless(false).run(args);
-
 		QuantTrader quantTrader = applicationContext.getBean(QuantTrader.class);
-
-		// if (quantTrader.isTradable()) {
 		quantTrader.beforeClose();
-		// }
-
-		applicationContext.close();
 	}
 
+	// @EnableScheduling
+	// @Scheduled(cron = "0 35 15 * * ?")
+	public static void beforeClose() throws Exception {
+		// if (quantTrader.isTradable()) {
+		// }
+	}
 }

@@ -113,7 +113,7 @@ public class Portfolio {
 	 * 
 	 * @return
 	 */
-	public double orderPercent(double percent) {
+	public double orderPercent(double percent) {// TODO 国债可以不限制。
 		int positionSize = positions.size();
 		return (positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize)) * percent;
 	}
@@ -353,16 +353,26 @@ public class Portfolio {
 		return marketValue + cash - init;
 	}
 
-	public String getReturnRate() {
+	public String getProfit() {
 		return percentFormat.format(getReturn() / init);
+	}
+
+	public String getPositionProfit() {
+		double boughtV = 0, marketV = 0;
+		for (Position p : positions.values()) {
+			boughtV += p.getHoldingPrice() * p.getSize();
+			marketV += p.getCurrentPrice() * p.getSize();
+		}
+		return percentFormat.format((marketV - boughtV) / boughtV);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(name);
-		builder.append(", position: ").append(positions.size());
-		builder.append(", trading today: ").append(orderList.size());
-		builder.append(", return: ").append(getReturnRate());
+		builder.append(", holding: ").append(positions.size());
+		builder.append(", trading: ").append(orderList.size());
+		builder.append(", balance: ").append(cash);
+		builder.append(", return: ").append(getPositionProfit());
 		return builder.toString();
 	}
 

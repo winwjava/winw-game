@@ -49,12 +49,23 @@ public abstract class QuantTradingBase {
 		}
 	}
 
-	public QuoteIndex getCurrentQuote(String code) {// 收盘价上记录的是当前实时价格。
+	public QuoteIndex getQuoteIndex(String code) {
+		return getQuoteIndex(code, 0);
+	}
+
+	/**
+	 * 如果是当前交易日的交易时间，收盘价上记录的是当前实时价格。
+	 * 
+	 * @param code
+	 * @param offset
+	 * @return
+	 */
+	public QuoteIndex getQuoteIndex(String code, int offset) {
 		List<QuoteIndex> list = getHistoryQuote(code);
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
-		return list.get(list.size() - 1);
+		return list.get(list.size() - 1 + offset);
 	}
 
 	/**

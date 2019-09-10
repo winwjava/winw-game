@@ -12,6 +12,8 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,10 +54,11 @@ public class GeneralBrokerService extends BrokerService {
 		if (config.getBroker() == null || config.getBroker().isEmpty()) {
 			return;
 		}
-		client = Runtime.getRuntime().exec(config.getBrokerExe());
 		robot = new Robot();
-		for (long cpuDuration = 0, lastDuration = -100; cpuDuration - lastDuration >= 100;) {
-			robot.delay(1000);
+		robot.mouseMove(dimension.width / 2, dimension.height / 2);
+		client = Runtime.getRuntime().exec(config.getBrokerExe());
+		for (long cpuDuration = 0, lastDuration = -100; cpuDuration - lastDuration >= 2000 * 5 / 100;) {
+			robot.delay(2000);
 			lastDuration = cpuDuration;
 			cpuDuration = ProcessHandle.of(client.pid()).get().info().totalCpuDuration().get().toMillis();
 		}
@@ -65,6 +68,7 @@ public class GeneralBrokerService extends BrokerService {
 		robot.setAutoDelay(20);
 
 		// Login
+		// 自动申购新股。
 	}
 
 	@PreDestroy
@@ -74,20 +78,25 @@ public class GeneralBrokerService extends BrokerService {
 		}
 	}
 
-	/**
-	 * 资金余额为前一交易日结算后的余额。
-	 */
-	public Portfolio getPortfolio(TradingConfig config) throws Exception {// TODO getBalance是昨天的，应该和今天的成交和委托一并计算。
+	public Portfolio getPortfolio(TradingConfig config) throws Exception {
 		startBrokerClient(config);
-		// 根据初始资金和持仓计算资金余额。
-		Portfolio portfolio = new Portfolio(config.getPortfolio(), getBalance(), config.getMaxPosition(),
+
+		Portfolio portfolio = new Portfolio(config.getPortfolio(), 300000, config.getMaxPosition(),
 				config.getDrawdownLimit(), config.getStoplossLimit());
+		Double balance = getBalance(portfolio);
+		if (balance == null) {// 重新启动
+			destroy();
+			return getPortfolio(config);
+		}
+		portfolio.setCash(balance);
+
+		// 根据初始资金和持仓计算资金余额。
+		// 前一交易日结算后的余额
 		portfolio.getPositions().putAll(getPositions());
 		return portfolio;
 	}
 
 	public void delegate(Portfolio portfolio, Order order) {
-		long t0 = System.currentTimeMillis();
 		key(KeyEvent.VK_F4);// 还原F1和F2的光标位置
 		key(order.getSize() > 0 ? KeyEvent.VK_F1 : KeyEvent.VK_F2);
 
@@ -106,12 +115,22 @@ public class GeneralBrokerService extends BrokerService {
 			key(KeyEvent.VK_ENTER);
 			robot.delay(100);
 		}
-		long t1 = System.currentTimeMillis();
-		System.out.println("Delegate " + order + " cost: " + (t1 - t0));
+	}
+
+	/**
+	 * 全部撤单。
+	 * 
+	 * @param portfolio
+	 */
+	public void withdrawal(Portfolio portfolio) {
+		key(KeyEvent.VK_F1);
+		key(KeyEvent.VK_SLASH);
 	}
 
 	/**
 	 * 当日交易记录。
+	 * <p>
+	 * 注意：佣金无法获取。
 	 * 
 	 * @throws IOException
 	 * @throws UnsupportedFlavorException
@@ -121,6 +140,7 @@ public class GeneralBrokerService extends BrokerService {
 		click(100, dimension.height - 100);
 		key(KeyEvent.VK_DOWN);
 		robot.delay(500);
+		key(KeyEvent.VK_DOWN);
 		key(KeyEvent.VK_DOWN);
 		keyWithCtrl(KeyEvent.VK_C);
 		String tradings = getClipboardString();
@@ -138,20 +158,22 @@ public class GeneralBrokerService extends BrokerService {
 			order.setCode(addPrefix(fileds[1]));
 			order.setSize(("证券卖出".equals(fileds[3]) ? -1 : 1) * Integer.valueOf(fileds[4]));
 			order.setPrice(Double.valueOf(fileds[5]));
-			order.setAmount(Double.valueOf(fileds[6]));
+
+			order.setCommission(portfolio.commission(order.getPrice() * order.getSize()));
+			order.setAmount(new BigDecimal(order.getPrice() * order.getSize())
+					.add(new BigDecimal(order.getCommission())).setScale(2, RoundingMode.DOWN).doubleValue());
 			result.add(order);
 		}
 		return result;
 	}
 
 	/**
-	 * 前一交易日结算后的余额。TODO 根据交易记录计算当前余额。
+	 * 前一交易日结算后的余额。
 	 * 
 	 * @return
-	 * @throws UnsupportedFlavorException
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	private Double getBalance() throws UnsupportedFlavorException, IOException {
+	private Double getBalance(Portfolio portfolio) throws Exception {
 		key(KeyEvent.VK_F4);
 		for (int i = 0; i <= 5; i++) {
 			click(100, dimension.height - 100);
@@ -159,15 +181,21 @@ public class GeneralBrokerService extends BrokerService {
 		}
 		robot.delay(500);
 		key(KeyEvent.VK_DOWN);
+		key(KeyEvent.VK_DOWN);
 		keyWithCtrl(KeyEvent.VK_C);
-		String balance = getClipboardString();
+		String lastday = getClipboardString();
 
-		if (!balance.startsWith("成交日期")) {
+		if (!lastday.startsWith("成交日期")) {
 			return null;
 		}
-		String[] lines = balance.split("\n");
+		String[] lines = lastday.split("\n");
 		String[] fileds = lines[lines.length - 1].split("\t");
-		return Double.valueOf(fileds[11]);
+
+		Double balance = Double.valueOf(fileds[11]);
+		for (Order order : getTradings(portfolio)) {// 假设没有委托。
+			balance -= order.getAmount();
+		}
+		return (double) balance.intValue();
 	}
 
 	/**
@@ -179,6 +207,7 @@ public class GeneralBrokerService extends BrokerService {
 	 */
 	private Map<String, Position> getPositions() throws UnsupportedFlavorException, IOException {
 		key(KeyEvent.VK_F4);
+		key(KeyEvent.VK_DOWN);
 		key(KeyEvent.VK_DOWN);
 		keyWithCtrl(KeyEvent.VK_C);
 		String positions = getClipboardString();
@@ -198,6 +227,7 @@ public class GeneralBrokerService extends BrokerService {
 			position.setSellable(Integer.valueOf(fileds[4]));
 			position.setHoldingPrice(Double.valueOf(fileds[5]));
 			position.setCurrentPrice(Double.valueOf(fileds[6]));
+			// position.setWeight(Double.valueOf(fileds[11]) * 0.01);
 			results.put(position.getCode(), position);
 		}
 		return results;

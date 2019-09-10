@@ -2,10 +2,12 @@ package winw.game.quant.strategy;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math3.stat.StatUtils;
 
 import winw.game.quant.Portfolio;
+import winw.game.quant.Position;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
 import winw.game.quant.QuoteIndex;
@@ -28,6 +30,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 
 	public MeanReversionStrategy() {
 		super();
+		this.samples.add(SH_BOND_ETF);
 		this.samples.addAll(Arrays.asList(CSI_300_TOP));
 	}
 
@@ -58,32 +61,40 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	 */
 	@Override
 	public void trading(Portfolio portfolio) {
+		boolean buy = false, sell = false;
 		for (String code : samples()) {
-			List<QuoteIndex> quoteIndexs = getHistoryQuote(code);
-			if (quoteIndexs == null || quoteIndexs.isEmpty()) {
-				return;
+			if (SH_BOND_ETF.equals(code)) {
+				continue;
 			}
-			QuoteIndex current = quoteIndexs.get(quoteIndexs.size() - 1);
-			QuoteIndex yestday = quoteIndexs.get(quoteIndexs.size() - 2);
+			QuoteIndex today = getQuoteIndex(code, 0);
+			QuoteIndex yesterday = getQuoteIndex(code, -1);
 
-			if (yestday.getZ() <= -2 && !portfolio.hasPosition(code)) {
-				portfolio.addBatch(current, 1, String.format("z-score: %.2f", current.getZ()));
+			if (yesterday.getZ() <= -2 && !portfolio.hasPosition(code)) {
+				buy = true;
+				portfolio.addBatch(today, 1, String.format("z-score: %.2f", today.getZ()));
 			}
-			if (yestday.getZ() >= 1 && portfolio.hasPosition(code)) {
-				portfolio.addBatch(current, -1, String.format("z-score: %.2f", current.getZ()));
+			if (yesterday.getZ() >= 1 && portfolio.hasPosition(code)) {
+				sell = true;
+				portfolio.addBatch(today, -1, String.format("z-score: %.2f", today.getZ()));
 			}
 		}
-
 		stoploss(portfolio);
+
+		QuoteIndex shbond = getQuoteIndex(SH_BOND_ETF, 0);
+		// 有需要建仓时，先将国债清仓。
+		Map<String, Position> positions = portfolio.getPositions();
+		if (positions.containsKey(SH_BOND_ETF) && buy) {
+			portfolio.addBatch(shbond, -1, "auto sell bond");
+		}
+		// TODO 余额自动买入国债。
+		if (sell || (buy == false && portfolio.maxBuy(shbond.getClose()) >= 100)) {
+			portfolio.addBatch(shbond, 1, "auto buy bond");
+		}
 		portfolio.commitBatch();
 	}
 
 	// 当天z-score回去了也不能买。
 	// TODO 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
-
-	// TODO 清仓后用全部余额买国债或其他固定收益，与现有手动操作无法衔接。
-
-	// TODO 自动买入国债，自动申购新股。
 
 	public static void main(String[] args) throws Exception {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.15, 0.15);

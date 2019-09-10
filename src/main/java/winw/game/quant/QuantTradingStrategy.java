@@ -24,7 +24,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 	private Logger logger = LoggerFactory.getLogger(QuantTradingStrategy.class);
 
 	// private String name;
-	protected List<String> samples = new ArrayList<String>(Arrays.asList("CSI_300"));
+	protected List<String> samples = new ArrayList<String>(Arrays.asList(CSI_300));
 
 	protected int observation = -120;
 
@@ -151,7 +151,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 			logger.info("{}, {}", order.getDate(), order.toString());
 		}
 		logger.info("{}, Backtesting from {} to {}, profit: {}, samples: {}", this.getClass().getSimpleName(), from, to,
-				portfolio.getReturnRate(), samples());
+				portfolio.getProfit(), samples());
 	}
 
 	/**
@@ -172,7 +172,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 		for (Position position : portfolio.getPositions().values()) {
 			position.addHoldingDays(1);
 			String code = position.getCode();
-			QuoteIndex current = getCurrentQuote(code);
+			QuoteIndex current = getQuoteIndex(code);
 			double profit = position.getReturnRate(current.getClose());
 			// n天内涨幅小于m%离场。
 			// if(positionDays.get(code) >= 5 && increase <= 0.01)

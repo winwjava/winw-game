@@ -69,15 +69,17 @@ public class QuantTrader {
 	 */
 	public void beforeClose() throws Exception {
 		Portfolio portfolio = getBrokerService().getPortfolio(config);
-		logger.info("{} [{}], balance: {}", portfolio.getName(), config.getBroker(), portfolio.getCash());
 		QuantTradingStrategy strategy = config.getStrategy().getDeclaredConstructor().newInstance();
 		strategy.addSamples(portfolio.getPositions().keySet());
 		String result = strategy.mockTrading(portfolio);
 		for (Order order : portfolio.getOrderList()) {
-			logger.info("Delegate: {}", order);
+			long t0 = System.currentTimeMillis();
+			// TODO 2、考虑成交后再委托下一个订单。
 			// getBrokerService().delegate(portfolio, order);
+			logger.info("Delegate: {}, cost {}ms.", order, System.currentTimeMillis() - t0);
 		}
-		// TODO 邮件里可以带上图表，方便查看分析。
+		getBrokerService().destroy();
+		// TODO 1、邮件里可以带上图表，方便查看分析。
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");
 	}

@@ -3,6 +3,7 @@ package winw.game.quant;
 import java.util.List;
 
 import javax.annotation.ManagedBean;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import winw.game.TradingConfig;
@@ -57,6 +58,15 @@ public class BrokerService {
 	}
 
 	/**
+	 * 全部撤单。
+	 * 
+	 * @param portfolio
+	 */
+	public void withdrawal(Portfolio portfolio) {
+
+	}
+
+	/**
 	 * 获得当日成交的订单。
 	 * 
 	 * @return
@@ -67,4 +77,8 @@ public class BrokerService {
 		return portfolio.getOrderList();
 	}
 
+	@PreDestroy
+	public void destroy() {
+
+	}
 }
