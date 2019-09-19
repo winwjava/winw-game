@@ -107,7 +107,7 @@ public class Position {
 	 * @return
 	 */
 	public double getReturnRate(double currentPrice) {
-		return (currentPrice - holdingPrice) / holdingPrice;
+		return currentPrice / holdingPrice - 1;
 	}
 
 	public int getId() {
@@ -211,15 +211,12 @@ public class Position {
 			setCurrentPrice(holdingPrice);
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append("[").append(code).append(" = ");
-		builder.append(size);
-		builder.append(", price(current/holding)=");
-		builder.append(currentPrice);
-		builder.append("/");
-		builder.append(floatFormat.format(holdingPrice));
-		builder.append(", marketValue=");
-		builder.append(marketValue);
-		builder.append(", return=");
+		builder.append("[").append(code).append(":  ");
+		builder.append(size).append(" * ").append(currentPrice).append(" = ").append(marketValue);
+		double diffPrice = currentPrice - holdingPrice;
+		builder.append(", ").append(diffPrice > 0 ? "+" : "-");
+		builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");
+		builder.append(floatFormat.format(holdingPrice)).append(" = ");
 		builder.append(percentFormat.format(getReturnRate(currentPrice)));
 		builder.append("]");
 		return builder.toString();

@@ -109,7 +109,7 @@ public class BrokerService {
 
 		robot.delay(100);
 		key(KeyEvent.VK_BACK_SPACE, 10);// 删除自动输入的价格
-		key(String.valueOf(order.getPrice()));
+		key(String.valueOf(order.getCurrentPrice()));
 		key(KeyEvent.VK_TAB);
 
 		key(String.valueOf(Math.abs(order.getSize())));
@@ -161,10 +161,10 @@ public class BrokerService {
 			order.setTime(fileds[0]);
 			order.setCode(addPrefix(fileds[1]));
 			order.setSize(("证券卖出".equals(fileds[3]) ? -1 : 1) * Integer.valueOf(fileds[4]));
-			order.setPrice(Double.valueOf(fileds[5]));
+			order.setCurrentPrice(Double.valueOf(fileds[5]));
 
-			order.setCommission(portfolio.commission(order.getPrice() * order.getSize()));
-			order.setAmount(new BigDecimal(order.getPrice() * order.getSize())
+			order.setCommission(portfolio.commission(order.getCurrentPrice() * order.getSize()));
+			order.setAmount(new BigDecimal(order.getCurrentPrice() * order.getSize())
 					.add(new BigDecimal(order.getCommission())).setScale(2, RoundingMode.DOWN).doubleValue());
 			result.add(order);
 		}
@@ -363,7 +363,7 @@ public class BrokerService {
 		Order order = new Order();
 		order.setCode("sh600519");
 		order.setSize(1000);
-		order.setPrice(1000);
+		order.setCurrentPrice(1000);
 
 		BrokerService service = new BrokerService();
 		Portfolio portfolio = service.getPortfolio(config);

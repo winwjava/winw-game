@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -54,7 +56,7 @@ public class Portfolio {
 	private final List<Order> orderList = new ArrayList<Order>();
 	// 持仓记录。
 	@Transient
-	private final Map<String, Position> positions = new HashMap<String, Position>();
+	private final SortedMap<String, Position> positions = new TreeMap<String, Position>();
 	// 卖出后保持空仓天数
 	@Transient
 	private Map<String, Integer> emptyPositionDays = new HashMap<String, Integer>();
@@ -176,7 +178,7 @@ public class Portfolio {
 
 			int size = percent < 0 // 计算买入或者卖出的数量。
 					? Double.valueOf(positions.get(code).getSize() * percent).intValue()
-					: Double.valueOf(maxBuy(order.getPrice())).intValue() / 100 * 100;
+					: Double.valueOf(maxBuy(order.getCurrentPrice())).intValue() / 100 * 100;
 			// TODO 国债可以不限制。
 			// FIXME 暂时不考虑最大持仓书 * orderPercent(percent)
 
@@ -185,8 +187,8 @@ public class Portfolio {
 			}
 
 			order.setSize(size);
-			order.setCommission(commission(order.getPrice() * size));
-			order.setAmount(new BigDecimal(order.getPrice() * size).add(new BigDecimal(order.getCommission()))
+			order.setCommission(commission(order.getCurrentPrice() * size));
+			order.setAmount(new BigDecimal(order.getCurrentPrice() * size).add(new BigDecimal(order.getCommission()))
 					.setScale(2, RoundingMode.DOWN).doubleValue());
 			resultList.add(order(order));
 		}
@@ -210,7 +212,8 @@ public class Portfolio {
 
 		Position position = positions.getOrDefault(code, new Position(pid, code));
 		if (position.getSize() + size == 0) {
-			order.setProfit(percentFormat.format(position.getReturnRate(order.getPrice())));
+			order.setHoldingPrice(position.getHoldingPrice());
+			order.setProfit(percentFormat.format(position.getReturnRate(order.getCurrentPrice())));
 			positions.remove(code);
 			emptyPositionDays.put(code, 0);
 		} else {

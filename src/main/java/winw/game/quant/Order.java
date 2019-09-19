@@ -1,5 +1,8 @@
 package winw.game.quant;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,7 +32,8 @@ public class Order {
 
 	private int size;// 数量
 
-	private double price;// 价格
+	private double currentPrice;// 当前价
+	private double holdingPrice;// 持有价
 
 	private double commission;// 佣金
 
@@ -53,7 +57,7 @@ public class Order {
 		this.pid = pid;
 		this.date = quote.getDate();
 		this.code = quote.getCode();
-		this.price = price;
+		this.currentPrice = price;
 		this.percent = percent;
 		this.comment = comment;
 	}
@@ -114,12 +118,20 @@ public class Order {
 		this.time = time;
 	}
 
-	public double getPrice() {
-		return price;
+	public double getCurrentPrice() {
+		return currentPrice;
 	}
 
-	public void setPrice(double price) {
-		this.price = price;
+	public void setCurrentPrice(double currentPrice) {
+		this.currentPrice = currentPrice;
+	}
+
+	public double getHoldingPrice() {
+		return holdingPrice;
+	}
+
+	public void setHoldingPrice(double holdingPrice) {
+		this.holdingPrice = holdingPrice;
 	}
 
 	public int getSize() {
@@ -178,23 +190,27 @@ public class Order {
 		this.percent = percent;
 	}
 
+	private static final NumberFormat floatFormat = new DecimalFormat("#.##");
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("[").append(code).append(size > 0 ? " + " : " - ");
 		builder.append(Math.abs(size));
-		builder.append(", price=");
-		builder.append(price);
-		builder.append(", amount=");
+		builder.append(" * ");
+		builder.append(currentPrice);
+		builder.append(" = ");
 		builder.append(Math.abs(amount));
-		builder.append(", comment=");
+		builder.append(", ");
 		builder.append(comment);
 		if (profit != null) {
-			builder.append(", profit=");
+			double diffPrice = currentPrice - holdingPrice;
+			builder.append(", ").append(diffPrice > 0 ? "+" : "-");
+			builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");
+			builder.append(floatFormat.format(holdingPrice)).append(" = ");
 			builder.append(profit);
 		}
-		builder.append("]");
-		return builder.toString();
+		return builder.append("]").toString();
 	}
 
 }

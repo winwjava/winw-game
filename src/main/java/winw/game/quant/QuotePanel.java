@@ -356,7 +356,7 @@ public class QuotePanel extends JPanel {
 			double rectY = (masterY + masterH - (quote.getLow() - minPrice) * priceRatio) + quoteW - 1;
 			g.setColor(Color.BLUE);
 			g.setFont(new Font(null, 0, 11));
-			g.drawString(String.valueOf(order.getPrice()), (float) rectX,
+			g.drawString(String.valueOf(order.getCurrentPrice()), (float) rectX,
 					(float) (masterY + masterH - (quote.getHigh() - minPrice) * priceRatio) - fontH / 2);
 			fillRect(g, rectX - 1, rectY - 1, quoteW + 3, quoteW + 3);
 
