@@ -113,7 +113,7 @@ public class Portfolio {
 	 * 
 	 * @return
 	 */
-	public double orderPercent(double percent) {// TODO 国债可以不限制。
+	public double orderPercent(double percent) {
 		int positionSize = positions.size();
 		return (positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize)) * percent;
 	}
@@ -176,7 +176,9 @@ public class Portfolio {
 
 			int size = percent < 0 // 计算买入或者卖出的数量。
 					? Double.valueOf(positions.get(code).getSize() * percent).intValue()
-					: Double.valueOf(maxBuy(order.getPrice()) * orderPercent(percent)).intValue() / 100 * 100;
+					: Double.valueOf(maxBuy(order.getPrice())).intValue() / 100 * 100;
+			// TODO 国债可以不限制。
+			// FIXME 暂时不考虑最大持仓书 * orderPercent(percent)
 
 			if (size == 0) {
 				continue;
@@ -202,7 +204,7 @@ public class Portfolio {
 		int size = order.getSize();
 		String code = order.getCode();
 
-		if (size > 0 && cash - order.getAmount() < 0) {
+		if (size > 0 && cash < order.getAmount()) {
 			return null;
 		}
 
@@ -368,11 +370,11 @@ public class Portfolio {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder(name);
-		builder.append(", holding: ").append(positions.size());
+		StringBuilder builder = new StringBuilder();
+		builder.append("holding: ").append(positions.size());
 		builder.append(", trading: ").append(orderList.size());
 		builder.append(", balance: ").append(cash);
-		builder.append(", return: ").append(getPositionProfit());
+		builder.append(", profit: ").append(getPositionProfit());
 		return builder.toString();
 	}
 

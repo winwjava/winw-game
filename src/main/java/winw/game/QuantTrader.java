@@ -1,4 +1,4 @@
-package winw.game.quant;
+package winw.game;
 
 import java.util.Date;
 
@@ -8,8 +8,12 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import winw.game.Application;
-import winw.game.TradingConfig;
+import winw.game.quant.BrokerService;
+import winw.game.quant.MailService;
+import winw.game.quant.Order;
+import winw.game.quant.Portfolio;
+import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.QuoteService;
 
 /**
  * 根据策略名称、券商接口做量化交易。
@@ -22,24 +26,17 @@ public class QuantTrader {
 	private Logger logger = LoggerFactory.getLogger(Application.class);
 
 	@Resource
-	protected TradingConfig config;
+	protected QuantConfig config;
 
 	@Resource
 	private MailService mailService;
 
 	@Resource
-	private BrokerService defaultBrokerService;
-	@Resource
-	private BrokerService generalBrokerService;
+	private BrokerService brokerService;
 
 	private QuoteService quoteService = QuoteService.getDefault();
 
 	public QuantTrader() {
-	}
-
-	private BrokerService getBrokerService() {
-		return (config.getBroker() == null || config.getBroker().isEmpty()) ? defaultBrokerService
-				: generalBrokerService;
 	}
 
 	public boolean isTradable() throws Exception {
@@ -68,7 +65,7 @@ public class QuantTrader {
 	 * @throws Exception
 	 */
 	public void beforeClose() throws Exception {
-		Portfolio portfolio = getBrokerService().getPortfolio(config);
+		Portfolio portfolio = brokerService.getPortfolio(config);
 		QuantTradingStrategy strategy = config.getStrategy().getDeclaredConstructor().newInstance();
 		strategy.addSamples(portfolio.getPositions().keySet());
 		String result = strategy.mockTrading(portfolio);
@@ -78,7 +75,7 @@ public class QuantTrader {
 			// getBrokerService().delegate(portfolio, order);
 			logger.info("Delegate: {}, cost {}ms.", order, System.currentTimeMillis() - t0);
 		}
-		getBrokerService().destroy();
+		brokerService.destroy();
 		// TODO 1、邮件里可以带上图表，方便查看分析。
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");

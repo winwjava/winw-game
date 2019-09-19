@@ -8,14 +8,14 @@ import winw.game.quant.strategy.MeanReversionStrategy;
 import winw.game.quant.strategy.TrendFollowingStrategy;
 
 /**
- * 交易券商和策略配置。
+ * 量化交易券商和策略配置。
  * 
  * @author winw
  *
  */
 @Component
-@ConfigurationProperties(prefix = "trading", ignoreUnknownFields = true)
-public class TradingConfig {
+@ConfigurationProperties(prefix = "quant", ignoreUnknownFields = true)
+public class QuantConfig {
 
 	/**
 	 * 券商，如果为空，则使用模拟交易。

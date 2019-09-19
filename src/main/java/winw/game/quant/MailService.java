@@ -16,7 +16,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import winw.game.TradingConfig;
+import winw.game.QuantConfig;
 
 /**
  * 
@@ -27,7 +27,7 @@ import winw.game.TradingConfig;
 public class MailService extends Authenticator {
 
 	@Resource
-	private TradingConfig config;
+	private QuantConfig config;
 
 	private String smtpHost;
 	private String smtpPort;

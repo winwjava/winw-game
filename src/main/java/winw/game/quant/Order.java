@@ -181,7 +181,7 @@ public class Order {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Trading ").append(code).append(size > 0 ? " + " : " - ");
+		builder.append("[").append(code).append(size > 0 ? " + " : " - ");
 		builder.append(Math.abs(size));
 		builder.append(", price=");
 		builder.append(price);
@@ -193,6 +193,7 @@ public class Order {
 			builder.append(", profit=");
 			builder.append(profit);
 		}
+		builder.append("]");
 		return builder.toString();
 	}
 

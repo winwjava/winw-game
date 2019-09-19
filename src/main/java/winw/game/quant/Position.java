@@ -1,5 +1,6 @@
 package winw.game.quant;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -84,7 +85,7 @@ public class Position {
 	 */
 	public void setCurrentPrice(double currentPrice) {
 		this.currentPrice = currentPrice;
-		this.marketValue = currentPrice * size;
+		this.marketValue = new BigDecimal(Double.toString(currentPrice)).multiply(new BigDecimal(size)).doubleValue();
 		highestMarketValue = Math.max(highestMarketValue, marketValue);
 	}
 
@@ -210,7 +211,7 @@ public class Position {
 			setCurrentPrice(holdingPrice);
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append("Position [").append(code).append(": ");
+		builder.append("[").append(code).append(" = ");
 		builder.append(size);
 		builder.append(", price(current/holding)=");
 		builder.append(currentPrice);
