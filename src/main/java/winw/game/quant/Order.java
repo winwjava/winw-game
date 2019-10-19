@@ -195,7 +195,7 @@ public class Order {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("[").append(code).append(size > 0 ? " + " : " - ");
+		builder.append(code).append(size > 0 ? " + " : " - ");
 		builder.append(Math.abs(size));
 		builder.append(" * ");
 		builder.append(currentPrice);
@@ -210,7 +210,7 @@ public class Order {
 			builder.append(floatFormat.format(holdingPrice)).append(" = ");
 			builder.append(profit);
 		}
-		return builder.append("]").toString();
+		return builder.toString();
 	}
 
 }

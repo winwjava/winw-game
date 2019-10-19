@@ -63,12 +63,15 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	public void trading(Portfolio portfolio) {
 		boolean buy = false, sell = false;
 		for (String code : samples()) {
-			if (SH_BOND_ETF.equals(code)) {
+			if (SH_BOND_ETF.equals(code) || CSI_300.equals(code)) {
 				continue;
 			}
 			QuoteIndex today = getQuoteIndex(code, 0);
 			QuoteIndex yesterday = getQuoteIndex(code, -1);
 
+			if (today.getZ() <= -2) {
+				System.out.println(today.getCode() + ": " + today.getZ());
+			}
 			if (yesterday.getZ() <= -2 && !portfolio.hasPosition(code)) {
 				buy = true;
 				portfolio.addBatch(today, 1, String.format("Z: %.2f", today.getZ()));
@@ -97,7 +100,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	// TODO 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		Portfolio portfolio = new Portfolio(1000000, 1, 0.15, 0.15);
+		Portfolio portfolio = new Portfolio(1000000, 2, 0.15, 0.15);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 		strategy.backTesting(portfolio, "2019-04-26", Quote.today());
 		QuotePanel.show(portfolio, strategy, "2019-04-01", Quote.today());

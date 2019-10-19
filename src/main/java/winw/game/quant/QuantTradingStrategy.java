@@ -108,18 +108,20 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), today));
 
-		String subject = portfolio.toString();
-		StringBuilder html = new StringBuilder("<b>").append(subject).append("</b><br>");
-		logger.info(subject);
+		StringBuilder html = new StringBuilder();
 		for (Order order : portfolio.getOrderList()) {
 			logger.info(order.toString());
 			html.append(order.toString()).append("<br>");
 		}
+		html.append("<hr/>");
 		for (Position position : portfolio.getPositions().values()) {
+			position.setCurrentPrice(getQuoteIndex(position.getCode()).getPrice());
 			logger.info(position.toString());
 			html.append(position.toString()).append("<br>");
 		}
-		return html.toString();
+		String subject = portfolio.toString();
+		logger.info(subject);
+		return html.append("<hr/><b>").append(subject).append("</b>").toString();
 	}
 
 	public void backTesting(Portfolio portfolio, String from, String to) throws Exception {
@@ -168,7 +170,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 	 * 一笔成功的交易是：无论获利与否，都要适时的离场。
 	 * 
 	 */
-	protected void stoploss(Portfolio portfolio) {
+	protected void stoploss(Portfolio portfolio) {// 涨跌停的买卖操作。
 		for (Position position : portfolio.getPositions().values()) {
 			position.addHoldingDays(1);
 			String code = position.getCode();

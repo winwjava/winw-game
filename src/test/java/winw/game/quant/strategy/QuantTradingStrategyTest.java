@@ -74,4 +74,6 @@ public class QuantTradingStrategyTest {
 		}
 		// QuoteChart.show(portfolio, from, to);
 	}
+	
+	// TODO 根据历史回测，确定用均值回归还是趋势跟踪。
 }

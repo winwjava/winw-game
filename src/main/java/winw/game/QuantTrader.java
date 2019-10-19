@@ -64,7 +64,11 @@ public class QuantTrader {
 	 * 
 	 * @throws Exception
 	 */
+	// @Scheduled(cron = "30 50 14 * * 1-5")
 	public void beforeClose() throws Exception {
+//		if (!isTradable()) {
+//			return;
+//		}
 		Portfolio portfolio = brokerService.getPortfolio(config);
 		QuantTradingStrategy strategy = config.getStrategy().getDeclaredConstructor().newInstance();
 		strategy.addSamples(portfolio.getPositions().keySet());
@@ -79,14 +83,7 @@ public class QuantTrader {
 		// TODO 1、邮件里可以带上图表，方便查看分析。
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");
-	}
-
-	public MailService getMailService() {
-		return mailService;
-	}
-
-	public void setMailService(MailService mailService) {
-		this.mailService = mailService;
+		//Runtime.getRuntime().exec("shutdown /h");
 	}
 
 }

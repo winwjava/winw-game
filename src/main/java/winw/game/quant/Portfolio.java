@@ -362,6 +362,11 @@ public class Portfolio {
 		return percentFormat.format(getReturn() / init);
 	}
 
+	/**
+	 * 持仓盈亏。
+	 * 
+	 * @return
+	 */
 	public String getPositionProfit() {
 		double boughtV = 0, marketV = 0;
 		for (Position p : positions.values()) {
@@ -371,12 +376,18 @@ public class Portfolio {
 		return percentFormat.format((marketV - boughtV) / boughtV);
 	}
 
+	public static void main(String[] args) {
+		System.out.println(percentFormat.format((0) / 10000));
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("holding: ").append(positions.size());
-		builder.append(", trading: ").append(orderList.size());
-		builder.append(", balance: ").append(cash);
+		BigDecimal assets = new BigDecimal(marketValue + cash).setScale(2, RoundingMode.DOWN);
+		builder.append("assets : ").append(assets.doubleValue());
+//		builder.append("holding: ").append(positions.size());
+//		builder.append(", trading: ").append(orderList.size());
+		builder.append(", cash: ").append(cash);
 		builder.append(", profit: ").append(getPositionProfit());
 		return builder.toString();
 	}

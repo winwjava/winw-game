@@ -211,14 +211,13 @@ public class Position {
 			setCurrentPrice(holdingPrice);
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append("[").append(code).append(":  ");
+		builder.append(code).append(" = ");
 		builder.append(size).append(" * ").append(currentPrice).append(" = ").append(marketValue);
 		double diffPrice = currentPrice - holdingPrice;
 		builder.append(", ").append(diffPrice > 0 ? "+" : "-");
 		builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");
 		builder.append(floatFormat.format(holdingPrice)).append(" = ");
 		builder.append(percentFormat.format(getReturnRate(currentPrice)));
-		builder.append("]");
 		return builder.toString();
 	}
 
