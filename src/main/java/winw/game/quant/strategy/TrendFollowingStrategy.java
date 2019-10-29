@@ -105,7 +105,7 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 		QuoteIndex shbond = getQuoteIndex(SH_BOND);
 		double bondYield = shbond.getL();// 国债收益率
 		for (String code : samples()) {
-			if (SH_BOND.equals(code)) {
+			if (SH_BOND_ETF.equals(code) || CSI_300.equals(code)) {
 				continue;
 			}
 			QuoteIndex today = getQuoteIndex(code, 0);

@@ -42,7 +42,7 @@ public class QuantAdvise {
 	 * 
 	 * @throws Exception
 	 */
-	@Scheduled(cron = "30 50 14 * * 1-5")
+	@Scheduled(cron = "30 30 14 * * 1-5")
 	public void publish() throws Exception {
 		// TODO 只发送次日的交易信号。用树莓派启动即可。
 		// TODO 根据历史回测将沪深300分为三类：均值回归、趋势跟踪，或都不适宜。

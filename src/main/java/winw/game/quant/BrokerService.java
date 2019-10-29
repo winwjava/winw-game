@@ -1,7 +1,6 @@
 package winw.game.quant;
 
 import java.awt.AWTException;
-import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -44,13 +43,14 @@ public class BrokerService {
 	private Robot robot;
 	protected Process client;
 
-	private static Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+	protected int screenHeight;
 
 	public BrokerService() {
 		super();
 	}
 
 	private void startBrokerClient(QuantConfig config) throws AWTException, IOException, UnsupportedFlavorException {
+		screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
 		if (config.getBroker() == null || config.getBroker().isEmpty()) {
 			return;
 		}
@@ -141,7 +141,7 @@ public class BrokerService {
 	 */
 	public List<Order> getTradings(Portfolio portfolio) throws Exception {
 		key(KeyEvent.VK_F4);
-		click(100, dimension.height - 100);
+		click(100, screenHeight - 100);
 		key(KeyEvent.VK_DOWN);
 		robot.delay(500);
 		key(KeyEvent.VK_DOWN);
@@ -180,7 +180,7 @@ public class BrokerService {
 	private Double getBalance(Portfolio portfolio) throws Exception {
 		key(KeyEvent.VK_F4);
 		for (int i = 0; i <= 5; i++) {
-			click(100, dimension.height - 100);
+			click(100, screenHeight - 100);
 			key(KeyEvent.VK_DOWN);
 		}
 		robot.delay(500);
