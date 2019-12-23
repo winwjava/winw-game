@@ -2,7 +2,6 @@ package winw.game;
 
 import java.util.Date;
 
-import javax.annotation.ManagedBean;
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import winw.game.quant.QuoteService;
  * @author winw
  *
  */
-@ManagedBean
+//@ManagedBean
 public class QuantTrader {
 	private Logger logger = LoggerFactory.getLogger(Application.class);
 
@@ -83,7 +82,7 @@ public class QuantTrader {
 		// TODO 1、邮件里可以带上图表，方便查看分析。
 		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
 				"text/html;charset=utf-8");
-		//Runtime.getRuntime().exec("shutdown /h");
+		// Runtime.getRuntime().exec("shutdown /h");
 	}
 
 }

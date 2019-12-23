@@ -175,6 +175,9 @@ public class Portfolio {
 			if (percent < 0 && !hasPosition(code)) {
 				continue;
 			}
+			if (hasFullPosition() && percent > 0) {
+				break;
+			}
 
 			int size = percent < 0 // 计算买入或者卖出的数量。
 					? Double.valueOf(positions.get(code).getSize() * percent).intValue()
