@@ -89,6 +89,11 @@ public class Portfolio {
 		return (int) ((cash - commission(cash)) / price);
 	}
 
+	public int maxBuy(double cash, double price) {
+		// 假设全部买入
+		return (int) ((cash - commission(cash)) / price);
+	}
+
 	public double commission(double amount) {
 		// 计算佣金，买入是万3，卖出是千分之1.3,不足5元以5元计
 		double tax = (amount > 0 ? 0 : closeTax) * Math.abs(amount);
@@ -115,10 +120,10 @@ public class Portfolio {
 	 * 
 	 * @return
 	 */
-	public double orderPercent(double percent) {
-		int positionSize = positions.size();
-		return (positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize)) * percent;
-	}
+//	public double orderPercent(double percent) {
+//		int positionSize = positions.size();
+//		return (positionSize >= maxPosition ? 0 : 1d / (maxPosition - positionSize)) * percent;
+//	}
 
 	public boolean hasPosition(String code) {
 		return positions.containsKey(code);
@@ -140,15 +145,29 @@ public class Portfolio {
 	/**
 	 * 预添加订单。如果当天没有提交，则次日自动失效。
 	 * 
+	 * <p>
+	 * <b><code>percent</code></b> 是指买入/卖出以自动调整仓位到占有投资组合的目标百分比。
+	 * 
+	 * <ul>
+	 * <li>如果投资组合中没有任何该证券的仓位，那么会买入等于现在投资组合总价值的目标百分比的数目的证券。
+	 * <li>如果投资组合中已经拥有该证券的仓位，那么会买入/卖出目标百分比和现有百分比的差额数目的证券，最终调整该证券的仓位占据投资组合的比例至目标百分比。
+	 * </ul>
+	 * 
+	 * <p>
+	 * 如果没有足够资金可以买入到目标仓位，订单将创建失败。
+	 * 
 	 * @param quote
-	 * @param percent
+	 * @param percent 买入/卖出以自动调整仓位到占有投资组合的目标百分比。
 	 * @param desc
 	 */
 	public void addBatch(Quote quote, double percent, String desc) {
-		if (percent < 0 && !hasPosition(quote.getCode())) {
+		if (percent < 0) {
+			throw new IllegalArgumentException("Percent is not allowed to be negative.");
+		}
+		if (percent == 0 && !hasPosition(quote.getCode())) {
 			return;
 		}
-		if (percent < 0) {
+		if (percent == 0) {
 			batchOrders.addFirst(new Order(quote, pid, quote.getClose(), percent, desc));
 		} else {
 			batchOrders.addLast(new Order(quote, pid, quote.getClose(), percent, desc));
@@ -168,25 +187,31 @@ public class Portfolio {
 	 * @return
 	 */
 	public List<Order> commitBatch() {
+		double assets = getPositionMarketValue() + cash;
 		ArrayList<Order> resultList = new ArrayList<Order>();
 		for (Order order : batchOrders) {
 			String code = order.getCode();
-			double percent = order.getPercent();
-			if (percent < 0 && !hasPosition(code)) {
+			double targetPercent = order.getPercent();
+			if (targetPercent == 0 && !hasPosition(code)) {
 				continue;
 			}
-			if (hasFullPosition() && percent > 0) {
-				break;
+			double currentPercent = 0;
+			if (hasPosition(code)) {
+				currentPercent = positions.get(code).getMarketValue() / assets;
 			}
-
+			double percent = targetPercent - currentPercent;
 			int size = percent < 0 // 计算买入或者卖出的数量。
 					? Double.valueOf(positions.get(code).getSize() * percent).intValue()
-					: Double.valueOf(maxBuy(order.getCurrentPrice())).intValue() / 100 * 100;
-			// TODO 国债可以不限制。
-			// FIXME 暂时不考虑最大持仓书 * orderPercent(percent)
+					: Double.valueOf(maxBuy(assets * percent, order.getCurrentPrice())).intValue() / 100 * 100;
 
+			if (targetPercent == 0) {
+				size = -positions.get(code).getSize();
+			}
 			if (size == 0) {
 				continue;
+			}
+			if (hasFullPosition() && size > 0) {
+				break;
 			}
 
 			order.setSize(size);
@@ -350,11 +375,23 @@ public class Portfolio {
 	}
 
 	public double getMarketValue() {
-		return marketValue;
+		double marketV = 0;
+		for (Position p : positions.values()) {
+			marketV += p.getCurrentPrice() * p.getSize();
+		}
+		return marketV;
 	}
 
 	public void setMarketValue(double marketValue) {
 		this.marketValue = marketValue;
+	}
+
+	public double getPositionMarketValue() {
+		double marketV = 0;
+		for (Position p : positions.values()) {
+			marketV += p.getCurrentPrice() * p.getSize();
+		}
+		return marketV;
 	}
 
 	public double getReturn() {

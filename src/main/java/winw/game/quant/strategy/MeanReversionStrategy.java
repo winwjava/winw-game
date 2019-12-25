@@ -63,7 +63,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	 */
 	@Override
 	public void trading(Portfolio portfolio) {
-		boolean buy = false, sell = false;
+		int buy = 0, sell = 0;
 		for (String code : samples()) {
 			if (SH_BOND_ETF.equals(code) || CSI_300.equals(code)) {
 				continue;
@@ -75,12 +75,13 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 //				System.out.println(today.getCode() + ": " + today.getZ());
 //			}
 			if (yesterday.getZ() <= -2 && !portfolio.hasPosition(code)) {
-				buy = true;
-				portfolio.addBatch(today, 1, String.format("Z: %.2f", today.getZ()));
+				buy++;
+				portfolio.addBatch(today, Double.valueOf(1) / portfolio.getMaxPosition(),
+						String.format("Z: %.2f", today.getZ()));
 			}
 			if (yesterday.getZ() >= 1 && portfolio.hasPosition(code)) {
-				sell = true;
-				portfolio.addBatch(today, -1, String.format("Z: %.2f", today.getZ()));
+				sell++;
+				portfolio.addBatch(today, 0, String.format("Z: %.2f", today.getZ()));
 			}
 		}
 		stoploss(portfolio);
@@ -89,11 +90,11 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			QuoteIndex shbond = getQuoteIndex(SH_BOND_ETF, 0);
 			// 有需要建仓时，先将国债清仓。
 			Map<String, Position> positions = portfolio.getPositions();
-			if (positions.containsKey(SH_BOND_ETF) && buy) {
+			if (positions.containsKey(SH_BOND_ETF) && buy > 0) {
 				portfolio.addBatch(shbond, -1, "auto sell bond");
 			}
 			// 余额自动买入国债。
-			if (sell || (buy == false && portfolio.maxBuy(shbond.getClose()) >= 100)) {
+			if (sell > 0 || (buy == 0 && portfolio.maxBuy(shbond.getClose()) >= 100)) {
 				portfolio.addBatch(shbond, 1, "auto buy bond");
 			}
 		}
@@ -104,7 +105,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	// 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		Portfolio portfolio = new Portfolio(1000000, 1, 0.1, 0.1);
+		Portfolio portfolio = new Portfolio(1000000, 2, 0.1, 0.1);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 //		strategy.backTesting(portfolio, "2018-01-01", "2019-01-01");
 //		QuotePanel.show(portfolio, strategy, "2017-12-01",  "2019-01-01");

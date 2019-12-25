@@ -181,13 +181,13 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 			// slowness
 			// 控制亏损，亏损2%离场。
 			if (profit < -portfolio.getStoplossLimit()) {
-				portfolio.addBatch(current, -1, "stoploss: " + percentFormat(profit));
+				portfolio.addBatch(current, 0, "stoploss: " + percentFormat(profit));
 				continue;
 			}
 			// 控制回撤，回撤5%离场。
 			double drawdown = position.getDrawdown(current.getClose());
 			if (drawdown > portfolio.getDrawdownLimit()) {
-				portfolio.addBatch(current, -1, "drawdown: " + percentFormat(drawdown));
+				portfolio.addBatch(current, 0, "drawdown: " + percentFormat(drawdown));
 			}
 		}
 	}
