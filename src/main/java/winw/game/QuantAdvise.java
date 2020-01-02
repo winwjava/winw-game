@@ -12,6 +12,7 @@ import winw.game.quant.OrderRepository;
 import winw.game.quant.Portfolio;
 import winw.game.quant.PortfolioRepository;
 import winw.game.quant.PositionRepository;
+import winw.game.quant.QuoteService;
 import winw.game.quant.strategy.MeanReversionStrategy;
 
 /**
@@ -47,8 +48,9 @@ public class QuantAdvise {
 		// TODO 只发送次日的交易信号。用树莓派启动即可。
 		// TODO 根据历史回测将沪深300分为三类：均值回归、趋势跟踪，或都不适宜。
 
-		// TODO 从数据库中取出Portfolio
-
+		if (!QuoteService.getDefault().isTradingDay()) {
+			return;
+		}
 		Portfolio portfolio = portfolioRepository.findByName("MR300TOP");
 		if (portfolio == null) {
 			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 1, 0.1, 0.1));
