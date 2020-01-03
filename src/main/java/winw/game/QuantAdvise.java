@@ -27,7 +27,7 @@ public class QuantAdvise {
 	@Resource
 	private MailService mailService;
 
-	private double init = 100000;
+	private double init = 500000;
 
 	@Resource
 	private OrderRepository orderRepository;
@@ -53,7 +53,7 @@ public class QuantAdvise {
 		}
 		Portfolio portfolio = portfolioRepository.findByName("MR300TOP");
 		if (portfolio == null) {
-			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 1, 0.1, 0.1));
+			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 2, 0.1, 0.1));
 		} else {
 			portfolio.putPositions(positionRepository.findByPid(portfolio.getPid()));
 		}
