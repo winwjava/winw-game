@@ -226,7 +226,7 @@ public class Position {
 		builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");
 		builder.append(floatFormat.format(holdingPrice)).append(" = ");
 		builder.append(percentFormat.format(getReturnRate(currentPrice)));
-		builder.append(", Z: ").append(z);
+		builder.append(", Z: ").append(floatFormat.format(z));
 		return builder.toString();
 	}
 
