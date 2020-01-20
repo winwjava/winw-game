@@ -115,7 +115,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 		}
 		html.append("<hr/>");
 		for (Position position : portfolio.getPositions().values()) {
-			position.setCurrentPrice(getQuoteIndex(position.getCode()).getPrice());
+			position.update(getQuoteIndex(position.getCode()));
 			logger.info(position.toString());
 			html.append(position.toString()).append("<br>");
 		}

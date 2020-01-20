@@ -50,12 +50,20 @@ public class Position {
 	 */
 	private double highestMarketValue;
 
+	@Transient
+	protected double z;
+
 	public Position() {
 	}
 
 	public Position(int pid, String code) {
 		this.pid = pid;
 		this.code = code;
+	}
+
+	public void update(QuoteIndex q) {
+		this.currentPrice = q.getPrice();
+		this.z = q.getZ();
 	}
 
 	/**
@@ -218,6 +226,7 @@ public class Position {
 		builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");
 		builder.append(floatFormat.format(holdingPrice)).append(" = ");
 		builder.append(percentFormat.format(getReturnRate(currentPrice)));
+		builder.append(", Z: ").append(z);
 		return builder.toString();
 	}
 
