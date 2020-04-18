@@ -220,7 +220,7 @@ public class Position {
 		}
 		StringBuilder builder = new StringBuilder();
 		builder.append(code).append(" = ");
-		builder.append(size).append(" * ").append(currentPrice).append(" = ").append(marketValue);
+		builder.append(size).append(" * ").append(currentPrice);//.append(" = ").append(marketValue);
 		double diffPrice = currentPrice - holdingPrice;
 		builder.append(", ").append(diffPrice > 0 ? "+" : "-");
 		builder.append(floatFormat.format(Math.abs(diffPrice))).append("/");

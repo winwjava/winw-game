@@ -109,6 +109,9 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 		portfolio.setMarketValue(getMarketValue(portfolio.getPositions().values(), today));
 
 		StringBuilder html = new StringBuilder();
+		if (portfolio.getPrompt().length() > 0) {
+			html.append(portfolio.getPrompt().toString()).append("<br>");
+		}
 		for (Order order : portfolio.getOrderList()) {
 			logger.info(order.toString());
 			html.append(order.toString()).append("<br>");

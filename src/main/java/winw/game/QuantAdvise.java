@@ -53,9 +53,11 @@ public class QuantAdvise {
 		}
 		Portfolio portfolio = portfolioRepository.findByName("MR300TOP");
 		if (portfolio == null) {
-			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 2, 0.1, 0.1));
+			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 2, 1, 1));
 		} else {
 			portfolio.putPositions(positionRepository.findByPid(portfolio.getPid()));
+			portfolio.setDrawdownLimit(1);
+			portfolio.setStoplossLimit(1);
 		}
 
 		// 根据模拟交易生成投资建议。

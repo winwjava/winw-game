@@ -71,15 +71,15 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			QuoteIndex today = getQuoteIndex(code, 0);
 			QuoteIndex yesterday = getQuoteIndex(code, -1);
 
-//			if (today.getZ() <= -2) {
-//				System.out.println(today.getCode() + ": " + today.getZ());
-//			}
+			if (today.getZ() <= -2) {
+				portfolio.getPrompt().append(today.getCode() + ": " + today.getZ()).append(",");
+			}
 			if (yesterday.getZ() <= -2 && !portfolio.hasPosition(code)) {
 				buy++;
 				portfolio.addBatch(today, Double.valueOf(1) / portfolio.getMaxPosition(),
 						String.format("Z: %.2f", today.getZ()));
 			}
-			if (yesterday.getZ() >= 1 && portfolio.hasPosition(code)) {
+			if (yesterday.getZ() >= 1.5 && portfolio.hasPosition(code)) {
 				sell++;
 				portfolio.addBatch(today, 0, String.format("Z: %.2f", today.getZ()));
 			}
@@ -105,11 +105,15 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	// 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		Portfolio portfolio = new Portfolio(500000, 2, 0.1, 0.1);
+		Portfolio portfolio = new Portfolio(500000, 2, 1, 1);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 //		strategy.backTesting(portfolio, "2018-01-01", "2019-01-01");
 //		QuotePanel.show(portfolio, strategy, "2017-12-01",  "2019-01-01");
-		strategy.backTesting(portfolio, "2019-01-01", Quote.today());
-		QuotePanel.show(portfolio, strategy, "2018-12-01", Quote.today());
+
+//		strategy.backTesting(portfolio, "2019-01-01", "2020-01-01");
+//		QuotePanel.show(portfolio, strategy, "2018-12-01",  "2020-01-01");
+		
+		strategy.backTesting(portfolio, "2020-01-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2019-12-01", Quote.today());
 	}
 }
