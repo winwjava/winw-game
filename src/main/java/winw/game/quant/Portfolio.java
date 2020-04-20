@@ -47,19 +47,21 @@ public class Portfolio {
 
 	private double drawdownLimit = 1;// 回撤限制。
 	private double stoplossLimit = 1;// 亏损限制。
-	
+
 	/**
 	 * 交易提醒。
 	 */
+	@Transient
 	private StringBuffer prompt = new StringBuffer();
-	
+
 	public StringBuffer getPrompt() {
 		return prompt;
 	}
+
 	public void appendPrompt(String s) {
 		prompt.append(s).append("<br>");
 	}
-	
+
 	// 持仓市值。
 	@Transient
 	private double marketValue = 0;
