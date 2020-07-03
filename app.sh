@@ -1,0 +1,1 @@
+mvn -q spring-boot:run & >> logs/app.log
