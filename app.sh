@@ -1,1 +1,1 @@
-mvn -q spring-boot:run & >> logs/app.log
+mvn -q spring-boot:run >> logs/app.log &
