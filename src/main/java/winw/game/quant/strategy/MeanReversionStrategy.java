@@ -72,7 +72,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 			QuoteIndex yesterday = getQuoteIndex(code, -1);
 
 			if (today.getZ() <= -2) {
-				portfolio.getPrompt().append(today.getCode() + ": " + today.getZ()).append(",");
+				portfolio.addPrompt(today.getCode() + ": " + String.format("Z: %.2f", today.getZ()));
 			}
 			if (yesterday.getZ() <= -2 && !portfolio.hasPosition(code)) {
 				buy++;
@@ -112,7 +112,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 
 //		strategy.backTesting(portfolio, "2019-01-01", "2020-01-01");
 //		QuotePanel.show(portfolio, strategy, "2018-12-01",  "2020-01-01");
-		
+
 		strategy.backTesting(portfolio, "2020-01-01", Quote.today());
 		QuotePanel.show(portfolio, strategy, "2019-12-01", Quote.today());
 	}

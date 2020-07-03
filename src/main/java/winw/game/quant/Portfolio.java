@@ -52,14 +52,14 @@ public class Portfolio {
 	 * 交易提醒。
 	 */
 	@Transient
-	private StringBuffer prompt = new StringBuffer();
+	private List<String> prompt = new ArrayList<String>();
 
-	public StringBuffer getPrompt() {
+	public List<String> getPrompt() {
 		return prompt;
 	}
 
-	public void appendPrompt(String s) {
-		prompt.append(s).append("<br>");
+	public void addPrompt(String s) {
+		prompt.add(s);
 	}
 
 	// 持仓市值。

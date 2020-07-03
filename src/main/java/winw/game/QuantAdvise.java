@@ -68,7 +68,7 @@ public class QuantAdvise {
 		positionRepository.deleteAll();
 		positionRepository.saveAll(portfolio.getPositions().values());
 
-		mailService.send(String.format("%tF, %s mock trading", new Date(), portfolio.getOrderList().size()), result,
-				"text/html;charset=utf-8");
+		mailService.send(String.format("%tF, Advice: %s/%s", new Date(), portfolio.getOrderList().size(),
+				portfolio.getPrompt().size()), result, "text/html;charset=utf-8");
 	}
 }
