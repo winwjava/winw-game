@@ -438,11 +438,11 @@ public class Portfolio {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		BigDecimal assets = new BigDecimal(marketValue + cash).setScale(2, RoundingMode.DOWN);
-		builder.append("assets : ").append(assets.doubleValue());
+		builder.append("assets: ").append(assets.doubleValue());
 //		builder.append("holding: ").append(positions.size());
 //		builder.append(", trading: ").append(orderList.size());
 		builder.append(", cash: ").append(cash);
-		builder.append(", profit: ").append(getPositionProfit());
+		builder.append(", profit: ").append(getProfit());
 		return builder.toString();
 	}
 
