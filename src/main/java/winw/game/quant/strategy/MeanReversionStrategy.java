@@ -79,7 +79,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 				portfolio.addBatch(today, Double.valueOf(1) / portfolio.getMaxPosition(),
 						String.format("Z: %.2f", today.getZ()));
 			}
-			if (yesterday.getZ() >= 1.5 && portfolio.hasPosition(code)) {
+			if (yesterday.getZ() >= 1 && portfolio.hasPosition(code)) {
 				sell++;
 				portfolio.addBatch(today, 0, String.format("Z: %.2f", today.getZ()));
 			}

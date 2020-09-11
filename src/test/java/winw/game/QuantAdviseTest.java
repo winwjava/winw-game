@@ -7,15 +7,20 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import winw.game.quant.MailService;
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class QuantAdviseTest {
 
 	@Resource
 	private QuantAdvise quantAdvise;
+	@Resource
+	private MailService mailService;
 
 	@Test
-	public void testAddUser() throws Exception {
+	public void testPublish() throws Exception {
+		mailService.setDefaultRecipients("winwgame@sina.com");
 		quantAdvise.publish();
 	}
 }
