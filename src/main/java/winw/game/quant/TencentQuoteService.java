@@ -16,10 +16,10 @@ import java.util.List;
 public class TencentQuoteService implements QuoteService {
 
 	// http://qt.gtimg.cn/q=sh600233
-	protected String realtimeQuoteUrl = "http://qt.gtimg.cn/q=V_CODE";
+	protected String realtimeQuoteUrl = "https://qt.gtimg.cn/q=V_CODE";
 
 	// 获取每日报价数据（前复权）
-	protected String dailyQuoteUrl = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,V_FROM,V_TO,V_NUM,qfq";
+	protected String dailyQuoteUrl = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=V_CODE,day,V_FROM,V_TO,V_NUM,qfq";
 
 	// 下面的接口是不复权接口
 	// http://data.gtimg.cn/flashdata/hushen/latest/daily/sh600233.js
