@@ -56,8 +56,9 @@ public class QuantAdvise {
 			portfolio = portfolioRepository.save(new Portfolio("MR300TOP", init, 2, 1, 1));
 		} else {
 			portfolio.putPositions(positionRepository.findByPid(portfolio.getPid()));
-			portfolio.setDrawdownLimit(1);
-			portfolio.setStoplossLimit(1);
+			portfolio.setMaxPosition(3);
+			portfolio.setDrawdownLimit(0.05);
+			portfolio.setStoplossLimit(0.05);
 		}
 
 		// 根据模拟交易生成投资建议。

@@ -105,7 +105,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 	// 用Slope趋势卖出。或者回撤卖出。或者向上趋势形成后按趋势卖出。
 
 	public static void main(String[] args) throws Exception {
-		Portfolio portfolio = new Portfolio(500000, 2, 1, 1);
+		Portfolio portfolio = new Portfolio(500000, 3, 0.05, 0.05);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 //		strategy.backTesting(portfolio, "2018-01-01", "2019-01-01");
 //		QuotePanel.show(portfolio, strategy, "2017-12-01",  "2019-01-01");
@@ -113,7 +113,8 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 //		strategy.backTesting(portfolio, "2019-01-01", "2020-01-01");
 //		QuotePanel.show(portfolio, strategy, "2018-12-01",  "2020-01-01");
 
-		strategy.backTesting(portfolio, "2020-01-01", Quote.today());
-		QuotePanel.show(portfolio, strategy, "2019-12-01", Quote.today());
+		strategy.backTesting(portfolio, "2019-01-01", "2021-01-01");
+		QuotePanel.show(portfolio, strategy, "2018-12-01", "2021-01-01");
+		// TODO test current day and next day buy.
 	}
 }

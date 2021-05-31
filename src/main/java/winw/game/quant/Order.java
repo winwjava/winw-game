@@ -201,8 +201,8 @@ public class Order {
 		builder.append(currentPrice);
 		builder.append(" = ");
 		builder.append(Math.abs(amount));
-		builder.append(", ");
-		builder.append(comment);
+		// builder.append(", ");
+		// builder.append(comment);
 		if (profit != null) {
 			double diffPrice = currentPrice - holdingPrice;
 			builder.append(", ").append(diffPrice > 0 ? "+" : "-");
