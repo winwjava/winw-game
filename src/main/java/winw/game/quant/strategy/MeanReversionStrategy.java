@@ -9,7 +9,6 @@ import org.apache.commons.math3.stat.StatUtils;
 import winw.game.quant.Portfolio;
 import winw.game.quant.Position;
 import winw.game.quant.QuantTradingStrategy;
-import winw.game.quant.Quote;
 import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
 
