@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>test java script</title>
+
+</head>
+<body>
+    <h1>Hello World</h1>
+    <p></p>
+    <button type="button" onclick="test()">TEST</button>
+</body>
+<script>
+
+var VOL ='VOL';
+var OPEN ='OPEN';
+var CLOSE ='CLOSE';
+
+
+function MA(label , num){
+    switch (label) {
+    case CLOSE:
+		alert(5/num);
+        break;
+    case OPEN:
+		alert(3/num);
+         break;
+    case VOL:
+		alert(2/num);
+         break;
+    } 
+}
+
+function test(){
+	MA(CLOSE, 5) + MA(OPEN, 5)
+}
+
+function EMA(CLOSE , num){
+    document.getElementById("demo").innerHTML=Date();
+}
+
+function CROSS(CLOSE , num){
+    document.getElementById("demo").innerHTML=Date();
+}
+
+// 例如：
+// DIFF6: = EMA(CLOSE, 12) - EMA (CLOSE, 26);
+// DEA6: = EMA(DIFF6, 27);
+// MACD6: = 2 * EMA(DIFF6 - DEA6);
+// 天鹅展翅：MACD6 > 0 AND CROSS(DIFF6, 0)
+</script>
+</html>

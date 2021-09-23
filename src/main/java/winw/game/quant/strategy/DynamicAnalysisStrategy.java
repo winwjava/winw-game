@@ -33,6 +33,8 @@ import winw.game.quant.QuoteIndex;
  */
 public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 
+	// TODO 考虑用JavaScript 支持编写函数/公式；返回是否交易；
+	
 	// 默认用国债和300二八轮换
 	public DynamicAnalysisStrategy() {
 		this.samples.addAll(Arrays.asList(CSI_300_TOP));

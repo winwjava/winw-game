@@ -37,3 +37,11 @@ wget https://www-eu.apache.org/dist/maven/maven-3/3.6.1/binaries/apache-maven-3.
 tar -xf /root/apache-maven-3.6.1-bin.tar.gz -C /usr/lib/  
 echo "export JAVA_HOME=/usr/lib/jvm/java-12-openjdk-12.0.2.9-1.rolling.el7.x86_64" >> /etc/profile  
 echo "export PATH=/usr/lib/apache-maven-3.6.1/bin:$PATH" >> /etc/profile  
+
+## 大趋势的判断，
+大趋势向上：趋势跟踪，或均值回归均可盈利；
+大趋势震荡：可用均值回归策略；
+大趋势向下，只能靠融券做空盈利，均值回归策略失效，并不能盈利；
+
+大趋势至底部震荡时，可用均值回归策略；
+

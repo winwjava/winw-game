@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Path2D.Double;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -458,9 +458,9 @@ public class QuotePanel extends JPanel {
 		frame.setVisible(true);
 		JPanel container = new JPanel();// new GridLayout(2, 2)
 		// new BoxLayout(container, BoxLayout.Y_AXIS)
-		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+		container.setLayout(new GridLayout(2, 2));
 		for (QuotePanel quotePanel : views) {
-			quotePanel.setPreferredSize(new Dimension(1000, 320));
+			quotePanel.setPreferredSize(new Dimension(500, 320));
 			container.add(quotePanel);
 		}
 		frame.add(new JScrollPane(container));
@@ -503,8 +503,8 @@ public class QuotePanel extends JPanel {
 	private static QuotePanel newChart(String code) throws Exception {
 		QuoteService service = QuoteService.getDefault();
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
-		List<QuoteIndex> dailyQuote = QuoteIndex.compute(service.get(QuoteIndex.class, code, "2018-10-01", today));
-		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 120, 120, code + " Daily", "", null);
+		List<QuoteIndex> dailyQuote = QuoteIndex.compute(service.get(QuoteIndex.class, code, "2021-01-01", today));
+		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 90, 90, code + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		return chart;
 	}
