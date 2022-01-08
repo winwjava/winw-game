@@ -1,4 +1,4 @@
-package winw.game.quant.csindex;
+package winw.game.quant.dataview;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public class IndexLine {
 
 	private String label;
 
-	private List<String> data;
+	private List<Double> data;
 }

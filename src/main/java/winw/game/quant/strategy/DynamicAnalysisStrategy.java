@@ -1,17 +1,24 @@
 package winw.game.quant.strategy;
 
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
+import ij.measure.CurveFitter;
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
 import winw.game.quant.QuoteIndex;
+import winw.game.quant.QuotePanel;
+import winw.game.quant.QuoteService;
 
 /**
  * 股票价格受市场信息所影响。买卖双方会综合各种信息进行交易，最后反映到价格。
@@ -34,10 +41,10 @@ import winw.game.quant.QuoteIndex;
 public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 
 	// TODO 考虑用JavaScript 支持编写函数/公式；返回是否交易；
-	
+
 	// 默认用国债和300二八轮换
 	public DynamicAnalysisStrategy() {
-		this.samples.addAll(Arrays.asList(CSI_300_TOP));
+		this.samples.addAll(Arrays.asList("sz002594"));
 	}
 
 	@Override
@@ -79,13 +86,13 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 				continue;
 			}
 			double xInterval5 = list.get(turningPoint).getMa5() * 0.15;
-			for (int j = turningPoint, k = 0; j < list.size(); j++ , k++) {
+			for (int j = turningPoint, k = 0; j < list.size(); j++, k++) {
 				points.add(new WeightedObservedPoint(1, k * xInterval5, list.get(j).getClose()));
-				System.out.println(k* xInterval5+", "+ list.get(j).getClose());
-				
+				System.out.println(k * xInterval5 + ", " + list.get(j).getClose());
+
 			}
 			double[] fit = curveFitter.fit(points);
-			System.out.println("fit: f(x) = "+ fit[0] + "*x*x + "+fit[1]+"*x + " + fit[2]);
+			System.out.println("fit: f(x) = " + fit[0] + "*x*x + " + fit[1] + "*x + " + fit[2]);
 			// TODO 买入日期 在拐点之前，则应该抛掉。
 
 			// TODO 偏离趋势，向下？ 应该抛掉？
@@ -103,11 +110,65 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 	}
 
 	public static void main(String[] args) throws Exception {
+
+		QuoteService service = QuoteService.getDefault();
+		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
+		List<QuoteIndex> dailyQuote = QuoteIndex
+				.compute(service.get(QuoteIndex.class, "sh000001", "2021-08-01", today));
+
+		// TODO 拟合，并计算拟合线，将值记录到QuoteIndex. Fit
+
+		PolynomialCurveFitter curveFitter = PolynomialCurveFitter.create(2);// 2阶
+		ArrayList<WeightedObservedPoint> points = new ArrayList<WeightedObservedPoint>();
+
+		double[] xPoints = new double[10];
+		double[] yPoints = new double[10];
+		for (int j = dailyQuote.size() - 10, i = 0; j < dailyQuote.size(); j++, i++) {
+			xPoints[i] = i;
+			yPoints[i] = dailyQuote.get(j).getClose();
+			points.add(new WeightedObservedPoint(1, i, dailyQuote.get(j).getClose()));
+		}
+
+		fit(xPoints, yPoints);
+//		CurveFitter curveFitter2 = new CurveFitter(xPoints, yPoints);
+//		curveFitter2.doFit(CurveFitter.POLY2);
+//		System.out.println(curveFitter2.getFormula() + " FitGoodness: " + curveFitter2.getFitGoodness());
+
+//		double[] fit = curveFitter.fit(points);
+//		System.out.println("fit: f(x) = " + fit[2] + "*x*x + " + fit[1] + "*x + " + fit[0]);
+
+		// 判断，拟合优度，或者用平均绝对误差、
+
+		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 90, 90, "sh000001" + " Daily", "", null);
+		chart.setLayout(new FlowLayout());
+		QuotePanel.show(Arrays.asList(chart));
+	}
+
+	private static void fit(double[] xPoints, double[] yPoints) {// 分段拟合
+		double[] fitPoints = new double[yPoints.length];// 还需要连线？
+
+		LinkedHashMap<Integer, CurveFitter> resultMap = new LinkedHashMap<Integer, CurveFitter>();
+		for (int i = 0; i < yPoints.length - 3; i++) {
+			CurveFitter fitter = new CurveFitter(Arrays.copyOfRange(xPoints, i, yPoints.length),
+					Arrays.copyOfRange(yPoints, i, yPoints.length));
+			fitter.doFit(CurveFitter.POLY2);
+			System.out.println("from [" + yPoints[i] + "] FitGoodness: " + fitter.getFitGoodness() + ", R^2: "
+					+ fitter.getRSquared());
+
+			if (fitter.getRSquared() > 0.9) {// R^2 大于0.9说明拟合优度还可以
+				resultMap.put(i, fitter);
+			}
+			// TODO 计算出拟合点数组返回
+		}
+
+	}
+
+	public static void main11(String[] args) throws Exception {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		DynamicAnalysisStrategy strategy = new DynamicAnalysisStrategy();
-		strategy.backTesting(portfolio, "2021-01-01", Quote.today());
+		strategy.backTesting(portfolio, "2021-10-01", Quote.today());
 //		strategy.backTesting(portfolio, "2020-01-01", Quote.today());
-//		QuotePanel.show(portfolio, strategy, "2019-12-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2019-10-01", Quote.today());
 	}
 
 	public static void main0(String[] args) {

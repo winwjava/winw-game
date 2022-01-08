@@ -43,13 +43,13 @@ public class WebLogRecoder implements RequestBodyAdvice, HandlerInterceptor, Res
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
-		String query = request.getQueryString();
-		String body = requestBodyThreadLocal.get();
-		log.info("{} {} {} {} {} {}ms", request.getRemoteAddr(), request.getMethod(), request.getRequestURI(),
-				query == null ? "-" : query, body == null ? "-" : body,
-				(System.currentTimeMillis() - requestTimeThreadLocal.get()));
-		requestTimeThreadLocal.remove();
-		requestBodyThreadLocal.remove();
+//		String query = request.getQueryString();
+//		String body = requestBodyThreadLocal.get();
+//		log.info("{} {} {} {} {} {}ms", request.getRemoteAddr(), request.getMethod(), request.getRequestURI(),
+//				query == null ? "-" : query, body == null ? "-" : body,
+//				(System.currentTimeMillis() - requestTimeThreadLocal.get()));
+//		requestTimeThreadLocal.remove();
+//		requestBodyThreadLocal.remove();
 	}
 
 	@Override

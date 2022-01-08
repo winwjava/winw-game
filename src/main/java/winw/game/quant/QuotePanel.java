@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Path2D.Double;
@@ -24,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -456,11 +456,11 @@ public class QuotePanel extends JPanel {
 	public static void show(List<QuotePanel> views) {
 		JFrame frame = new JFrame("winw-game");
 		frame.setVisible(true);
-		JPanel container = new JPanel();// new GridLayout(2, 2)
-		// new BoxLayout(container, BoxLayout.Y_AXIS)
-		container.setLayout(new GridLayout(2, 2));
+		JPanel container = new JPanel();
+//		container.setLayout(new GridLayout(2, 2));
+		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		for (QuotePanel quotePanel : views) {
-			quotePanel.setPreferredSize(new Dimension(500, 320));
+			quotePanel.setPreferredSize(new Dimension(1000, 320));
 			container.add(quotePanel);
 		}
 		frame.add(new JScrollPane(container));

@@ -7,6 +7,7 @@ import org.apache.commons.math3.stat.StatUtils;
 
 import winw.game.quant.Portfolio;
 import winw.game.quant.QuantTradingStrategy;
+import winw.game.quant.Quote;
 import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
 
@@ -83,8 +84,8 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		Portfolio portfolio = new Portfolio(500000, 3, 0.05, 0.05);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 
-		strategy.backTesting(portfolio, "2021-06-01", "2021-07-31");
-		QuotePanel.show(portfolio, strategy, "2021-05-01", "2021-07-31");
+		strategy.backTesting(portfolio, "2021-10-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2021-09-01", Quote.today());
 		// TODO test current day and next day buy.
 	}
 }

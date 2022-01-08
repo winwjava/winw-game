@@ -4,12 +4,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 项目启动入口。
  * 
  * @author winw
  *
  */
+@Slf4j
 @EnableScheduling
 @SpringBootApplication
 public class Application {
@@ -18,6 +21,7 @@ public class Application {
 
 	public static void main(String[] args) throws Exception {
 		springBuilder.run(args);
+		log.info("Application Started OK.");
 //		ConfigurableApplicationContext applicationContext = springBuilder.headless(false).run(args);
 //		QuantTrader quantTrader = applicationContext.getBean(QuantTrader.class);
 //		quantTrader.beforeClose();
