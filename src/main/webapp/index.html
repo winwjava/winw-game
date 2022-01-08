@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>winw-game</title>
+<meta charset="utf-8">
+<script type="text/javascript"
+	src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+
+<script type="text/javascript"
+	src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+
+
+<script type="text/javascript" src="echarts.js"></script>
+</head>
+<body>
+	<div id="main" style="width: 100%; height: 700px; margin: 0px auto"></div>
+</body>
+<script>
+	var ROOT_PATH = 'https://cdn.jsdelivr.net/gh/apache/echarts-website@asf-site/examples';
+
+	var chartDom = document.getElementById('main');
+	var myChart = echarts.init(chartDom);
+	var option;
+	$.get('/SubjectIndex/getIndexQuoteList0?days=30', function(_rawData) {
+		run(_rawData);
+	});
+
+	const seriesList = [];
+	const datasetWithFilters = [];
+
+	function run(_rawData) {
+		 var names = [];
+
+		 for (let i = 1; i < _rawData.length; i++) {
+			 if(names.indexOf(_rawData[i][2]) === -1){
+				 names.push(_rawData[i][2]);
+			  }
+		 } 
+		 console.log(names);
+		 names.forEach(function(_item) {
+			var datasetId = 'dataset_' + _item;
+			 datasetWithFilters.push({
+				id : datasetId,
+				fromDatasetId : 'dataset_raw',
+			 transform: {
+			  type: 'filter',
+			  config: {
+			    and: [
+			      { dimension: 'name', '=': _item }
+			    ]
+			  }
+			} 
+			}); 
+			seriesList.push({
+				type : 'line',
+				datasetId : datasetId,
+				showSymbol : false,
+				name : _item,
+				 endLabel : {
+					show : true,
+					formatter : function(params) {
+						return params[2];
+					}
+				}, 
+				labelLayout : {
+					moveOverlap : 'shiftY'
+				},
+				emphasis : {
+					focus : 'series'
+				},
+				encode : {
+					x : 'date',
+					y : 'close',
+					label : [ 'name', 'close' ],
+					itemName : 'date',
+					tooltip : [ 'close' ]
+				}
+			});
+		});
+
+		  option = {
+		    animationDuration: 0,
+		    dataset: [
+		      {
+		        id: 'dataset_raw',
+		        source: _rawData
+		      },
+		      ...datasetWithFilters
+		    ],
+		    title: {
+		      text: 'Trend of Category Index '
+		    },
+		    tooltip: {
+		      order: 'valueDesc',
+		      trigger: 'axis'
+		    },
+		    xAxis: {
+		      type: 'category',
+		      nameLocation: 'middle'
+		    },
+		    yAxis: {
+		      name: 'Income'
+		    },
+		    grid: {
+		      right: 140
+		    },
+		    series: seriesList
+		  };
+		  myChart.setOption(option);
+	}
+</script>
+</html>
