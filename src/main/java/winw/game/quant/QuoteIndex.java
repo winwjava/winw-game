@@ -47,6 +47,7 @@ public class QuoteIndex extends Quote {
 	protected double ema60max;
 	protected double ema60min;
 
+	private double y;
 	private double z;
 	private double s;
 	private double l;
@@ -536,6 +537,14 @@ public class QuoteIndex extends Quote {
 
 	public void setEma60min(double ema60min) {
 		this.ema60min = ema60min;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = y;
 	}
 
 	public double getZ() {

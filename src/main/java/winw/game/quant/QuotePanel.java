@@ -228,6 +228,9 @@ public class QuotePanel extends JPanel {
 		} else {
 			drawZscore(g);
 		}
+		if (quoteList.get(0).getY() != 0) {
+			drawFitLine(g);
+		}
 	}
 
 	protected void drawVolume(Graphics2D g) {
@@ -270,6 +273,19 @@ public class QuotePanel extends JPanel {
 			g.drawString(format(0 + scale * i), masterX + masterW + 3,
 					(float) (height - bottomH - scale * i * volumeRatio + fontH * 0.25));
 		}
+	}
+
+	protected void drawFitLine(Graphics2D g) {// 画趋势线
+		double baseY = masterY + masterH;
+		List<Point2D> fitPoints = new ArrayList<Point2D>();
+		for (int i = viewFrom; i < viewFrom + viewLength; i++) {
+			double lineX = masterX + (quoteW + 1) * (i - viewFrom) + quoteW / 2 - 0.5 + 1;
+			fitPoints.add(new Point2D.Double(lineX, baseY - (quoteList.get(i).getY() - minPrice) * priceRatio));
+		}
+
+		g.setStroke(new BasicStroke(2)); // 设置新的画刷
+		drawBezierCurve(g, fitPoints, Color.BLACK);
+		g.setStroke(new BasicStroke());// 还原
 	}
 
 	protected void drawZscore(Graphics2D g) {

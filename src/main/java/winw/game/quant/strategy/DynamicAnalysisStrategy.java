@@ -114,53 +114,52 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 		QuoteService service = QuoteService.getDefault();
 		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
 		List<QuoteIndex> dailyQuote = QuoteIndex
-				.compute(service.get(QuoteIndex.class, "sh000001", "2021-08-01", today));
+				.compute(service.get(QuoteIndex.class, "sz002594", "2021-08-01", today));
 
-		// TODO 拟合，并计算拟合线，将值记录到QuoteIndex. Fit
+		// sz002594 sh000001
+		
+		// 拟合
+		fit(dailyQuote);
 
-		PolynomialCurveFitter curveFitter = PolynomialCurveFitter.create(2);// 2阶
-		ArrayList<WeightedObservedPoint> points = new ArrayList<WeightedObservedPoint>();
-
-		double[] xPoints = new double[10];
-		double[] yPoints = new double[10];
-		for (int j = dailyQuote.size() - 10, i = 0; j < dailyQuote.size(); j++, i++) {
-			xPoints[i] = i;
-			yPoints[i] = dailyQuote.get(j).getClose();
-			points.add(new WeightedObservedPoint(1, i, dailyQuote.get(j).getClose()));
-		}
-
-		fit(xPoints, yPoints);
-//		CurveFitter curveFitter2 = new CurveFitter(xPoints, yPoints);
-//		curveFitter2.doFit(CurveFitter.POLY2);
-//		System.out.println(curveFitter2.getFormula() + " FitGoodness: " + curveFitter2.getFitGoodness());
-
-//		double[] fit = curveFitter.fit(points);
-//		System.out.println("fit: f(x) = " + fit[2] + "*x*x + " + fit[1] + "*x + " + fit[0]);
-
-		// 判断，拟合优度，或者用平均绝对误差、
-
-		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 90, 90, "sh000001" + " Daily", "", null);
+		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 90, 90, "sz002594" + " Daily", "", null);
 		chart.setLayout(new FlowLayout());
 		QuotePanel.show(Arrays.asList(chart));
 	}
 
-	private static void fit(double[] xPoints, double[] yPoints) {// 分段拟合
-		double[] fitPoints = new double[yPoints.length];// 还需要连线？
+	private static void fit(List<QuoteIndex> dailyQuote) {// 分段拟合
 
 		LinkedHashMap<Integer, CurveFitter> resultMap = new LinkedHashMap<Integer, CurveFitter>();
-		for (int i = 0; i < yPoints.length - 3; i++) {
-			CurveFitter fitter = new CurveFitter(Arrays.copyOfRange(xPoints, i, yPoints.length),
-					Arrays.copyOfRange(yPoints, i, yPoints.length));
-			fitter.doFit(CurveFitter.POLY2);
-			System.out.println("from [" + yPoints[i] + "] FitGoodness: " + fitter.getFitGoodness() + ", R^2: "
-					+ fitter.getRSquared());
 
-			if (fitter.getRSquared() > 0.9) {// R^2 大于0.9说明拟合优度还可以
-				resultMap.put(i, fitter);
-			}
-			// TODO 计算出拟合点数组返回
+		double[] xPoints = new double[dailyQuote.size()];
+		double[] yPoints = new double[dailyQuote.size()];
+		for (int i = 0; i < dailyQuote.size(); i++) {
+			xPoints[i] = i;
+			yPoints[i] = dailyQuote.get(i).getClose();
 		}
 
+		System.out.println(yPoints.length);
+		// 正向开始，拿10个点开始拟合，然后拿9个拟合，如果10个点可以成功，则继续拿20个点拟合
+		for (int i = 0, j = 20; i < yPoints.length -1 && j - i > 2; j--) {
+			CurveFitter fitter = new CurveFitter(Arrays.copyOfRange(xPoints, i, j), Arrays.copyOfRange(yPoints, i, j));
+			fitter.doFit(CurveFitter.POLY2);
+
+			System.out.println("from [" + yPoints[i] + " to " + yPoints[j] + "] FitGoodness: " + fitter.getFitGoodness()
+					+ ", R^2: " + fitter.getRSquared());
+			if (fitter.getRSquared() > 0.6) {// R^2 大于0.9说明拟合优度还可以
+				resultMap.put(i, fitter);
+				// 计算实际拟合的点
+				for (int m = i; m < j; m++) {
+					dailyQuote.get(m).setY(fitter.f(m));
+					System.out.println("------- " + dailyQuote.get(m).getClose() + " ----- " + dailyQuote.get(m).getY());
+				}
+				i = j;
+				j = j + 20 > yPoints.length ? yPoints.length : j + 10;
+			}
+
+			// TODO 没有拟合到函数？
+		}
+
+		// TODO 计算出拟合点数组返回
 	}
 
 	public static void main11(String[] args) throws Exception {
