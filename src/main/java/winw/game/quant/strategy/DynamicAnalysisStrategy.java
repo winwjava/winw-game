@@ -1,16 +1,9 @@
 package winw.game.quant.strategy;
 
-import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoint;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import ij.measure.CurveFitter;
 import winw.game.quant.Portfolio;
@@ -18,7 +11,6 @@ import winw.game.quant.QuantTradingStrategy;
 import winw.game.quant.Quote;
 import winw.game.quant.QuoteIndex;
 import winw.game.quant.QuotePanel;
-import winw.game.quant.QuoteService;
 
 /**
  * 股票价格受市场信息所影响。买卖双方会综合各种信息进行交易，最后反映到价格。
@@ -44,65 +36,69 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 
 	// 默认用国债和300二八轮换
 	public DynamicAnalysisStrategy() {
-		this.samples.addAll(Arrays.asList("sz002594"));
+		this.samples.addAll(Arrays.asList(CSI_300_TOP));
+	}
+
+	public List<QuoteIndex> compute(List<QuoteIndex> list) {
+		super.compute(list);
+		// 分段拟合
+		LinkedHashMap<Integer, CurveFitter> resultMap = new LinkedHashMap<Integer, CurveFitter>();
+
+		double[] xPoints = new double[list.size()];
+		double[] yPoints = new double[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			xPoints[i] = i;
+			yPoints[i] = list.get(i).getClose();
+		}
+
+		System.out.println(yPoints.length);
+		// 反向开始，拿10个点开始拟合，然后拿9个拟合，如果10个点可以成功，则继续拿20个点拟合
+		for (int i = yPoints.length - 30, j = yPoints.length - 1; i > 0 && j - i > 2; i++) {
+
+			// TODO 考虑去掉方差较大的点（意外跳动），再拟合。
+
+			double[] xTemp = Arrays.copyOfRange(xPoints, i, j);
+			double[] yTemp = Arrays.copyOfRange(yPoints, i, j);
+			CurveFitter poly2 = new CurveFitter(xTemp, yTemp);
+			poly2.doFit(CurveFitter.POLY2);
+			CurveFitter straight = new CurveFitter(xTemp, yTemp);
+			straight.doFit(CurveFitter.STRAIGHT_LINE);
+
+//			System.out.println("from [" + yPoints[i] + " to " + yPoints[j] + "] FitGoodness: " + poly2.getFitGoodness()
+//					+ ", R^2: " + poly2.getRSquared());
+
+			CurveFitter fit = poly2.getRSquared() > straight.getRSquared() ? poly2 : straight;
+			if (fit.getRSquared() > 0.8) {// R^2 大于0.9说明拟合优度较好
+				resultMap.put(i, fit);
+				// 计算实际拟合的点
+				for (int m = i + 1; m <= j; m++) {
+					list.get(m).setY(fit.f(m));
+					System.out.println("------- " + list.get(m).getClose() + " ----- " + list.get(m).getY());
+				}
+				j = i;
+				i = j - 30 > yPoints.length ? yPoints.length : j - 30;
+			}
+		}
+		return list;
 	}
 
 	@Override
 	public void trading(Portfolio portfolio) {
 		for (String code : samples()) {
 			// 先计算最近一个拐点。
-			int turningPoint = 0;
 			QuoteIndex today = getQuoteIndex(code, 0);
-			List<QuoteIndex> list = getHistoryQuote(code);
-			List<Double> colseList = new ArrayList<>();
-			for (int j = list.size() - 1; j > 0; j--) {
 
-				// TODO 考虑用加权平均。
-				double t0 = list.get(j).getMa5();
-				double tn1 = list.get(j - 1).getMa5();
-				double tn2 = list.get(j - 2).getMa5();
-
-				colseList.add(t0);
-				// 如果t-2 > t-1 < t0 向上拐点
-				if (tn2 > tn1 && tn1 < t0) {
-					turningPoint = j;
-					break;
-				}
-				// 如果t-2 < t-1 > t0则向下拐点。
-				if (tn2 < tn1 && tn1 > t0) {
-					turningPoint = -j;
-					break;
-				}
-			}
-//			System.out.println(turningPoint + " "+colseList);
-			// 向上情况，判断函数形态：冥函数（k*x 或 k*x*x）、指数函数（a的x次方）？
-
-			PolynomialCurveFitter curveFitter = PolynomialCurveFitter.create(2);
-			ArrayList<WeightedObservedPoint> points = new ArrayList<WeightedObservedPoint>();
-
-			if (turningPoint < 0) {
-//				System.out.println(turningPoint);
-//				portfolio.addBatch(today, -1, String.format("SlopeL: %.2f", today.getL()));
-				continue;
-			}
-			double xInterval5 = list.get(turningPoint).getMa5() * 0.15;
-			for (int j = turningPoint, k = 0; j < list.size(); j++, k++) {
-				points.add(new WeightedObservedPoint(1, k * xInterval5, list.get(j).getClose()));
-				System.out.println(k * xInterval5 + ", " + list.get(j).getClose());
-
-			}
-			double[] fit = curveFitter.fit(points);
-			System.out.println("fit: f(x) = " + fit[0] + "*x*x + " + fit[1] + "*x + " + fit[2]);
-			// TODO 买入日期 在拐点之前，则应该抛掉。
-
-			// TODO 偏离趋势，向下？ 应该抛掉？
-
-			// 5/10/20均线是否全部需要向上？
-			// 从转折点买入，避免从顶部买入。
 			if (portfolio.getEmptyPositionDays(today.getCode(), 100) > 2 // 卖出后保持空仓天数
 					&& !portfolio.hasPosition(today.getCode())) {
-				portfolio.addBatch(today, 1, String.format("SlopeL: %.2f", today.getL()));
+				portfolio.addBatch(today, 0.5, String.format("SlopeL: %.2f", today.getL()));
 			}
+
+			// TODO 过拟合问题，如何优化？
+
+			// TODO 用直线拟合
+
+			// TODO 只做指定的函数类型，比如开口向上的抛物线，并且在底部，回测
+			// 或者开口向下的抛物线，并且在起步阶段。
 
 		}
 		stoploss(portfolio);
@@ -110,92 +106,10 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 	}
 
 	public static void main(String[] args) throws Exception {
-
-		QuoteService service = QuoteService.getDefault();
-		String today = DateFormatUtils.format(new Date(), Quote.DATE_PATTERN);
-		List<QuoteIndex> dailyQuote = QuoteIndex
-				.compute(service.get(QuoteIndex.class, "sz002594", "2021-08-01", today));
-
-		// sz002594 sh000001
-		
-		// 拟合
-		fit(dailyQuote);
-
-		QuotePanel chart = new QuotePanel(dailyQuote, dailyQuote.size() - 90, 90, "sz002594" + " Daily", "", null);
-		chart.setLayout(new FlowLayout());
-		QuotePanel.show(Arrays.asList(chart));
-	}
-
-	private static void fit(List<QuoteIndex> dailyQuote) {// 分段拟合
-
-		LinkedHashMap<Integer, CurveFitter> resultMap = new LinkedHashMap<Integer, CurveFitter>();
-
-		double[] xPoints = new double[dailyQuote.size()];
-		double[] yPoints = new double[dailyQuote.size()];
-		for (int i = 0; i < dailyQuote.size(); i++) {
-			xPoints[i] = i;
-			yPoints[i] = dailyQuote.get(i).getClose();
-		}
-
-		System.out.println(yPoints.length);
-		// 正向开始，拿10个点开始拟合，然后拿9个拟合，如果10个点可以成功，则继续拿20个点拟合
-		for (int i = 0, j = 20; i < yPoints.length -1 && j - i > 2; j--) {
-			CurveFitter fitter = new CurveFitter(Arrays.copyOfRange(xPoints, i, j), Arrays.copyOfRange(yPoints, i, j));
-			fitter.doFit(CurveFitter.POLY2);
-
-			System.out.println("from [" + yPoints[i] + " to " + yPoints[j] + "] FitGoodness: " + fitter.getFitGoodness()
-					+ ", R^2: " + fitter.getRSquared());
-			if (fitter.getRSquared() > 0.6) {// R^2 大于0.9说明拟合优度还可以
-				resultMap.put(i, fitter);
-				// 计算实际拟合的点
-				for (int m = i; m < j; m++) {
-					dailyQuote.get(m).setY(fitter.f(m));
-					System.out.println("------- " + dailyQuote.get(m).getClose() + " ----- " + dailyQuote.get(m).getY());
-				}
-				i = j;
-				j = j + 20 > yPoints.length ? yPoints.length : j + 10;
-			}
-
-			// TODO 没有拟合到函数？
-		}
-
-		// TODO 计算出拟合点数组返回
-	}
-
-	public static void main11(String[] args) throws Exception {
-		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
+		Portfolio portfolio = new Portfolio(1000000, 5, 0.05, 0.05);
 		DynamicAnalysisStrategy strategy = new DynamicAnalysisStrategy();
-		strategy.backTesting(portfolio, "2021-10-01", Quote.today());
-//		strategy.backTesting(portfolio, "2020-01-01", Quote.today());
-		QuotePanel.show(portfolio, strategy, "2019-10-01", Quote.today());
-	}
-
-	public static void main0(String[] args) {
-		SimpleRegression regression = new SimpleRegression();
-		double[] points60 = new double[] { 16.2441, 16.2296, 16.2048, 16.2129, 16.2746, 16.3092 };
-		double xInterval5 = points60[5] * 0.15;
-		for (int j = 0; j <= 5; j++) {
-			regression.addData(j * xInterval5, points60[j]);
-		}
-	}
-
-	public static void main1(String[] args) {
-		PolynomialCurveFitter curveFitter = PolynomialCurveFitter.create(2);
-		double[] points60 = new double[] { 16.2441, 16.2296, 16.2048, 16.2129, 16.2746, 16.3092 };
-		double xInterval5 = points60[5] * 0.15;
-
-		ArrayList<WeightedObservedPoint> list = new ArrayList<WeightedObservedPoint>();
-
-		for (int j = 0; j <= 5; j++) {
-//			regression.addData(j * xInterval5, points60[j]);
-
-			list.add(new WeightedObservedPoint(1, j * xInterval5, points60[j]));
-		}
-		double[] fit = curveFitter.fit(list);
-		for (double d : fit) {
-			System.out.println(d);
-		}
-		// y = k * x*x + x + m;
+		strategy.backTesting(portfolio, "2021-08-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2021-08-01", Quote.today());
 	}
 
 }

@@ -268,12 +268,11 @@
       <version>0.3.0</version>
     </dependency>
 
-<dependency>
-    <groupId>net.imagej</groupId>
-    <artifactId>ij</artifactId>
-    <version>1.53j</version>
-</dependency>
-
+    <dependency>
+      <groupId>net.imagej</groupId>
+      <artifactId>ij</artifactId>
+      <version>1.53j</version>
+    </dependency>
 
   </dependencies>
 

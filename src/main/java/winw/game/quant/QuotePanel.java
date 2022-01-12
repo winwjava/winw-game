@@ -228,7 +228,7 @@ public class QuotePanel extends JPanel {
 		} else {
 			drawZscore(g);
 		}
-		if (quoteList.get(0).getY() != 0) {
+		if (quoteList.get(quoteList.size() - 1).getY() != 0) {
 			drawFitLine(g);
 		}
 	}
