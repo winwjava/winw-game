@@ -130,7 +130,7 @@ public class SubjectIndexService {
 	}
 
 	@PostConstruct
-	@Scheduled(cron = "00 00 17 * * 1-5")
+	@Scheduled(cron = "00 00 18 * * 1-5")
 	public void fetchIndices() throws Exception {
 		subjectIndexRepository.deleteAll();
 		indexQuoteRepository.deleteAll();

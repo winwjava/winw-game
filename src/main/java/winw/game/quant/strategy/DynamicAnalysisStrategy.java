@@ -53,21 +53,25 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 
 		System.out.println(yPoints.length);
 		// 反向开始，拿10个点开始拟合，然后拿9个拟合，如果10个点可以成功，则继续拿20个点拟合
-		for (int i = yPoints.length - 30, j = yPoints.length - 1; i > 0 && j - i > 2; i++) {
+		for (int i = yPoints.length - 30, j = yPoints.length - 1; i > 0 && j - i > 1; i++) {
 
 			// TODO 考虑去掉方差较大的点（意外跳动），再拟合。
 
 			double[] xTemp = Arrays.copyOfRange(xPoints, i, j);
 			double[] yTemp = Arrays.copyOfRange(yPoints, i, j);
-			CurveFitter poly2 = new CurveFitter(xTemp, yTemp);
-			poly2.doFit(CurveFitter.POLY2);
 			CurveFitter straight = new CurveFitter(xTemp, yTemp);
 			straight.doFit(CurveFitter.STRAIGHT_LINE);
+			CurveFitter poly2 = new CurveFitter(xTemp, yTemp);
+			poly2.doFit(CurveFitter.POLY2);
 
+			CurveFitter poly3 = new CurveFitter(xTemp, yTemp);
+			poly3.doFit(CurveFitter.POLY3);
+			
 //			System.out.println("from [" + yPoints[i] + " to " + yPoints[j] + "] FitGoodness: " + poly2.getFitGoodness()
 //					+ ", R^2: " + poly2.getRSquared());
 
 			CurveFitter fit = poly2.getRSquared() > straight.getRSquared() ? poly2 : straight;
+			fit = poly3.getRSquared() > fit.getRSquared() ? poly3 : poly2;
 			if (fit.getRSquared() > 0.8) {// R^2 大于0.9说明拟合优度较好
 				resultMap.put(i, fit);
 				// 计算实际拟合的点
