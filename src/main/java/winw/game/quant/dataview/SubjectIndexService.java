@@ -23,6 +23,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import winw.game.quant.Quote;
 
 @Slf4j
 @ManagedBean
@@ -129,9 +130,14 @@ public class SubjectIndexService {
 		
 	}
 
+	private String today = "";
+	
 	@PostConstruct
-	@Scheduled(cron = "00 00 18 * * 1-5")
+	@Scheduled(cron = "00 00 15-19 * * 1-5")
 	public void fetchIndices() throws Exception {
+		if(Quote.today().equals(today)) {
+			return ;// 今天已运行成功。
+		}
 		subjectIndexRepository.deleteAll();
 		indexQuoteRepository.deleteAll();
 		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
@@ -149,6 +155,7 @@ public class SubjectIndexService {
 		for (SubjectIndex subjectIndexBak : findAll) {
 			try {
 				indexQuoteRepository.saveAll(detail(subjectIndexBak.getIndexCode()));
+				today = Quote.today();
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
