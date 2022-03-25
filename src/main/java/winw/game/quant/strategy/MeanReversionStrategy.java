@@ -27,6 +27,7 @@ import winw.game.quant.QuotePanel;
 public class MeanReversionStrategy extends QuantTradingStrategy {
 	public MeanReversionStrategy() {
 		super();
+		 this.samples.add(CSI_300);
 		this.samples.addAll(Arrays.asList(CSI_300_TOP));
 	}
 

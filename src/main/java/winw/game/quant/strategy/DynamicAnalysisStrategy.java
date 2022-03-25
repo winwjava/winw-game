@@ -72,7 +72,7 @@ public class DynamicAnalysisStrategy extends QuantTradingStrategy {
 
 			CurveFitter fit = poly2.getRSquared() > straight.getRSquared() ? poly2 : straight;
 			fit = poly3.getRSquared() > fit.getRSquared() ? poly3 : poly2;
-			if (fit.getRSquared() > 0.8) {// R^2 大于0.9说明拟合优度较好
+			if (fit.getRSquared() > 0.9) {// R^2 大于0.9说明拟合优度较好
 				resultMap.put(i, fit);
 				// 计算实际拟合的点
 				for (int m = i + 1; m <= j; m++) {

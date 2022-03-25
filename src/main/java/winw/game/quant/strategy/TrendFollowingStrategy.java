@@ -56,7 +56,7 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 		// 线性回归，计算斜率
 		for (int i = 1; i < list.size(); i++) {
 			QuoteIndex quoteIndex = list.get(i);
-			if (i < 5) {
+			if (i < 60) {
 				continue;
 			}
 
@@ -65,13 +65,13 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 			double hight = list.get(i).getEma60max() - list.get(i).getEma60min();
 			double bottom = list.get(i).getEma60min();
 
-			for (int j = 1; j <= 3; j++) {
+			for (int j = 1; j <= 5; j++) {
 				QuoteIndex temp = list.get(i - 3 + j);
 				regression.addData((1500 / 60) * j, 300d * (temp.getEma5() - bottom) / hight);
 			}
-			quoteIndex.setS(regression.getSlope());
+			quoteIndex.setS(regression.getSlope());// 5日趋势
 			regression.clear();
-			for (int j = 1; j <= 5; j++) {
+			for (int j = 1; j <= 60; j++) {
 				QuoteIndex temp = list.get(i - 5 + j);
 				regression.addData((1500d / 60) * j, 300d * (temp.getEma60() - bottom) / hight);
 			}
@@ -110,18 +110,24 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 			}
 			QuoteIndex today = getQuoteIndex(code, 0);
 			QuoteIndex yesterday = getQuoteIndex(code, -1);
+			if(yesterday == null) {
+				continue;
+			}
 
 			// 5/10/20均线是否全部需要向上？
 			// 从转折点买入，避免从顶部买入。
-			if (yesterday.getL() < bondYield && today.getL() > bondYield && today.getS() > bondYield
+			
+			// yesterday.getL() < bondYield && today.getL() > bondYield && 
+			if (today.getS() > 0.05
 					&& portfolio.getEmptyPositionDays(today.getCode(), 100) > 2 // 卖出后保持空仓天数
-					&& !portfolio.hasPosition(today.getCode())) {
+					&& !portfolio.hasPosition(today.getCode())
+					&& today.getEma60() > yesterday.getEma60()) {
 				portfolio.addBatch(today, 1, String.format("SlopeL: %.2f", today.getL()));
 			}
 
 			// 考虑用20日线。卖出更可靠。
-			if (today.getL() < bondYield) {
-				portfolio.addBatch(today, -1, String.format("SlopeL: %.2f", today.getL()));
+			if (today.getS() <= 0.02) {
+				portfolio.addBatch(today, 0, String.format("SlopeL: %.2f", today.getL()));
 			}
 		}
 		stoploss(portfolio);
@@ -131,8 +137,8 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 	public static void main(String[] args) throws Exception {
 		Portfolio portfolio = new Portfolio(1000000, 1, 0.05, 0.05);
 		TrendFollowingStrategy strategy = new TrendFollowingStrategy(CSI_300_TOP);
-		strategy.backTesting(portfolio, "2019-01-01", Quote.today());
-		QuotePanel.show(portfolio, strategy, "2019-01-01", Quote.today());
+		strategy.backTesting(portfolio, "2021-01-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2021-01-01", Quote.today());
 	}
 
 	public static void main0(String[] args) {

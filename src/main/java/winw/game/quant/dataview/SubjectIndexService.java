@@ -138,18 +138,18 @@ public class SubjectIndexService {
 		if(Quote.today().equals(today)) {
 			return ;// 今天已运行成功。
 		}
-		subjectIndexRepository.deleteAll();
+//		subjectIndexRepository.deleteAll();
 		indexQuoteRepository.deleteAll();
-		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
-			SubjectIndexResp<SubjectIndex> indices = indices(i, 20);
-			subjectIndexRepository.saveAll(indices.getData().stream().filter(o -> //
-			"人民币".equals(o.getCurrency()) //
-					&& "境内".equals(o.getRegion())//
-					&& pivotalMap.containsKey(o.getIndexCode())// 关键指标
-
-			).collect(Collectors.toList()));
-			totalPage = indices.getTotal() / 20 + 1;
-		}
+//		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
+//			SubjectIndexResp<SubjectIndex> indices = indices(i, 20);
+//			subjectIndexRepository.saveAll(indices.getData().stream().filter(o -> //
+//			"人民币".equals(o.getCurrency()) //
+//					&& "境内".equals(o.getRegion())//
+//					&& pivotalMap.containsKey(o.getIndexCode())// 关键指标
+//
+//			).collect(Collectors.toList()));
+//			totalPage = indices.getTotal() / 20 + 1;
+//		}
 
 		List<SubjectIndex> findAll = subjectIndexRepository.findAll();
 		for (SubjectIndex subjectIndexBak : findAll) {

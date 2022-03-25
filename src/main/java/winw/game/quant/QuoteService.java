@@ -98,12 +98,12 @@ public interface QuoteService {
 	static QuoteService getDefault() {
 		return new QuoteService() {
 
-			private SinaQuoteService sinaQuoteService = new SinaQuoteService();
+			//private SinaQuoteService sinaQuoteService = new SinaQuoteService();
 			private TencentQuoteService tencentQuoteService = new TencentQuoteService();
 
 			@Override
 			public <T extends Quote> T get(Class<T> clazz, String code) throws Exception {
-				return sinaQuoteService.get(clazz, code);
+				return tencentQuoteService.get(clazz, code);
 			}
 
 			@Override
