@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class PageInfo<T> implements Serializable {
+public class PageResult<T> implements Serializable {
     private static final long serialVersionUID = -3928691272412041580L;
     @ApiModelProperty(value = "当前页")
     private int pageNum;
@@ -20,10 +20,10 @@ public class PageInfo<T> implements Serializable {
     @ApiModelProperty(value = "结果集")
     private List<T> list;
 
-    public PageInfo() {
+    public PageResult() {
     }
 
-    public PageInfo(org.springframework.data.domain.Page<T> page) {
+    public PageResult(org.springframework.data.domain.Page<T> page) {
         this.pageNum = page.getNumber();
         this.pageSize = page.getSize();
 

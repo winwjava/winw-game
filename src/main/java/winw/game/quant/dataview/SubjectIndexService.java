@@ -91,6 +91,7 @@ public class SubjectIndexService {
 		pivotalMap.put("H30007", "芯片产业");// 芯片
 //		pivotalMap.put("930721", "CS智能汽车");
 //		pivotalMap.put("930771", "CS新能源");
+		pivotalMap.put("930997", "新能源车");
 		pivotalMap.put("399959", "军工指数");// 军工
 
 //		pivotalMap.put("930875", "空天军工");
