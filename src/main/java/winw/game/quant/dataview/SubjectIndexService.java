@@ -63,20 +63,20 @@ public class SubjectIndexService {
 		pivotalMap.put("H30206", "中证造纸");// 造纸
 
 		pivotalMap.put("930698", "中证水利");// 水利水电（长江电力、中国电建、中国能建）
-		
+
 		// 第三产业：服务业（银行、证券、保险、房地产、旅游、餐饮酒店、信息技术、物流、教育、文体娱乐、水电气热）
 		pivotalMap.put("000951", "300银行");// 银行
 		pivotalMap.put("931169", "证券30");// 券商，与大盘同起同落
 		pivotalMap.put("930618", "中证保险");// 保险
 		pivotalMap.put("930633", "中证旅游");// 旅游，假期
-		pivotalMap.put("H11060", "中证物流");// 物流，9月中旬快递会涨价，出现行情。  顺丰控股 中远海控 韵达股份
+		pivotalMap.put("H11060", "中证物流");// 物流，9月中旬快递会涨价，出现行情。 顺丰控股 中远海控 韵达股份
 		pivotalMap.put("399812", "养老产业");// 养老
 		pivotalMap.put("H30095", "中证医药");// 医药 新华制药 药明康德
 //		pivotalMap.put("H50026", "上证医药");// 医药 千金药业 浙江医药
 		pivotalMap.put("930641", "中证中药");// 以岭药业
-		
+
 		pivotalMap.put("930781", "中证影视");// 万达电影
-		pivotalMap.put("H30365", "中证文娱");// 	三七互娱
+		pivotalMap.put("H30365", "中证文娱");// 三七互娱
 
 		pivotalMap.put("L11618", "300海运");// 300海运
 		pivotalMap.put("000952", "300地产（万科、保利）");// 300地产
@@ -128,29 +128,30 @@ public class SubjectIndexService {
 		// 2010年美国15万亿，中国6.5万亿，2020年美国21，中国16
 		// 到2025年，GDP达到20万亿美元，2030年达到25万亿美元，2035年左右GDP超过美国，人均GDP进入发达国家行列
 		// 届时将具备解放台湾的军事实力，国际局势会减轻，贸易提升，税负减轻。
-		
+
 	}
 
 	private String today = "";
-	
+
 	@PostConstruct
 	@Scheduled(cron = "00 00 15-19 * * 1-5")
 	public void fetchIndices() throws Exception {
-		if(Quote.today().equals(today)) {
-			return ;// 今天已运行成功。
+		if (Quote.today().equals(today)) {
+			return;// 今天已运行成功。
 		}
-//		subjectIndexRepository.deleteAll();
+		log.info("Fetch Indices......");
+		subjectIndexRepository.deleteAll();
 		indexQuoteRepository.deleteAll();
-//		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
-//			SubjectIndexResp<SubjectIndex> indices = indices(i, 20);
-//			subjectIndexRepository.saveAll(indices.getData().stream().filter(o -> //
-//			"人民币".equals(o.getCurrency()) //
-//					&& "境内".equals(o.getRegion())//
-//					&& pivotalMap.containsKey(o.getIndexCode())// 关键指标
-//
-//			).collect(Collectors.toList()));
-//			totalPage = indices.getTotal() / 20 + 1;
-//		}
+		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
+			SubjectIndexResp<SubjectIndex> indices = indices(i, 20);
+			subjectIndexRepository.saveAll(indices.getData().stream().filter(o -> //
+			"人民币".equals(o.getCurrency()) //
+					&& "境内".equals(o.getRegion())//
+					&& pivotalMap.containsKey(o.getIndexCode())// 关键指标
+
+			).collect(Collectors.toList()));
+			totalPage = indices.getTotal() / 20 + 1;
+		}
 
 		List<SubjectIndex> findAll = subjectIndexRepository.findAll();
 		for (SubjectIndex subjectIndexBak : findAll) {

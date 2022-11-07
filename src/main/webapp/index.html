@@ -4,14 +4,14 @@
 <title>winw-game</title>
 <meta charset="utf-8">
 <script type="text/javascript"
-	src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+	src="/jquery-2.2.4.min.js"></script>
 
 <script type="text/javascript"
 	src="/echarts.min.js"></script>
 
 </head>
 <body>
-	<div id="main" style="width: 100%; height: 700px; margin: 0px auto"></div>
+	<div id="main" style="width: 100%; height: 630px; margin: 0px auto"></div>
 </body>
 <script>
 	var chartDom = document.getElementById('main');
@@ -83,12 +83,12 @@
 		      },
 		      ...datasetWithFilters
 		    ],
-		    title: {
-		      text: 'Trend of Category Index '
-		    },
-		    tooltip: {
-		      order: 'valueDesc',
-		      trigger: 'axis'
+		    //title: {
+		      //text: 'Trend of Subject Index '
+		    //},
+		    tooltip: {// 鼠标滑过的提示框
+		     // order: 'valueDesc',
+		     // trigger: 'axis'
 		    },
 		    xAxis: {
 		      type: 'category',
@@ -98,11 +98,17 @@
 		      name: 'Change'
 		    },
 		    grid: {
-		      right: 140
+		      //right: 140,
+	            top: '1%',  
+	            left: '1%', 
+	            right: '8%',
+	            bottom: '1%',
+	            containLabel: true
 		    },
 		    series: seriesList
 		  };
 		  myChart.setOption(option);
+		  
 	}
 </script>
 </html>

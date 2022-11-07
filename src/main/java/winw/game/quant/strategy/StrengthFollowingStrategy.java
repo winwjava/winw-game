@@ -15,7 +15,7 @@ import winw.game.quant.Portfolio;
  * @author winw
  *
  */
-public class StrengthFollowingStrategy extends StatsAarbitrageStrategy {
+public abstract class StrengthFollowingStrategy extends StatsAarbitrageStrategy {
 
 	@Override
 	public void trading(Portfolio portfolio) {

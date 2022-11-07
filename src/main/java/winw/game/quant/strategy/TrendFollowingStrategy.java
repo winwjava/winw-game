@@ -102,8 +102,8 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 
 	@Override
 	public void trading(Portfolio portfolio) {
-		QuoteIndex shbond = getQuoteIndex(SH_BOND);
-		double bondYield = shbond.getL();// 国债收益率
+//		QuoteIndex shbond = getQuoteIndex(SH_BOND);
+//		double bondYield = shbond.getL();// 国债收益率
 		for (String code : samples()) {
 			if (SH_BOND_ETF.equals(code) || CSI_300.equals(code)) {
 				continue;

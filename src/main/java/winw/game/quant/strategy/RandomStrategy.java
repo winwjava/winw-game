@@ -9,6 +9,6 @@ package winw.game.quant.strategy;
  * @author winw
  *
  */
-public class RandomStrategy {
+public abstract class RandomStrategy {
 
 }

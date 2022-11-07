@@ -5,8 +5,6 @@ import java.util.Date;
 import javax.annotation.ManagedBean;
 import javax.annotation.Resource;
 
-import org.springframework.scheduling.annotation.Scheduled;
-
 import winw.game.quant.MailService;
 import winw.game.quant.OrderRepository;
 import winw.game.quant.Portfolio;

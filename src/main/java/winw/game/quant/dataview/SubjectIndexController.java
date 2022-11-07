@@ -3,8 +3,6 @@ package winw.game.quant.dataview;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -110,7 +108,7 @@ public class SubjectIndexController {
 //		return indexQuoteRepository.findByIndexCode(indexCode);
 	}
 
-	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
+//	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
 
 	// TODO 过滤掉低波动率的指数。
 	// TODO 过滤掉振幅较低的指数。

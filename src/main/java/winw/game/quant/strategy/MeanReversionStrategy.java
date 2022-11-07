@@ -85,8 +85,8 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 		Portfolio portfolio = new Portfolio(500000, 3, 0.05, 0.05);
 		MeanReversionStrategy strategy = new MeanReversionStrategy();
 
-		strategy.backTesting(portfolio, "2021-10-01", Quote.today());
-		QuotePanel.show(portfolio, strategy, "2021-09-01", Quote.today());
+		strategy.backTesting(portfolio, "2022-01-01", Quote.today());
+		QuotePanel.show(portfolio, strategy, "2021-12-01", Quote.today());
 		// TODO test current day and next day buy.
 	}
 }

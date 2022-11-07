@@ -8,6 +8,6 @@ package winw.game.quant.strategy;
  * @author winw
  *
  */
-public class SmileCurveStrategy {
+public abstract class SmileCurveStrategy {
 
 }

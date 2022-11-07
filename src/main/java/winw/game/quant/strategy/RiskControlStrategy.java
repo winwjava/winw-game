@@ -1,6 +1,6 @@
 package winw.game.quant.strategy;
 
-public class RiskControlStrategy {
+public abstract class RiskControlStrategy {
 
 	// TODO 1. Support run again at 14:50;
 	// TODO 2. Support system risk control(CSI_300 continuous decline);

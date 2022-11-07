@@ -8,6 +8,6 @@ package winw.game.quant.strategy;
  * @author winw
  *
  */
-public class VolatilityArbitrageStrategy {// 10点和14点操作。
+public abstract class VolatilityArbitrageStrategy {// 10点和14点操作。
 
 }

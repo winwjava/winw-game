@@ -11,6 +11,6 @@ package winw.game.quant.strategy;
  * @author winw
  *
  */
-public class TutleTradingStrategy {
+public abstract class TutleTradingStrategy {
 
 }
