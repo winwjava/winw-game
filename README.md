@@ -11,32 +11,32 @@
 <img width="1000px" src="./docs/winwgame-frame.png">
 
 
-## Subect Index Data View
-
-<img width="1000px" src="./docs/winwgame-subject.png">
-
 ## Back Testing Data View
 
 <img width="1000px" src="./docs/winwgame-backtesting.png">
 
+## Subect Index Data View
+
+<img width="1000px" src="./docs/winwgame-subject.png">
+
 
 #### 量化策略
-
-<table style="width: 900px;"  border="1px" cellpadding="0" cellspacing="0" >
+行情不好时，避免交易。
+<table style="width: 1000px;"  border="1px" cellpadding="0" cellspacing="0" >
 <style>
 	tr{height: 30px;text：center;}
 	td{align: center;}
 </style>
-  <tr><th>策略简称</th><th>策略实现</th><th>策略说明</th></tr>
-  <tr><td>趋势跟踪</td><td>TrendFollowingStrategy</td><td>在向上趋势形成后买入，趋势向下后卖出；</td></tr>
-  <tr><td>均值回归</td><td>TrendFollowingStrategy</td><td>过度下跌后买入，预期将恢复到接近平均位置卖出；</td></tr>
-  <tr><td>黄金交叉</td><td>GoldenCrossStrategy</td><td>根据 MACD 的金叉死叉判断多空双方的力量判断做多或做空；</td></tr>
-  <tr><td>利弗莫尔</td><td>LivermoreStrategy</td><td>华尔街投机大鳄“利弗莫尔”的买卖法则，适合跟随“涨停敢死队”操作；</td></tr>
-  <tr><td>微笑曲线</td><td>SmileCurveStrategy</td><td>对于波动较低的行业，按价格走势的不同阶段分批买入，分批卖出；</td></tr>
-  <tr><td>日内突破</td><td>IntradayBreakthroughStrategy</td><td>根据“唐安奇通道”或“布林线”，向上突破时买入，向下突破时卖出；</td></tr>
-  <tr><td>日内趋势</td><td>IntradayTrendStrategy</td><td>在向上趋势形成后买入，趋势向下后卖出，判断错误时需要及时止损；</td></tr>
-  <tr><td>日内倒卖</td><td>IntradayScalpStrategy</td><td>低价吸收筹码，高价卖出，适合炒作大宗商品，日内交易避免隔夜风险；</td></tr>
-  <tr><td>对冲套利</td><td>HedgeArbitrageStrategy</td><td>一般属于高频交易：跨市场套利、期货与现货套利、配对交易套利；</td></tr>
+  <tr><th>策略简称</th><th>策略实现</th><th>策略说明</th><th>适用场景</th></tr>
+  <tr><td>趋势跟踪</td><td>TrendFollowingStrategy</td><td>在向上趋势形成后买入，趋势向下后卖出；</td><td>强周期性</td></tr>
+  <tr><td>均值回归</td><td>MeanReversionStrategy</td><td>过度下跌后买入，恢复到接近平均位置后卖出；</td><td>震荡向上</td></tr>
+  <tr><td>黄金交叉</td><td>GoldenCrossStrategy</td><td>根据 MACD 的金叉死叉判断多空双方的力量判断做多或做空；</td><td>强周期性</td></tr>
+  <tr><td>利弗莫尔</td><td>LivermoreStrategy</td><td>华尔街投机大鳄“利弗莫尔”的买卖法则，上涨时不断加仓，回撤10%清仓；</td><td>跟踪牛股</td></tr>
+  <tr><td>微笑曲线</td><td>SmileCurveStrategy</td><td>对于波动较低的行业，按价格走势的不同阶段分批买入，分批卖出；</td><td>保守玩法</td></tr>
+  <tr><td>日内突破</td><td>IntradayBreakthroughStrategy</td><td>根据“唐安奇通道”或“布林线”，向上突破时买入，向下突破时卖出；</td><td>成交放量</td></tr>
+  <tr><td>日内趋势</td><td>IntradayTrendStrategy</td><td>在向上趋势形成后买入，趋势向下后卖出，判断错误时需要及时止损；</td><td>突发行情</td></tr>
+  <tr style="background-color:#BFEFFF;"><td>日内倒卖</td><td>IntradayScalpStrategy</td><td>杀价吸收筹码，抬高价格卖出，日内平仓避免隔夜风险；</td><td>大宗商品</td></tr>
+  <tr style="background-color:#BFEFFF;"><td>对冲套利</td><td>HedgeArbitrageStrategy</td><td>跨市场对冲套利、期货与现货对冲套利、配对交易套利、可转债套利；</td><td>高频交易</td></tr>
 
 </table>
 

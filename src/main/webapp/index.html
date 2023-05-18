@@ -3,11 +3,9 @@
 <head>
 <title>winw-game</title>
 <meta charset="utf-8">
-<script type="text/javascript"
-	src="/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="/jquery-2.2.4.min.js"></script>
 
-<script type="text/javascript"
-	src="/echarts.min.js"></script>
+<script type="text/javascript" src="/echarts.min.js"></script>
 
 </head>
 <body>
@@ -23,7 +21,23 @@
 
 	const seriesList = [];
 	const datasetWithFilters = [];
-
+	//随机颜色;
+    function getRandomColor() {
+    	var r = Math.floor(Math.random() * 256);
+    	var g = Math.floor(Math.random() * 256);
+    	var b = Math.floor(Math.random() * 256);
+    	return "rgb(" + r + ',' + g + ',' + b + ")";
+    }
+    
+    //获取随机颜色数组
+    function getColor(num) {
+        var colorList = [];
+        for (var i = 0; i < num; i++) {
+            colorList.push(getRandomColor());
+        }
+        return colorList;
+    }
+    
 	function run(_rawData) {
 		 var names = [];
 
@@ -105,10 +119,11 @@
 	            bottom: '1%',
 	            containLabel: true
 		    },
-		    series: seriesList
+		    series: seriesList,
+		    color: getColor(20)
 		  };
 		  myChart.setOption(option);
-		  
+		  // https://www.csindex.com.cn/#/indices/family/detail?indexCode=930633
 	}
 </script>
 </html>
