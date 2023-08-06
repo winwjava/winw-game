@@ -273,7 +273,12 @@
       <artifactId>ij</artifactId>
       <version>1.53j</version>
     </dependency>
-
+<!-- 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+ -->
   </dependencies>
 
 </project>

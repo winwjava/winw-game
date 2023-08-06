@@ -63,7 +63,9 @@ public interface QuoteService {
 	default <T extends Quote> List<T> get(Class<T> clazz, String code, String from, String to) throws Exception {
 		// TODO 历史数据支持缓存，24小时内数据只取一次，次日更换。
 		List<T> result = get(clazz, code, from, to, Quote.diff(from, to));
-
+		if(result == null) {
+			return null;
+		}
 		String lastday = result.get(result.size() - 1).getDate();
 		if (to.equals(lastday)) {
 			return result;

@@ -81,9 +81,9 @@ public class TencentQuoteService implements QuoteService {
 		quote.setLow(Double.parseDouble(fileds[42]));
 		// 43: 振幅
 		// 44: 流通市值
-		// quote.setMarketVal(Double.parseDouble(split[44]));
+		 quote.setMarketVal(Double.parseDouble(fileds[44]));// 单位：亿元
 		// 45: 总市值
-		// quote.setMarketCap(Double.parseDouble(split[45]));
+		 quote.setMarketCap(Double.parseDouble(fileds[45]));// 单位：亿元
 		// 46: 市净率
 		// 47: 涨停价
 		// 48: 跌停价

@@ -27,14 +27,14 @@ import winw.game.quant.Quote;
 
 @Slf4j
 @ManagedBean
-public class SubjectIndexService {
+public class IndicesService {
 
 	@Resource
 	IndexQuoteRepository indexQuoteRepository;
 //	@Resource
 //	CategoryRepository categoryRepository;
 	@Resource
-	SubjectIndexRepository subjectIndexRepository;
+	IndicesRepository indicesRepository;
 
 //	@PostConstruct
 //	public void setCategoryIndex() throws Exception {
@@ -133,18 +133,18 @@ public class SubjectIndexService {
 
 	private String today = "";
 
-	@PostConstruct
-	@Scheduled(cron = "00 00 15-19 * * 1-5")
+//	@PostConstruct
+//	@Scheduled(cron = "00 00 15-19 * * 1-5")
 	public void fetchIndices() throws Exception {
 		if (Quote.today().equals(today)) {
 			return;// 今天已运行成功。
 		}
 		log.info("Fetch Indices......");
-		subjectIndexRepository.deleteAll();
+		indicesRepository.deleteAll();
 		indexQuoteRepository.deleteAll();
 		for (int i = 1, totalPage = 2; i <= totalPage; i++) {
-			SubjectIndexResp<SubjectIndex> indices = indices(i, 20);
-			subjectIndexRepository.saveAll(indices.getData().stream().filter(o -> //
+			IndicesResp<Indices> indices = indices(i, 20);
+			indicesRepository.saveAll(indices.getData().stream().filter(o -> //
 			"人民币".equals(o.getCurrency()) //
 					&& "境内".equals(o.getRegion())//
 					&& pivotalMap.containsKey(o.getIndexCode())// 关键指标
@@ -153,8 +153,8 @@ public class SubjectIndexService {
 			totalPage = indices.getTotal() / 20 + 1;
 		}
 
-		List<SubjectIndex> findAll = subjectIndexRepository.findAll();
-		for (SubjectIndex subjectIndexBak : findAll) {
+		List<Indices> findAll = indicesRepository.findAll();
+		for (Indices subjectIndexBak : findAll) {
 			try {
 				indexQuoteRepository.saveAll(detail(subjectIndexBak.getIndexCode()));
 				today = Quote.today();
@@ -166,7 +166,7 @@ public class SubjectIndexService {
 
 	private static WebClient webClient = WebClient.create();
 
-	public static SubjectIndexResp<SubjectIndex> indices(int page, int page_size)
+	public static IndicesResp<Indices> indices(int page, int page_size)
 			throws IOException, InterruptedException {
 		String url = "https://www.csindex.com.cn/csindex-home/index-list/query-index-item";
 
@@ -187,7 +187,7 @@ public class SubjectIndexService {
 		String response = resp.block();
 		log.info("<< {}", response);
 
-		return JSONObject.parseObject(response, new TypeReference<SubjectIndexResp<SubjectIndex>>() {
+		return JSONObject.parseObject(response, new TypeReference<IndicesResp<Indices>>() {
 		});
 
 //		return JSONObject.parseObject(response.replace("\uFEFF", ""), PageResult.class);
@@ -208,8 +208,8 @@ public class SubjectIndexService {
 
 //		List<IndexQuote> list = JSONObject.parseArray(response.replace("\uFEFF", ""), IndexQuote.class);
 
-		SubjectIndexResp<IndexQuote> list = JSONObject.parseObject(response,
-				new TypeReference<SubjectIndexResp<IndexQuote>>() {
+		IndicesResp<IndexQuote> list = JSONObject.parseObject(response,
+				new TypeReference<IndicesResp<IndexQuote>>() {
 				});
 		for (IndexQuote indexQuote : list.getData()) {
 			indexQuote.setId(indexQuote.getIndexCode() + "_" + indexQuote.getTradeDate());
@@ -219,10 +219,10 @@ public class SubjectIndexService {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		SubjectIndexResp<SubjectIndex> indices = indices(1, 5);
+		IndicesResp<Indices> indices = indices(1, 5);
 
-		for (SubjectIndex subjectIndex : indices.getData()) {
-			log.info("{}", subjectIndex);
+		for (Indices index : indices.getData()) {
+			log.info("{}", index);
 		}
 	}
 

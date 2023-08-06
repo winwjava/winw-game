@@ -28,17 +28,32 @@
     	var b = Math.floor(Math.random() * 256);
     	return "rgb(" + r + ',' + g + ',' + b + ")";
     }
-    
-    //获取随机颜色数组
-    function getColor(num) {
-        var colorList = [];
-        for (var i = 0; i < num; i++) {
-            colorList.push(getRandomColor());
-        }
-        return colorList;
-    }
+
+    const colorList = [
+        "#3CB371","#ff0066","#EE0000",
+         
+         "#990000",
+         "#000066",
+         "#AEEEEE",
+         "#9900ff",
+         "#ccaa55",
+         "#666699",
+         "#66ff00",
+          "#00EEEE",
+          "#8B7765",
+          "#CD9B9B",
+          "#EEEE00",
+          "#FFF0F5",
+          "#999999",
+          "#666633",
+          "#EED2EE",
+          "#000033", 
+          "#772233", 
+          "#1188ff", ];
+       
     
 	function run(_rawData) {
+		
 		 var names = [];
 
 		 for (let i = 1; i < _rawData.length; i++) {
@@ -47,7 +62,9 @@
 			  }
 		 } 
 		 console.log(names);
+		 var index = -1;
 		 names.forEach(function(_item) {
+			 index++;
 			var datasetId = 'dataset_' + _item;
 			 datasetWithFilters.push({
 				id : datasetId,
@@ -66,17 +83,39 @@
 				datasetId : datasetId,
 				showSymbol : false,
 				name : _item,
-				 endLabel : {
+				endLabel : {// 线条右侧标签
+					color: colorList[index],
 					show : true,
-					formatter : function(params) {
-						return params[2];
-					}
+					textStyle: { color: 'red' },
+					formatter:"{a} {@close}%",
 				}, 
 				labelLayout : {
 					moveOverlap : 'shiftY'
 				},
-				emphasis : {
-					focus : 'series'
+			    //opacity: 0.9,
+				//smooth: true,   // 折线平滑
+				lineStyle:{// 线条不选中时候的效果
+				    //opacity: 0.9,
+          			//type: 'highlight',
+					width: 1,
+				},
+
+		        itemStyle : {  
+	                normal : {  
+	                	color: colorList[index],//图例的颜色
+	                    lineStyle:{  
+	                        color: colorList[index],//线的颜色
+						    width: 1,
+	                    }  
+	                }
+	            }, 
+				emphasis : {// 选中的时候的效果
+					  lineStyle: {
+						//opacity: 0.9,
+		          		//type: 'highlight',
+					    width: 3,
+					  },
+					//focus : 'series' // 注释这个使得未选中的线条不会变暗看不清
 				},
 				encode : {
 					x : 'date',
@@ -109,7 +148,8 @@
 		      nameLocation: 'middle'
 		    },
 		    yAxis: {
-		      name: 'Change'
+		      name: 'Change',
+		      axisLabel:{formatter:'{value}%'}
 		    },
 		    grid: {
 		      //right: 140,
@@ -120,10 +160,11 @@
 	            containLabel: true
 		    },
 		    series: seriesList,
-		    color: getColor(20)
+		    color: colorList,
 		  };
 		  myChart.setOption(option);
 		  // https://www.csindex.com.cn/#/indices/family/detail?indexCode=930633
+
 	}
 </script>
 </html>

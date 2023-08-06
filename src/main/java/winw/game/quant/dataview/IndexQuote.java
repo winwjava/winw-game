@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(name = "Subject_Index_Quote")
+@Table(name = "Indices_Quote")
 public class IndexQuote {
 
 	@Id

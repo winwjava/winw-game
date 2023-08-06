@@ -31,12 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/SubjectIndex")
-public class SubjectIndexController {
+public class IndicesController {
 
 //	private static WebClient webClient = WebClient.create();
 
 	@Resource
-	SubjectIndexRepository subjectIndexRepository;
+	IndicesRepository indicesRepository;
 
 	@Resource
 	IndexQuoteRepository indexQuoteRepository;
@@ -71,13 +71,13 @@ public class SubjectIndexController {
 	public List<IndexLine> getIndexQuoteList(String indexCode) throws IOException, InterruptedException {
 		ArrayList<IndexLine> list = new ArrayList<IndexLine>();
 
-		List<SubjectIndex> all = subjectIndexRepository
+		List<Indices> all = indicesRepository
 				.findAll(PageRequest.of(0, 50, Sort.by(Direction.fromString("desc"), "monthlyReturn"))).getContent();
 
-		for (SubjectIndex subjectIndex : all) {
+		for (Indices indices : all) {
 			IndexLine line = new IndexLine();
-			line.setLabel(subjectIndex.getIndexName());
-			line.setData(indexQuoteRepository.findByIndexCode(subjectIndex.getIndexCode(), PageRequest.of(0, 90)));
+			line.setLabel(indices.getIndexName());
+			line.setData(indexQuoteRepository.findByIndexCode(indices.getIndexCode(), PageRequest.of(0, 90)));
 			Collections.reverse(line.getData());
 
 //			double first = line.getData().get(0);
@@ -97,7 +97,7 @@ public class SubjectIndexController {
 			// 截取最近30天。
 			line.setData(line.getData().subList(30, line.getData().size()));
 			if ((max - min) / 2 / zero < 0.06) {// 振幅小于0.05
-				log.info("{} amplitude less then 0.06", subjectIndex.getIndexName());
+				log.info("{} amplitude less then 0.06", indices.getIndexName());
 				continue;
 			}
 
@@ -110,17 +110,19 @@ public class SubjectIndexController {
 
 //	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
 
+//	private static final NumberFormat percentFormat = new DecimalFormat("#.##%");
+	
 	// TODO 过滤掉低波动率的指数。
 	// TODO 过滤掉振幅较低的指数。
 	@GetMapping(value = "/getIndexQuoteList0")
 	public List<List<Object>> getIndexQuoteList0(String indexCode) throws IOException, InterruptedException {
 		ArrayList<List<Object>> list = new ArrayList<List<Object>>();
 		list.add(Arrays.asList("close", "date", "name"));
-		List<SubjectIndex> all = subjectIndexRepository
+		List<Indices> all = indicesRepository
 				.findAll(PageRequest.of(0, 50, Sort.by(Direction.fromString("desc"), "monthlyReturn"))).getContent();
 
-		for (SubjectIndex subjectIndex : all) {
-			List<IndexQuote> data = indexQuoteRepository.findByIndexCode0(subjectIndex.getIndexCode(),
+		for (Indices indices : all) {
+			List<IndexQuote> data = indexQuoteRepository.findByIndexCode0(indices.getIndexCode(),
 					PageRequest.of(0, 90));
 			Collections.reverse(data);
 			double max = Double.MIN_VALUE;
@@ -136,14 +138,15 @@ public class SubjectIndexController {
 			// 截取最近30天。
 			data = data.subList(data.size() < 30 ? 0 : 30 , data.size());// .stream().map(d -> (d - zero) / zero).collect(Collectors.toList());
 			if ((max - min) / 2 / zero < 0.06) {// 振幅小于0.05
-				log.info("{} amplitude less then 0.06", subjectIndex.getIndexName());
+				log.info("{} amplitude less then 0.06", indices.getIndexName());
 				continue;
 			}
 			for (IndexQuote temp : data) {
 
-				double d = (temp.getClose() - zero) / zero;
-				list.add(Arrays.asList(new BigDecimal(d).setScale(3, RoundingMode.DOWN), temp.getTradeDate(),
-						subjectIndex.getIndexName()));
+				double d = (temp.getClose() - zero) / zero * 100;
+				BigDecimal close = new BigDecimal(d).setScale(1, RoundingMode.DOWN);
+				list.add(Arrays.asList(close, temp.getTradeDate(),
+						indices.getIndexName()));
 			}
 		}
 
