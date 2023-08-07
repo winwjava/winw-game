@@ -184,16 +184,16 @@ public class QuoteIndex extends Quote {
 
 	/**
 	 * 计算 MACD （moving average convergence/divergence）
-	 * <p>
+	 * <Point>
 	 * EMAtoday=α * Price today + ( 1 - α ) * EMAyesterday;
-	 * <p>
+	 * <Point>
 	 * The most commonly used values are 12, 26, and 9 days, that is, MACD(12,26,9).
-	 * <p>
+	 * <Point>
 	 * As true with most of the technical indicators, MACD also finds its period
 	 * settings from the old days when technical analysis used to be mainly based on
 	 * the daily charts. The reason was the lack of the modern trading platforms
 	 * which show the changing prices every moment.
-	 * <p>
+	 * <Point>
 	 * As the working week used to be 6-days, the period settings of (12, 26, 9)
 	 * represent 2 weeks, 1 month and one and a half week. Now when the trading
 	 * weeks have only 5 days, possibilities of changing the period settings cannot

@@ -25,12 +25,12 @@ import winw.game.QuantConfig;
 
 /**
  * 券商接口。用 <tt>Robot</tt> 模拟操作同花顺实现。
- * <p>
+ * <Point>
  * 只支持一个交易账户。
- * <p>
+ * <Point>
  * 参考https://github.com/nladuo/THSTrader实现（Python控制能力更强）。
  * 
- * <p>
+ * <Point>
  * 另外有代理服务器实现：https://github.com/928675268/alphaquant.git和开源实现：https://github.com/waditu/tushare.git，
  * 但可靠性很低，且难以维护更新。
  * 
@@ -133,7 +133,7 @@ public class BrokerService {
 
 	/**
 	 * 当日交易记录。
-	 * <p>
+	 * <Point>
 	 * 注意：佣金无法获取。
 	 * 
 	 * @throws IOException

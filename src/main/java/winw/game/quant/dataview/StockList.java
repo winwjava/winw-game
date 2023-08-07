@@ -3,7 +3,7 @@ package winw.game.quant.dataview;
 /**
  * 股票列表。
  * 
- * <p>
+ * <Point>
  * 数据来源：http://www.csindex.com.cn
  * 
  * @author winw

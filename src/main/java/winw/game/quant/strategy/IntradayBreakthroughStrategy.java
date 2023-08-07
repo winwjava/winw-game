@@ -8,15 +8,15 @@ import winw.game.quant.QuoteIndex;
  * 日内突破策略，属于日内回转交易。
  * 
  * 
- * <p>
+ * <Point>
  * 又称“RANGE BREAK”，或称打开范围突破（ORB，Opening range breakthrough）–包括利用打开时建立的方向偏差。
- * <p>
+ * <Point>
  * 向上突破时买入，向下突破时卖出。
  * 
- * <p>
+ * <Point>
  * 当发现判断错误时，应及时平仓纠正。
  * 
- * <p>
+ * <Point>
  * 尾盘平仓，只保留一半作为底仓。
  * 
  * @author winw

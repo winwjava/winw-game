@@ -45,7 +45,7 @@ public class Position {
 
 	/**
 	 * （持仓过程中的）最高市值。用于计算最大回撤。
-	 * <p>
+	 * <Point>
 	 * 考虑到有价格复权的情况，价格不能作为计算依据。
 	 */
 	private double highestMarketValue;

@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 量化交易策略。
- * <p>
+ * <Point>
  * 支持模拟交易和回溯测试。
- * <p>
+ * <Point>
  * 包含止盈止损规则。
  * 
  * @author winw
@@ -66,7 +66,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 
 	/**
 	 * 实现具体的交易。
-	 * <p>
+	 * <Point>
 	 * getHistoryQuote方法可以获取到每个code的历史数据。
 	 * 
 	 * @param codes
@@ -161,7 +161,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 
 	/**
 	 * 止盈止损。
-	 * <p>
+	 * <Point>
 	 * 满足以下条件之一时，以收盘价卖出平仓：
 	 * <ol>
 	 * <li>最大损失止损m%
@@ -169,7 +169,7 @@ public abstract class QuantTradingStrategy extends QuantTradingBase {
 	 * <li>回落平仓，n天内股价回落m%
 	 * <li>横盘平仓，n天内涨幅小于m%
 	 * </ol>
-	 * <p>
+	 * <Point>
 	 * 一笔成功的交易是：无论获利与否，都要适时的离场。
 	 * 
 	 */

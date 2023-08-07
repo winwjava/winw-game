@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 中证主题指数。
- * <p>
+ * <Point>
  * 数据来源：http://www.csindex.com.cn/zh-CN/indices/index?class_1=1&class_20=20&class_10=10&class_7=7&is_custom_0=1
  * 
  * @author winw

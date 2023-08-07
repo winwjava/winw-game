@@ -33,7 +33,7 @@ public class SubjectEntry {
 	/**
 	 * 权重，一般用总市值表示，当前的总市值占所有的总市值的比例，即是权重。
 	 * 
-	 * <p>
+	 * <Point>
 	 * 权重是变化的，每天都需要重新设定。
 	 */
 	private Double weight;// 这里用流通市值

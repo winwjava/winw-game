@@ -13,12 +13,12 @@ import winw.game.quant.QuotePanel;
 
 /**
  * 均值回归策略。
- * <p>
+ * <Point>
  * 价格距离移动平均线越远，其回归的可能性就越大。
- * <p>
+ * <Point>
  * 在市场中应用这种策略的方法是寻找极端事件，然后打赌事情将恢复到接近平均水平。
  * 
- * <p>
+ * <Point>
  * Standard Deviation/RSI/Bollinger Bands
  * 
  * @author winw
@@ -33,7 +33,7 @@ public class MeanReversionStrategy extends QuantTradingStrategy {
 
 	/**
 	 * 计算 Z-Score（此处计算的是收盘价与20天移动平均线的差值的Z-Score）
-	 * <p>
+	 * <Point>
 	 * 公式：z-score = (value - mean) / standard deviation;
 	 */
 	@Override

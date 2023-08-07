@@ -38,13 +38,13 @@ public class TrendFollowingStrategy extends QuantTradingStrategy {
 	 * 
 	 * 计算EMA曲线的导数。由于价格与时间没有直接的比例关系，所以共有三种假定关系的实现。
 	 * 
-	 * <p>
+	 * <Point>
 	 * 算法一：用最近60天的最高价和最低价作为高，60天标准高宽比例是300：1500 <br>
 	 * Y = 300 * (EMA60 - MIN(CLOSE, 60) ) * (MAX(CLOSE, 60) - MIN(CLOSE, 60) ) <br>
 	 * X = (1500 / 60) * N
-	 * <p>
+	 * <Point>
 	 * 算法二：模拟X轴，X点的间隔用Y点的0.005倍（y * 30% / 60）
-	 * <p>
+	 * <Point>
 	 * 算法三：每年250个交易日年化4%收益，斜率应该是0.04，则Y的间隔应该是X的0.104倍（y(1 + 0.04) / (250x) = 0.04）
 	 * 
 	 * @param list

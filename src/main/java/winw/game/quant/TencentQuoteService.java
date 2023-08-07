@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 腾讯接口实现。
  * 
- * <p>
+ * <Point>
  * 注意：腾讯的实时报价延迟十五分钟。
  * 
  * @author winw
